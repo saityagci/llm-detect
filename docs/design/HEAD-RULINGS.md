@@ -102,3 +102,13 @@ The tool is for reviews, chat messages, emails and essays in EN/TR/AR. No "this 
 
 ## R21. What the previous (stopped) build round left behind
 B3 had written a first agent file; it is at `<scratchpad>/build-prev/llm-text-detector.md` — B3 may start from it but must apply R17/R19. Nothing else survived. Any `tools/llm-detect` partial under `<scratchpad>/build-prev/tools-partial` is reference only.
+
+## R22. ARABIC IS OUT OF SCOPE (owner, 2026-09-09: "there is no arabic")
+Language scope for this project is **English + Turkish**. This overrides every "EN/TR/AR" and "Arabic first" line in SPEC.md, Part 1 and Part 2, and in the lane documents.
+- Do NOT build: `ar_dialect_markers`, `ar_orthographic_shortcuts`, `arabizi`, `ar_tashkeel_band`, `ar_tatweel`, the AR lexicons (`lexicon-src/ar.txt`, `human-ar.txt`, `arabizi.txt`), the AR rows of every shared lexicon/regex (assistant_frame_leak AR patterns, AR openers/closers/hedges/politeness), `llm-ar.jsonl`, the two KFUPM Arabic datasets, the Arabic rubric criteria, the Arabic reporting rule, the Arabic caveat texts.
+- Weight cells become `{en,tr} × {chat,prose}` (four, not six).
+- Language ID still recognises Arabic script — only to return `language.primary = "unsupported"` and `insufficient_text` with `gates.failed: ["G3_lang"]` and `reason: "unsupported_language"`. Never score it.
+- The private corpus: rows whose dominant script is Arabic (writer R1, many personas) are EXCLUDED from calibration by make-splits.mjs (script filter, reported as a count). Leave-one-writer-out therefore runs over R0 and R2 only; say so in the report.
+- `must-not-fire.jsonl`: drop the Arabic rows; the gate applies to the rows that remain (report the counts).
+- The Unicode facts of SPEC §B.9 that concern Arabic (AR_LETTER, tatweel in WORD_RE, `\p{Nd}` for Arabic-Indic digits) stay in the tokenizer/selftest because they protect script detection and the no-`\d` rule; they are not features.
+- Any SPEC or lane text about Arabic that is not listed here is reference material, not a deliverable.

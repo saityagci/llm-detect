@@ -13,6 +13,8 @@
    created_at,language). 2,712 REAL from three humans, 14,785 SYNTH from 1,285 GPT personas. No phone numbers.
    `eval/data/data_split.json` is DATA's leakage-safe split by message id.
 
+## Scope change 2026-09-09: ARABIC IS OUT — English + Turkish only (HEAD-RULINGS R22)
+
 ## Not done — the next step is the BUILD ROUND
 Run `docs/design/workflow-build.js` with the Workflow tool:
   Workflow({ scriptPath: "<abs path>/docs/design/workflow-build.js",

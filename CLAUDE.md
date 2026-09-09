@@ -1,7 +1,7 @@
 # CLAUDE.md — llm-detect
 
 Standalone project: a zero-dependency Node tool + a global Claude Code agent that judges whether a text
-(English, Turkish, Arabic; reviews, chat messages, emails, essays) was written by a human or generated
+(English and Turkish; reviews, chat messages, emails, essays) was written by a human or generated
 by an LLM. **This project is NOT part of Travelio.** Never read from, write to, or run anything inside
 `~/Desktop/travelio-asim-shadow`. The only Travelio-derived asset is the private calibration corpus
 already sitting in `eval/data/` (gitignored); do not re-pull it.
@@ -19,9 +19,7 @@ already sitting in `eval/data/` (gitignored); do not re-pull it.
 - **Brutal honesty over optimism.** Never quote an accuracy without its base rate, language, length bucket
   and the three-humans caveat. Report held-out numbers only; label any train number `(train, reference only)`.
   "insufficient_text" is a deliverable, not a failure.
-- **Language scope EN + TR + AR, Arabic first.** No IT/FR/ES rows, corpora or tickets.
-- **Never print Arabic to the owner's terminal without a Latin transliteration and an English gloss** on the
-  same line — his terminal reverses RTL and mangles embedded digits.
+- **Language scope EN + TR only.** Arabic is OUT (owner, 2026-09-09; HEAD-RULINGS R22). No IT/FR/ES/AR rows, corpora or tickets.
 - **PII**: `eval/data/` and `docs/design/private/` are gitignored because they hold real chat messages.
   Committed fixtures may contain corpus rows only from writer R0 (the owner's own messages), name-scrubbed.
   Never a phone number in a tracked file (`grep -rE "\+?[0-9]{10,15}"` is an acceptance check).
@@ -31,7 +29,7 @@ already sitting in `eval/data/` (gitignored); do not re-pull it.
 - `docs/design/SPEC.md` — the implementation contract (features, CLI/JSON schema, scoring, decision table,
   agent prompt, eval plan, acceptance checks).
 - `docs/design/HEAD-RULINGS.md` — head amendments; **they override SPEC where they conflict**, including
-  Part 2 (standalone layout, generic `known_machine_marker`, `LLM_DETECT_HOME`, the Supabase adapter).
+  Part 2 (standalone layout) and R22 (Arabic out, generic `known_machine_marker`, `LLM_DETECT_HOME`, the Supabase adapter).
 - `docs/design/D1-stylometry.md`, `R1-research.md` — feature computations/lexicons and the evidence brief.
 - `docs/design/private/` (gitignored) — D2 rubric + adversarial tests, DATA contrast study, the round-1 agent draft.
 - `HANDOFF.md` — current state and the exact next step.
