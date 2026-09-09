@@ -1,0 +1,67 @@
+# Turkish human-tell markers — D1 §5.4. Chat abbreviations, slang, address terms.
+# Folded with toLocaleLowerCase('tr') by build-lexicon.mjs. Same imitability caveat as human-en:
+# a model told to write like a WhatsApp user emits these on demand (D1 fixture B1).
+# format: phrase | tag | domain | flags | note
+slm | strong | general | - | chat abbreviation
+mrb | strong | general | - | chat abbreviation
+nbr | strong | general | - | chat abbreviation
+naber | strong | general | - | spoken Turkish
+napıyon | strong | general | - | spoken Turkish
+napiyon | strong | general | - | ASCII-fied spoken Turkish
+nasilsin | strong | general | - | ASCII-fied spoken Turkish
+nsl | strong | general | - | chat abbreviation
+tmm | strong | general | - | chat abbreviation
+tmmm | strong | general | - | chat abbreviation
+tamamdır | strong | general | - | spoken Turkish
+okey | strong | general | - | chat spelling
+eyv | strong | general | - | chat abbreviation
+eyvallah | strong | general | - | spoken Turkish
+inş | strong | general | - | chat abbreviation
+inşallah | weak | general | - | also a wholly formal religious formula
+insallah | strong | general | - | ASCII-fied form
+tşk | strong | general | - | chat abbreviation
+tsk | strong | general | - | chat abbreviation
+teşekkurler | strong | general | - | mixed-orthography chat spelling
+sagol | strong | general | - | ASCII-fied spoken Turkish
+sağol | strong | general | - | spoken Turkish
+sğol | strong | general | - | chat spelling
+bi | strong | general | - | reduced "bir"; collides with nothing in Turkish
+bii | strong | general | - | reduced "bir"
+yha | strong | general | - | chat interjection
+yaa | strong | general | - | chat interjection
+yaw | strong | general | - | chat interjection
+abi | strong | general | - | address term; used by customers to agents
+abicim | strong | general | - | address term
+abla | weak | general | - | address term, also literal kinship
+kanka | strong | general | - | slang address term
+kanks | strong | general | - | slang address term
+reis | strong | general | - | address term
+hocam | strong | general | - | address term
+kardeşim | weak | general | - | address term, also literal kinship
+kardesim | strong | general | - | ASCII-fied address term
+valla | strong | general | - | spoken Turkish
+vallahi | strong | general | - | spoken Turkish
+aynen | strong | general | - | spoken Turkish
+aynn | strong | general | - | chat spelling
+hadi | weak | general | - | ordinary Turkish imperative particle
+hdi | strong | general | - | chat spelling
+bakalım | weak | general | - | ordinary Turkish
+bakcam | strong | general | - | reduced future, spoken Turkish
+oha | strong | general | - | slang interjection
+hayırdır | strong | general | - | spoken Turkish
+yok artık | strong | general | - | spoken Turkish
+cnm | strong | general | - | chat abbreviation
+canım | weak | general | - | ordinary Turkish endearment
+olcak | strong | general | - | reduced future, spoken Turkish
+yapcam | strong | general | - | reduced future, spoken Turkish
+gelcem | strong | general | - | reduced future, spoken Turkish
+gidicez | strong | general | - | reduced future, spoken Turkish
+görüşcez | strong | general | - | reduced future, spoken Turkish
+napcaz | strong | general | - | reduced future, spoken Turkish
+nolur | strong | general | - | reduced "ne olur"
+boşver | strong | general | - | spoken Turkish
+bosver | strong | general | - | ASCII-fied spoken Turkish
+neyse | weak | general | - | ordinary Turkish discourse particle
+tamam | weak | general | - | models emit it too
+evet | weak | general | - | models emit it too
+peki | weak | general | - | models emit it too

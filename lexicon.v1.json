@@ -1,0 +1,2334 @@
+{
+  "version": "v1",
+  "generatedBy": "build-lexicon.mjs",
+  "note": "Non-ASCII stored as \\uXXXX escapes on purpose (SPEC B.8). Edit lexicon-src/*.txt, not this file.",
+  "scope": "en+tr (Arabic out of scope, HEAD-RULINGS R22)",
+  "counts": {
+    "en:human": 66,
+    "en:llm": 77,
+    "tr:human": 66,
+    "tr:llm": 45
+  },
+  "rows": [
+    {
+      "phrase": "aight",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "asap",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "business abbreviation, both sides use it"
+    },
+    {
+      "phrase": "brb",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "btw",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "business-casual humans use it too"
+    },
+    {
+      "phrase": "coz",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "cuz",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "deadass",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "slang"
+    },
+    {
+      "phrase": "dunno",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "speech spelling"
+    },
+    {
+      "phrase": "fyi",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "business abbreviation, both sides use it"
+    },
+    {
+      "phrase": "gimme",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "speech spelling"
+    },
+    {
+      "phrase": "gonna",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary informal English"
+    },
+    {
+      "phrase": "gotcha",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "speech spelling"
+    },
+    {
+      "phrase": "gotta",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary informal English"
+    },
+    {
+      "phrase": "hbu",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "hmm",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat filler"
+    },
+    {
+      "phrase": "hmmm",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat filler"
+    },
+    {
+      "phrase": "idc",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "idk",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "imho",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "imo",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "jk",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "kinda",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "speech spelling"
+    },
+    {
+      "phrase": "kk",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "lemme",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "speech spelling"
+    },
+    {
+      "phrase": "lmao",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "lol",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "lowkey",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "slang"
+    },
+    {
+      "phrase": "meh",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat interjection"
+    },
+    {
+      "phrase": "nah",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "ngl",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "nope",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "np",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "nvm",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation; also a self-correction marker"
+    },
+    {
+      "phrase": "omg",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "oof",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat interjection"
+    },
+    {
+      "phrase": "pls",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "plz",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "ppl",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "prolly",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "rly",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "rn",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "rofl",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "smth",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "sounds good",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "business-casual humans use it constantly"
+    },
+    {
+      "phrase": "srsly",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "sry",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "sup",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat greeting"
+    },
+    {
+      "phrase": "tbh",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "thnx",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "thx",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "ttyl",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "ty",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "tysm",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "u",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "single-letter token; collides with ordinary use"
+    },
+    {
+      "phrase": "ugh",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat interjection"
+    },
+    {
+      "phrase": "ur",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "wanna",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary informal English"
+    },
+    {
+      "phrase": "wdym",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "wtf",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "wyd",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "y'all",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "speech spelling"
+    },
+    {
+      "phrase": "yall",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "speech spelling"
+    },
+    {
+      "phrase": "yea",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "yeah",
+      "lang": "en",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary spoken English"
+    },
+    {
+      "phrase": "yep",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "yup",
+      "lang": "en",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "a game-changer",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "business register"
+    },
+    {
+      "phrase": "a hidden gem",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "travel",
+      "flags": [],
+      "note": "extremely common in genuine human reviews"
+    },
+    {
+      "phrase": "a myriad of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary formal English"
+    },
+    {
+      "phrase": "a perfect balance of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "travel-brochure register"
+    },
+    {
+      "phrase": "a testament to",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "journalistic cliche predates LLMs"
+    },
+    {
+      "phrase": "absolutely",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "sentence-initial only; common human enthusiasm"
+    },
+    {
+      "phrase": "additionally",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "taught to L2 writers as an essay connector"
+    },
+    {
+      "phrase": "boasts",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "travel",
+      "flags": [],
+      "note": "ordinary travel-writing verb; low precision on its own"
+    },
+    {
+      "phrase": "certainly",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "sentence-initial only; mid-sentence \"certainly\" is ordinary"
+    },
+    {
+      "phrase": "cutting-edge",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "marketing",
+      "flags": [],
+      "note": "predates LLMs by decades"
+    },
+    {
+      "phrase": "delve into",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "rare but legitimate in academic prose"
+    },
+    {
+      "phrase": "delving into",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "rare but legitimate in academic prose"
+    },
+    {
+      "phrase": "elevate your",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "marketing",
+      "flags": [],
+      "note": "copywriting cliche predates LLMs"
+    },
+    {
+      "phrase": "embark on a journey",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "travel-brochure register"
+    },
+    {
+      "phrase": "ensuring a comfortable stay",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "hotel marketing register"
+    },
+    {
+      "phrase": "feel free to ask",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "feel free to reach out",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "furthermore",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "taught to L2 writers as an essay connector"
+    },
+    {
+      "phrase": "great question",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "human teachers and podcasters say it"
+    },
+    {
+      "phrase": "harness the power of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "marketing",
+      "flags": [],
+      "note": "copywriting cliche predates LLMs"
+    },
+    {
+      "phrase": "here are a few",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary list opener"
+    },
+    {
+      "phrase": "here are some",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary list opener"
+    },
+    {
+      "phrase": "highlights the importance of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "standard academic English"
+    },
+    {
+      "phrase": "i do not have access to real-time",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "narrowed variant; the rule covers the strong forms"
+    },
+    {
+      "phrase": "i hope that helps",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "a human writing a helpful email says this too"
+    },
+    {
+      "phrase": "i hope this helps",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "a human writing a helpful email says this too"
+    },
+    {
+      "phrase": "i hope you find this helpful",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "polite human email closers overlap"
+    },
+    {
+      "phrase": "i understand your concern",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "in human support snippet libraries"
+    },
+    {
+      "phrase": "i would be happy to",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "in human support snippet libraries"
+    },
+    {
+      "phrase": "in conclusion",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "essay",
+      "flags": [
+        "initial"
+      ],
+      "note": "taught to L2 writers as an essay connector"
+    },
+    {
+      "phrase": "in summary",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "taught to L2 writers as an essay connector"
+    },
+    {
+      "phrase": "in the ever-evolving landscape of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "marketing register, not authorship"
+    },
+    {
+      "phrase": "in the heart of the city",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "travel",
+      "flags": [],
+      "note": "ordinary description of a central hotel"
+    },
+    {
+      "phrase": "in today's digital age",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "marketing humans copied this from models"
+    },
+    {
+      "phrase": "in today's fast-paced world",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "marketing humans copied this from models"
+    },
+    {
+      "phrase": "it is essential to",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary formal English"
+    },
+    {
+      "phrase": "it is important to note that",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "academic humans write this"
+    },
+    {
+      "phrase": "it is worth noting that",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "academic humans write this"
+    },
+    {
+      "phrase": "it's important to note that",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "academic humans write this"
+    },
+    {
+      "phrase": "it's worth noting that",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "academic humans write this"
+    },
+    {
+      "phrase": "leaves no stone unturned",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "idiom, also human"
+    },
+    {
+      "phrase": "let me know if you have any questions",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "let me know if you need anything",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "let me know if you would like",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "let's dive in",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "blog register"
+    },
+    {
+      "phrase": "look no further",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "marketing",
+      "flags": [],
+      "note": "copywriting cliche predates LLMs"
+    },
+    {
+      "phrase": "meticulous attention to detail",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "travel",
+      "flags": [],
+      "note": "marketing register"
+    },
+    {
+      "phrase": "meticulously curated",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "marketing register"
+    },
+    {
+      "phrase": "moreover",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "taught to L2 writers as an essay connector"
+    },
+    {
+      "phrase": "navigating the complexities of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "marketing register, not authorship"
+    },
+    {
+      "phrase": "nestled in the heart of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "travel-brochure register, human copywriters use it"
+    },
+    {
+      "phrase": "not only \u2026 but also",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "textbook construction; taught to L2 writers"
+    },
+    {
+      "phrase": "of course",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "sentence-initial only; very common in human speech"
+    },
+    {
+      "phrase": "offers a wide range of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary business English"
+    },
+    {
+      "phrase": "overall",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "ordinary paragraph opener"
+    },
+    {
+      "phrase": "plays a crucial role",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "standard academic English"
+    },
+    {
+      "phrase": "plays a pivotal role",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "standard academic English"
+    },
+    {
+      "phrase": "plays a vital role",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "standard academic English"
+    },
+    {
+      "phrase": "rest assured",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "in human support snippet libraries"
+    },
+    {
+      "phrase": "rich tapestry",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "essayistic cliche"
+    },
+    {
+      "phrase": "seamless experience",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "product-marketing register"
+    },
+    {
+      "phrase": "seamlessly integrates",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "tech",
+      "flags": [],
+      "note": "product-marketing register"
+    },
+    {
+      "phrase": "second to none",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "travel",
+      "flags": [],
+      "note": "very common in genuine human reviews"
+    },
+    {
+      "phrase": "stands as a testament to",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "journalistic cliche predates LLMs"
+    },
+    {
+      "phrase": "state-of-the-art",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "marketing",
+      "flags": [],
+      "note": "predates LLMs by decades"
+    },
+    {
+      "phrase": "sure",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "sentence-initial only; extremely common in human chat"
+    },
+    {
+      "phrase": "take your \u2026 to the next level",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "marketing",
+      "flags": [],
+      "note": "copywriting cliche predates LLMs"
+    },
+    {
+      "phrase": "thank you for reaching out",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "in human support snippet libraries"
+    },
+    {
+      "phrase": "the perfect blend of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "travel-brochure register"
+    },
+    {
+      "phrase": "top-notch",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "travel",
+      "flags": [],
+      "note": "very common in genuine human reviews"
+    },
+    {
+      "phrase": "underscores the importance of",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "standard academic English"
+    },
+    {
+      "phrase": "unlock the potential",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "marketing",
+      "flags": [],
+      "note": "copywriting cliche predates LLMs"
+    },
+    {
+      "phrase": "we apologise for any inconvenience",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "in human support snippet libraries"
+    },
+    {
+      "phrase": "we apologize for any inconvenience",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "in human support snippet libraries"
+    },
+    {
+      "phrase": "whether you are \u2026 or",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "balanced-frame marketing register"
+    },
+    {
+      "phrase": "whether you're \u2026 or",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "balanced-frame marketing register"
+    },
+    {
+      "phrase": "would you like me to",
+      "lang": "en",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "a human colleague offering help says this"
+    },
+    {
+      "phrase": "abi",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "address term; used by customers to agents"
+    },
+    {
+      "phrase": "abicim",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "address term"
+    },
+    {
+      "phrase": "abla",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "address term, also literal kinship"
+    },
+    {
+      "phrase": "aynen",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "aynn",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "bakal\u0131m",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary Turkish"
+    },
+    {
+      "phrase": "bakcam",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced future, spoken Turkish"
+    },
+    {
+      "phrase": "bi",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced \"bir\"; collides with nothing in Turkish"
+    },
+    {
+      "phrase": "bii",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced \"bir\""
+    },
+    {
+      "phrase": "bosver",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "ASCII-fied spoken Turkish"
+    },
+    {
+      "phrase": "bo\u015fver",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "can\u0131m",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary Turkish endearment"
+    },
+    {
+      "phrase": "cnm",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "evet",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "models emit it too"
+    },
+    {
+      "phrase": "eyv",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "eyvallah",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "gelcem",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced future, spoken Turkish"
+    },
+    {
+      "phrase": "gidicez",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced future, spoken Turkish"
+    },
+    {
+      "phrase": "g\u00f6r\u00fc\u015fcez",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced future, spoken Turkish"
+    },
+    {
+      "phrase": "hadi",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary Turkish imperative particle"
+    },
+    {
+      "phrase": "hay\u0131rd\u0131r",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "hdi",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "hocam",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "address term"
+    },
+    {
+      "phrase": "insallah",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "ASCII-fied form"
+    },
+    {
+      "phrase": "in\u015f",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "in\u015fallah",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "also a wholly formal religious formula"
+    },
+    {
+      "phrase": "kanka",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "slang address term"
+    },
+    {
+      "phrase": "kanks",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "slang address term"
+    },
+    {
+      "phrase": "kardesim",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "ASCII-fied address term"
+    },
+    {
+      "phrase": "karde\u015fim",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "address term, also literal kinship"
+    },
+    {
+      "phrase": "mrb",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "naber",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "napcaz",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced future, spoken Turkish"
+    },
+    {
+      "phrase": "napiyon",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "ASCII-fied spoken Turkish"
+    },
+    {
+      "phrase": "nap\u0131yon",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "nasilsin",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "ASCII-fied spoken Turkish"
+    },
+    {
+      "phrase": "nbr",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "neyse",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary Turkish discourse particle"
+    },
+    {
+      "phrase": "nolur",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced \"ne olur\""
+    },
+    {
+      "phrase": "nsl",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "oha",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "slang interjection"
+    },
+    {
+      "phrase": "okey",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "olcak",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced future, spoken Turkish"
+    },
+    {
+      "phrase": "peki",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "models emit it too"
+    },
+    {
+      "phrase": "reis",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "address term"
+    },
+    {
+      "phrase": "sagol",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "ASCII-fied spoken Turkish"
+    },
+    {
+      "phrase": "sa\u011fol",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "slm",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "s\u011fol",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat spelling"
+    },
+    {
+      "phrase": "tamam",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "models emit it too"
+    },
+    {
+      "phrase": "tamamd\u0131r",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "te\u015fekkurler",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "mixed-orthography chat spelling"
+    },
+    {
+      "phrase": "tmm",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "tmmm",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "tsk",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "t\u015fk",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation"
+    },
+    {
+      "phrase": "valla",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "vallahi",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "yaa",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat interjection"
+    },
+    {
+      "phrase": "yapcam",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "reduced future, spoken Turkish"
+    },
+    {
+      "phrase": "yaw",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat interjection"
+    },
+    {
+      "phrase": "yha",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat interjection"
+    },
+    {
+      "phrase": "yok art\u0131k",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "spoken Turkish"
+    },
+    {
+      "phrase": "\u0131nsallah",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "ASCII-fied form [dotless-i orthography variant of \"insallah\", generated by build-lexicon.mjs: a bare Latin I folds to the dotless i]"
+    },
+    {
+      "phrase": "\u0131n\u015f",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "chat abbreviation [dotless-i orthography variant of \"in\u015f\", generated by build-lexicon.mjs: a bare Latin I folds to the dotless i]"
+    },
+    {
+      "phrase": "\u0131n\u015fallah",
+      "lang": "tr",
+      "kind": "human",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "also a wholly formal religious formula [dotless-i orthography variant of \"in\u015fallah\", generated by build-lexicon.mjs: a bare Latin I folds to the dotless i]"
+    },
+    {
+      "phrase": "anlay\u0131\u015f\u0131n\u0131z i\u00e7in te\u015fekk\u00fcr ederiz",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "ayr\u0131ca",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "extremely common ordinary Turkish adverb"
+    },
+    {
+      "phrase": "ba\u015fka bir sorunuz olursa",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "bir yapay zeka dil modeli",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "narrowed variant; the rule covers self-identification"
+    },
+    {
+      "phrase": "bu ba\u011flamda",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary academic Turkish"
+    },
+    {
+      "phrase": "bu do\u011frultuda",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary academic Turkish"
+    },
+    {
+      "phrase": "buna ek olarak",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "taught as an essay connector"
+    },
+    {
+      "phrase": "bunun yan\u0131 s\u0131ra",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "taught as an essay connector"
+    },
+    {
+      "phrase": "de\u011ferlendirilmektedir",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish officialese"
+    },
+    {
+      "phrase": "dikkat \u00e7ekmektedir",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish officialese; a lawyer writes this"
+    },
+    {
+      "phrase": "di\u011fer taraftan",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "taught as an essay connector"
+    },
+    {
+      "phrase": "elbette",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "sentence-initial only; ordinary Turkish affirmation"
+    },
+    {
+      "phrase": "e\u015fsiz bir deneyim",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "hotel marketing register"
+    },
+    {
+      "phrase": "genel olarak",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "ordinary Turkish"
+    },
+    {
+      "phrase": "geri bildiriminiz bizim i\u00e7in de\u011ferli",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "g\u00f6z \u00f6n\u00fcnde bulunduruldu\u011funda",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish essay-class register"
+    },
+    {
+      "phrase": "g\u00f6ze \u00e7arpmaktad\u0131r",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish officialese"
+    },
+    {
+      "phrase": "hem \u2026 hem de",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [],
+      "note": "ordinary Turkish correlative conjunction"
+    },
+    {
+      "phrase": "her b\u00fct\u00e7eye uygun",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "travel",
+      "flags": [],
+      "note": "hotel marketing register"
+    },
+    {
+      "phrase": "ihtiya\u00e7lar\u0131n\u0131za y\u00f6nelik",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "in human support snippet libraries"
+    },
+    {
+      "phrase": "keyifli bir tatil ge\u00e7irmenizi dileriz",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "in human agency snippet libraries"
+    },
+    {
+      "phrase": "konforlu bir konaklama",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "hotel marketing register"
+    },
+    {
+      "phrase": "k\u0131sacas\u0131",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "ordinary spoken Turkish too"
+    },
+    {
+      "phrase": "misafirperverli\u011fi ile \u00f6ne \u00e7\u0131k\u0131yor",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "hotel marketing register"
+    },
+    {
+      "phrase": "muhte\u015fem bir manzara",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "travel",
+      "flags": [],
+      "note": "very common in genuine human reviews"
+    },
+    {
+      "phrase": "m\u00fckemmel bir uyum",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "marketing register"
+    },
+    {
+      "phrase": "size nas\u0131l yard\u0131mc\u0131 olabilirim",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "cs",
+      "flags": [],
+      "note": "what a human receptionist says all day"
+    },
+    {
+      "phrase": "sizler i\u00e7in derledik",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "content",
+      "flags": [],
+      "note": "Turkish listicle register"
+    },
+    {
+      "phrase": "sonu\u00e7 olarak",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "essay",
+      "flags": [
+        "initial"
+      ],
+      "note": "taught as an essay closer"
+    },
+    {
+      "phrase": "s\u00f6z konusu",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "formal",
+      "flags": [],
+      "note": "ordinary Turkish legal/administrative register"
+    },
+    {
+      "phrase": "tabii ki",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "sentence-initial only; ordinary Turkish affirmation"
+    },
+    {
+      "phrase": "umar\u0131m bu bilgiler yard\u0131mc\u0131 olur",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "a human agent closing a message writes this"
+    },
+    {
+      "phrase": "umar\u0131m bu yard\u0131mc\u0131 olur",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "a human agent closing a message writes this"
+    },
+    {
+      "phrase": "umar\u0131m yard\u0131mc\u0131 olmu\u015ftur",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "a human agent closing a message writes this"
+    },
+    {
+      "phrase": "unutulmamal\u0131d\u0131r ki",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish essay-class register"
+    },
+    {
+      "phrase": "unutulmaz bir deneyim",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "hotel marketing register"
+    },
+    {
+      "phrase": "yard\u0131mc\u0131 olmaktan memnuniyet duyar\u0131m",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "ya\u015fad\u0131\u011f\u0131n\u0131z olumsuzluk i\u00e7in \u00f6z\u00fcr dileriz",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "literally in human support snippet libraries"
+    },
+    {
+      "phrase": "\u00f6n plana \u00e7\u0131kmaktad\u0131r",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish officialese"
+    },
+    {
+      "phrase": "\u00f6ncelikle belirtmek gerekir ki",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish essay-class register"
+    },
+    {
+      "phrase": "\u00f6nem ta\u015f\u0131maktad\u0131r",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish officialese; a lawyer writes this"
+    },
+    {
+      "phrase": "\u00f6nemli bir rol oynamaktad\u0131r",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "general",
+      "flags": [],
+      "note": "Turkish officialese"
+    },
+    {
+      "phrase": "\u00f6zetle",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "general",
+      "flags": [
+        "initial"
+      ],
+      "note": "taught as an essay closer"
+    },
+    {
+      "phrase": "\u0131htiya\u00e7lar\u0131n\u0131za y\u00f6nelik",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "weak",
+      "domain": "cs",
+      "flags": [],
+      "note": "in human support snippet libraries [dotless-i orthography variant of \"ihtiya\u00e7lar\u0131n\u0131za y\u00f6nelik\", generated by build-lexicon.mjs: a bare Latin I folds to the dotless i]"
+    },
+    {
+      "phrase": "\u015fehrin kalbinde",
+      "lang": "tr",
+      "kind": "llm",
+      "tag": "strong",
+      "domain": "travel",
+      "flags": [],
+      "note": "human travel bloggers copied this from models"
+    }
+  ]
+}

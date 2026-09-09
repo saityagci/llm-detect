@@ -1,0 +1,83 @@
+# English LLM-tell phrases — D1 §5.1, as amended by HEAD-RULINGS R1.
+# R1 moved several assistant formulae OUT of the Tier-0 rule and INTO this lexicon; they are
+# tagged domain:cs where a human support desk uses the same string, so --domain customer_service
+# zeroes them (SPEC B.8, "domain suppression is not optional").
+# "as an AI (language model)" is NOT here: it stayed a Tier-0 rule (R1).
+# format: phrase | tag | domain | flags | note
+i hope this helps | strong | general | - | a human writing a helpful email says this too
+i hope that helps | strong | general | - | a human writing a helpful email says this too
+i hope you find this helpful | strong | general | - | polite human email closers overlap
+let me know if you have any questions | weak | cs | - | literally in human support snippet libraries
+let me know if you need anything | weak | cs | - | literally in human support snippet libraries
+let me know if you would like | weak | cs | - | literally in human support snippet libraries
+feel free to reach out | weak | cs | - | literally in human support snippet libraries
+feel free to ask | weak | cs | - | literally in human support snippet libraries
+would you like me to | weak | general | - | a human colleague offering help says this
+i would be happy to | weak | cs | - | in human support snippet libraries
+great question | strong | general | - | human teachers and podcasters say it
+certainly | strong | general | initial | sentence-initial only; mid-sentence "certainly" is ordinary
+absolutely | weak | general | initial | sentence-initial only; common human enthusiasm
+of course | weak | general | initial | sentence-initial only; very common in human speech
+sure | weak | general | initial | sentence-initial only; extremely common in human chat
+it is important to note that | strong | general | - | academic humans write this
+it's important to note that | strong | general | - | academic humans write this
+it is worth noting that | strong | general | - | academic humans write this
+it's worth noting that | strong | general | - | academic humans write this
+it is essential to | weak | general | - | ordinary formal English
+delve into | strong | general | - | rare but legitimate in academic prose
+delving into | strong | general | - | rare but legitimate in academic prose
+in today's fast-paced world | strong | general | - | marketing humans copied this from models
+in today's digital age | strong | general | - | marketing humans copied this from models
+in the ever-evolving landscape of | strong | general | - | marketing register, not authorship
+navigating the complexities of | strong | general | - | marketing register, not authorship
+stands as a testament to | strong | general | - | journalistic cliche predates LLMs
+a testament to | weak | general | - | journalistic cliche predates LLMs
+plays a crucial role | strong | general | - | standard academic English
+plays a vital role | strong | general | - | standard academic English
+plays a pivotal role | strong | general | - | standard academic English
+underscores the importance of | strong | general | - | standard academic English
+highlights the importance of | weak | general | - | standard academic English
+unlock the potential | strong | marketing | - | copywriting cliche predates LLMs
+harness the power of | strong | marketing | - | copywriting cliche predates LLMs
+take your … to the next level | strong | marketing | - | copywriting cliche predates LLMs
+elevate your | weak | marketing | - | copywriting cliche predates LLMs
+embark on a journey | strong | travel | - | travel-brochure register
+the perfect blend of | strong | general | - | travel-brochure register
+a perfect balance of | strong | general | - | travel-brochure register
+look no further | strong | marketing | - | copywriting cliche predates LLMs
+nestled in the heart of | strong | travel | - | travel-brochure register, human copywriters use it
+in the heart of the city | weak | travel | - | ordinary description of a central hotel
+a hidden gem | weak | travel | - | extremely common in genuine human reviews
+boasts | weak | travel | - | ordinary travel-writing verb; low precision on its own
+offers a wide range of | weak | general | - | ordinary business English
+ensuring a comfortable stay | strong | travel | - | hotel marketing register
+whether you're … or | strong | travel | - | balanced-frame marketing register
+whether you are … or | strong | travel | - | balanced-frame marketing register
+seamless experience | weak | general | - | product-marketing register
+seamlessly integrates | weak | tech | - | product-marketing register
+state-of-the-art | weak | marketing | - | predates LLMs by decades
+cutting-edge | weak | marketing | - | predates LLMs by decades
+top-notch | weak | travel | - | very common in genuine human reviews
+second to none | weak | travel | - | very common in genuine human reviews
+leaves no stone unturned | strong | general | - | idiom, also human
+a myriad of | weak | general | - | ordinary formal English
+rich tapestry | strong | general | - | essayistic cliche
+meticulously curated | strong | general | - | marketing register
+meticulous attention to detail | weak | travel | - | marketing register
+a game-changer | weak | general | - | business register
+not only … but also | weak | general | - | textbook construction; taught to L2 writers
+furthermore | weak | general | initial | taught to L2 writers as an essay connector
+moreover | weak | general | initial | taught to L2 writers as an essay connector
+additionally | weak | general | initial | taught to L2 writers as an essay connector
+in conclusion | weak | essay | initial | taught to L2 writers as an essay connector
+in summary | weak | general | initial | taught to L2 writers as an essay connector
+overall | weak | general | initial | ordinary paragraph opener
+rest assured | weak | cs | - | in human support snippet libraries
+thank you for reaching out | weak | cs | - | in human support snippet libraries
+we apologize for any inconvenience | weak | cs | - | in human support snippet libraries
+we apologise for any inconvenience | weak | cs | - | in human support snippet libraries
+let's dive in | strong | general | - | blog register
+here are a few | weak | general | - | ordinary list opener
+here are some | weak | general | - | ordinary list opener
+i understand your concern | weak | cs | - | in human support snippet libraries
+i do not have access to real-time | weak | general | - | narrowed variant; the rule covers the strong forms

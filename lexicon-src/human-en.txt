@@ -1,0 +1,71 @@
+# English human-tell markers — D1 §5.4. Chat abbreviations and slang.
+# These feed `human_lexicon` (HUMAN-direction only). They are CHEAP TO PROMPT FOR: a model told
+# "reply like a WhatsApp user" produces them freely (D1 fixture B1). High precision under an
+# unaware writer, near-zero robustness under an adversary.
+# format: phrase | tag | domain | flags | note
+u | weak | general | - | single-letter token; collides with ordinary use
+ur | strong | general | - | chat abbreviation
+pls | strong | general | - | chat abbreviation
+plz | strong | general | - | chat abbreviation
+thx | strong | general | - | chat abbreviation
+thnx | strong | general | - | chat abbreviation
+ty | strong | general | - | chat abbreviation
+tysm | strong | general | - | chat abbreviation
+kk | strong | general | - | chat abbreviation
+idk | strong | general | - | chat abbreviation
+idc | strong | general | - | chat abbreviation
+imo | strong | general | - | chat abbreviation
+imho | strong | general | - | chat abbreviation
+btw | weak | general | - | business-casual humans use it too
+lol | strong | general | - | chat abbreviation
+lmao | strong | general | - | chat abbreviation
+rofl | strong | general | - | chat abbreviation
+omg | strong | general | - | chat abbreviation
+wtf | strong | general | - | chat abbreviation
+rn | strong | general | - | chat abbreviation
+tbh | strong | general | - | chat abbreviation
+ngl | strong | general | - | chat abbreviation
+smth | strong | general | - | chat abbreviation
+ppl | strong | general | - | chat abbreviation
+cuz | strong | general | - | chat abbreviation
+coz | strong | general | - | chat abbreviation
+yeah | weak | general | - | ordinary spoken English
+yea | strong | general | - | chat spelling
+yep | strong | general | - | chat spelling
+yup | strong | general | - | chat spelling
+nope | strong | general | - | chat spelling
+nah | strong | general | - | chat spelling
+hmm | strong | general | - | chat filler
+hmmm | strong | general | - | chat filler
+ugh | strong | general | - | chat interjection
+oof | strong | general | - | chat interjection
+meh | strong | general | - | chat interjection
+aight | strong | general | - | chat spelling
+wdym | strong | general | - | chat abbreviation
+hbu | strong | general | - | chat abbreviation
+wyd | strong | general | - | chat abbreviation
+jk | strong | general | - | chat abbreviation
+brb | strong | general | - | chat abbreviation
+ttyl | strong | general | - | chat abbreviation
+np | strong | general | - | chat abbreviation
+nvm | strong | general | - | chat abbreviation; also a self-correction marker
+sry | strong | general | - | chat spelling
+srsly | strong | general | - | chat spelling
+prolly | strong | general | - | chat spelling
+rly | strong | general | - | chat spelling
+gimme | strong | general | - | speech spelling
+lemme | strong | general | - | speech spelling
+gonna | weak | general | - | ordinary informal English
+wanna | weak | general | - | ordinary informal English
+gotta | weak | general | - | ordinary informal English
+kinda | strong | general | - | speech spelling
+dunno | strong | general | - | speech spelling
+yall | strong | general | - | speech spelling
+y'all | strong | general | - | speech spelling
+sup | strong | general | - | chat greeting
+gotcha | strong | general | - | speech spelling
+sounds good | weak | general | - | business-casual humans use it constantly
+lowkey | strong | general | - | slang
+deadass | strong | general | - | slang
+asap | weak | general | - | business abbreviation, both sides use it
+fyi | weak | general | - | business abbreviation, both sides use it

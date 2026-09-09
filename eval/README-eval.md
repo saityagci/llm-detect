@@ -1,0 +1,344 @@
+# eval/ — the harness, the fixtures and the corpus adapter
+
+Nothing in here ships. `stylometry.mjs` never imports from this directory; this is the machinery
+that decides whether the numbers it prints are allowed to be believed.
+
+Language scope is **English and Turkish**. Arabic is out (HEAD-RULINGS R22): the Arabic public
+sources stay in the registry but are disabled and never fetched, Arabic-script corpus rows are
+filtered out by `make-splits.mjs` and counted, and there is no `llm-ar.jsonl`.
+
+## The pipeline
+
+```bash
+# 1. optional, network: five public corpora into eval/data/public/ (gitignored)
+node eval/fetch-public-datasets.mjs                 # --list, --dry-run, --only, --cap
+
+# 2. dedup, cross-label collisions, group-aware fit/val/test split, contamination scan,
+#    and the scrubbed human-chat.jsonl. Reads eval/data/corpus_user_messages.json.
+node eval/make-splits.mjs                           # writes eval/data/splits.jsonl (gitignored)
+
+# 3. the report
+node eval/run-eval.mjs --quick                      # SMOKE RUN — writes eval/out/quick/ (R26)
+
+# 4. the fixture gate, driven through the shipped CLI rather than through detect()
+node eval/gate-fixtures.mjs --out .scratch/<lane>/out --real 20     # while developing
+```
+
+### Regenerating the release report
+
+```bash
+node eval/run-eval.mjs && node eval/gate-fixtures.mjs --real 200 --append eval/out/REPORT.md
+```
+
+That is the whole command, and it is the only thing that may write `eval/out/REPORT.md`.
+
+- **`--quick` never writes there.** A smoke run subsamples the rows, and a subsampled run overwrote
+  the release `REPORT.md` and `weights.fitted.json` once this round. `--quick` now defaults its
+  output to `eval/out/quick/` unless `--out` is given (HEAD-RULINGS R26), and says so on stderr.
+- **`gate-fixtures.mjs --out` is a DIRECTORY** (default `eval/out`), holding `gate-fixtures.json`
+  and `gate-fixtures.md`; `--json <path>` and `--md <path>` override the individual files. Point
+  `--out` at a scratch directory while developing.
+- **`eval/out/REPORT.md` is machine-generated only.** Nothing hand-written survives a regeneration.
+  Findings — defects, network wedges, head rulings — live in the "Findings log" at the bottom of
+  *this* file, which no command overwrites.
+
+`run-eval.mjs` imports `detect()` from `../stylometry.mjs`. Point it elsewhere with
+`--detector <path>` — that is how the harness was developed before the core existed.
+
+## Why the split sides are called fit / val / test
+
+Because SPEC §D.5 step 8 says a fit-side number may appear only on a line literally marked
+`(reference only)`, and it says the harness must **refuse in code** rather than by convention.
+`run-eval.mjs` routes every line it prints — terminal and `REPORT.md` alike — through `emit()`,
+which exits with code 4 if a line names a fitting-side number without that marker, and
+`headline()` exits with code 4 if it is handed a row that was not measured on the test side.
+Naming the side "fit" keeps that guard from tripping over the harness's own prose.
+
+## What each file is
+
+| file | what it does |
+|---|---|
+| `fetch-public-datasets.mjs` | The only file in the project that touches the network, and only `datasets-server.huggingface.co` (plus one documented Zenodo attempt, gated behind `--include-arabic`, which R22 leaves off). Caps at 1500 rows per label per dataset, pages `/rows` at 100, retries with Retry-After-aware backoff on 500/429, writes a manifest with per-file sha256, licence, cap, actual counts and the sampling strategy. A 500 from this API means "the index is loading", not "the dataset is gone". |
+| `make-splits.mjs` | SPEC §D.5 steps 1-3. Normalized-key dedup; cross-label strings forced to one side; group-aware split (writer for humans, persona for generated personas, source row / template family for public corpora); Arabic-script exclusion with counts; near-duplicate contamination scan; the R8 scrub. |
+| `gate-fixtures.mjs` | The CAL lane's gate. Runs the SHIPPED CLI, one process per row with that row's own flags, over `must-not-fire.jsonl` (SPEC §I gate), the 50 authored LLM rows (§F.3 verdicts and the humanization delta), the 30 support-desk snippets at both `--domain` settings, a deterministic sample of real corpus messages at `--channel whatsapp`, and `verify-round-1.jsonl` (R33). Exits 3 if the §I gate or either R33 gate line fails; a row outside its `allowed` set is reported as arbitration, never silently fixed. `--out` is a directory (default `eval/out`). It fits nothing and never touches the network. |
+| `run-eval.mjs` | SPEC §D.5 steps 4-10 and the §G.1 tables. Hand-rolled logistic regression, PAVA isotonic calibration, rank AUC, ECE, fairness-limited threshold, hard mode, leave-one-writer-out, negative controls (a)-(e), base-rate table. |
+| `adapters/supabase-messages.cjs` | Optional. Rebuilds `corpus_user_messages.json` from a Supabase message table. Not zero-dependency and not in `package.json` — see below. |
+| `fixtures/*.jsonl` | Committed. See the table further down. |
+| `data/` | Gitignored. Real chat messages live here. Never commit anything from it. |
+| `out/` | Where the release `REPORT.md` and `weights.fitted.json` land. `out/quick/` is where `--quick` lands (R26). |
+
+## The corpus adapter
+
+```bash
+NODE_PATH=/path/to/node_modules node eval/adapters/supabase-messages.cjs \
+  --env <path to a .env with SUPABASE_URL and SUPABASE_SERVICE_KEY> \
+  --human-ids <comma list of sender ids that are known humans> \
+  --out eval/data --dry-run
+```
+
+`dotenv` and `@supabase/supabase-js` are resolved through `NODE_PATH` on purpose: the shipped
+tool has no dependencies and this adapter is not going to be the reason it acquires two. If they
+cannot be resolved the script prints one line saying how to point `NODE_PATH` at them and exits 2.
+
+It **never writes a sender id**. Humans become `R0..Rn` by their position in `--human-ids`;
+everyone else becomes `persona_id = "p" + sha256(salt + id).slice(0,12)`. The output directory is
+checked with `git check-ignore -q` and the script exits 2 if it is not ignored. A real pull needs
+`--i-have-approval` and prints "this performs a database read" first; `--dry-run` counts only.
+
+Exit codes: 0 ok, 1 usage, 2 precondition (missing env file, unresolvable modules, output
+directory not ignored), 3 refused for want of `--i-have-approval`.
+
+## Fixtures (committed)
+
+| file | rows | what it asserts |
+|---|---:|---|
+| `must-not-fire.jsonl` | 24 | D1 §7. 12 human-that-looks-LLM rows that must never come out `likely_llm`, 12 LLM-that-looks-human rows that must never come out `likely_human`, with at least 6 of those 12 abstaining. Each row carries an `allowed` verdict set and a `criticalFailure` set. |
+| `judge-tests.jsonl` | 14 | D2 §5. Each row carries `expectedFinal` and `criticalFailure` for the agent's final verdict, plus the trap it sets. |
+| `llm-en.jsonl` / `llm-tr.jsonl` | 25 each | SPEC §F.3. 15 clean + 10 humanized per language, in the genre mix §F.3 specifies, with `gen`, `prompt`, `postprocess` and `transform` per row. |
+| `cs-snippets.jsonl` | 30 | HEAD-RULINGS R7. Human support-desk phrasing, 15 en / 15 tr, used as negative control (e). |
+| `verify-round-1.jsonl` | 83 | HEAD-RULINGS R33. The verify round's 43 authored texts (35 human, 8 LLM) and 40 assistant-frame-leak probes. Schema below. |
+
+### `verify-round-1.jsonl` — schema
+
+Two row kinds share the file; `kind` says which.
+
+**`kind: "text"`** — one of the refuter's authored documents, copied verbatim.
+
+| field | meaning |
+|---|---|
+| `id` | `H01`–`H35` (human) or `L01`–`L08` (LLM). |
+| `source` | `"verify-round-1 refuter, authored in-session, 2026-09-09"`. Every row was written in this session. **No corpus row is in this file**, so R8's writer-R0 rule does not apply to it. |
+| `class` | the failure class the text was built to provoke, with its SPEC §H reference. |
+| `truth` | `human` \| `llm`. The 8 LLM rows are Claude-written text, which HEAD-RULINGS R10 counts as LLM text. |
+| `lang`, `context`, `channel`, `genre`, `domain` | the flags the row is run with — the same ones the refuter used. `channel: "unknown"` and `genre: "auto"` mean the refuter passed no such flag. |
+| `markers` | `null`, or `"test"` on the three rows that need a configured machine marker. |
+| `requiresMarkers` | present only when `markers` is `"test"`: the array `markers.json` would hold. The gate writes it to a temporary file and passes `--markers`; the shipped `markers.json` stays `[]` (R17). |
+| `allowed` | verdicts this row may produce. Human rows: `insufficient_text \| uncertain \| leaning_human`. `H03`/`H04` additionally allow `leaning_llm` — that is the known §G.2 ESL-connector confound and it is documented, not asserted away. Marker rows carry their **with-markers** set (`H17`/`H20`: `likely_llm \| uncertain`; `H19`: `uncertain \| leaning_human`, per R28); their without-markers expectation is the plain human set and is stated in `note`. LLM rows allow everything except `likely_human`. |
+| `criticalFailure` | verdicts that are a gate failure. `likely_llm` on a human row; `likely_human` on an LLM row. `H17`/`H20` are the exception — machine-written templates with no human turn, where a marker-driven `likely_llm` is correct — so their critical value is `likely_human`. |
+| `expected_evasion` | `true` on `L07`/`L08`: these are *expected* to escape. They document the mimicry cost, they do not assert a fix. |
+| `note` | why the row exists, and which ruling covers it. |
+| `text` | the document, verbatim. |
+
+**`kind: "leakProbe"`** — one assistant-frame-leak probe.
+
+| field | meaning |
+|---|---|
+| `id` | `P01`–`P30` (must fire) or `N01`–`N10` (must not). |
+| `probe` | what the probe varies. |
+| `expectRule` | `true` if `rules[]` must contain `assistant_frame_leak`, `false` if it must not. |
+| `note` | the R27 clause or refuter defect it comes from. |
+| `text` | the phrase plus a fixed filler so the document clears the length gates. |
+
+The 30 positives are the refuter's `leakprobe.mjs` list (19 of them were misses before R27). The 10
+negatives are the precision side: the three shapes that made the rule accuse a human (defects
+D1–D3), the quotation-suppression cases that already worked and must keep working, and the two
+Turkish cue spellings. **A false fire counts differently from a miss and the gate reports them
+separately** — a miss is lost recall, a false fire is an accusation.
+
+`gate-fixtures.mjs` section CAL-E runs the file and adds two gate lines (R33): zero `likely_llm` on
+the human rows that name it critical, and every `expectRule` row correct. Either failing exits 3.
+
+### Arabic rows, and what replaced them
+
+R22 removes Arabic from the project after the fixtures were specified. Rather than shrink the
+acceptance gate from 12+12 to 9+10, each Arabic row was **replaced by an EN or TR row that sets
+the same trap**, and every replacement names what it stands in for in its `replaces` field:
+
+| dropped | replaced by | the trap that had to survive |
+|---|---|---|
+| `A4` Arabic MSA journalist prose | EN prose, a careful writer in the standard register of the genre | "correct, standard register carries zero evidence" |
+| `A7` Arabic formal MSA chat | TR chat, formal and correct, long enough to clear the gate | "correct orthography earns zero" |
+| `A8` Arabic vocalized quotation | EN review quoting the hotel's own marketing copy | "pasted material is not the sender's style" |
+| `B3` Arabic dialect on demand | TR chat slang produced on demand | "a register is promptable" |
+| `B11` Arabizi on demand | EN chat elongation + emoticons produced on demand | "the highest-precision human marker has no robustness to a prompt" |
+| `T01` Arabic dialect floor test | corpus R0 message, 5 words with a real typo | "below the floor is below the floor, however obvious the tells" |
+| `T05` Arabic markdown guest list | corpus R0 message: numbered list, em dashes, flawless orthography | the hardest case: a real customer who plausibly used an assistant |
+| `T06` product bot output pasted by a user | a generic bot confirmation with a placeholder marker | "the text is machine-written, the sender is a person" |
+| `T10` Arabic MSA business email | TR formal business email | "these formulae are older than any language model" |
+| `T11` Arabic humanized LLM | TR assistant prose with one chat word painted on | "one casual word is a costume, not a register" |
+
+`T06` also had to lose its product-specific marker: `markers.json` ships empty (R17), so the row
+carries a `requiresMarkers` field with a **placeholder** marker and reference format, and the
+`known_machine_marker` rule does not fire on it unless you pass `--markers` explicitly.
+
+### PII in committed fixtures (R8)
+
+Corpus-derived rows are allowed **only** from writer R0, the repository owner's own messages.
+`judge-tests.jsonl` rows `T01`, `T02`, `T04`, `T05` and `T12` are R0 messages; each says so in
+its `source` field and states what the scrub changed. `T12` had three guest names replaced with
+`[NAME]`. Everything else in the fixtures was written in-session.
+
+`human-chat.jsonl` is **not committed**. `make-splits.mjs` regenerates it under `eval/data/` at
+eval time with a deny-by-default scrub: a token prints only if it is on the allowlist (cities,
+hotel-catalogue words, months, weekdays, room types, booking vocabulary), is a stopword, is a
+number, or appears in 15 or more distinct corpus messages. Anything after an explicit name cue
+(`isim`, `adı`, `names`) is always `[NAME]`. Some innocent rare words print as `[NAME]`; that is
+the correct direction to err.
+
+## What the harness refuses to do
+
+- Quote an accuracy computed on a stream where the same string appears on both sides of the
+  split. Section 1 of the report prints the residual duplicate count and the straddle count.
+- Print a number in a headline table for a cell with fewer than 100 documents on either side.
+  It prints `INSUFFICIENT — placeholder, not a measurement` instead.
+- Print a rate for a bucket where every row was gated. It prints `NO COVERAGE` and the counts.
+- Print an accuracy without the coverage that produced it: `insufficient_text` is a deliverable,
+  and the gate rate per cell is section 2 of the report, before any accuracy appears.
+- Flip a fitted coefficient whose sign disagrees with the design. It flags it (section 6).
+- Claim negative controls (b) and (c) were run. They were not, and the report says why:
+  no labelled human-translated corpus, and no machine translation without a paid API.
+
+## Known limitations of this harness
+
+- **Three humans.** The human side of the in-house corpus is R0, R1 and R2. Leave-one-writer-out
+  over three writers, two of whom write mostly in a script this build excludes, is a weak test,
+  and the report prints the surviving counts rather than a comfortable rate.
+- **The chat cells barely have a model.** Over 90% of real chat messages are below the length
+  floor, so the fitting side of `en:chat` and `tr:chat` can be too thin to fit anything. That is
+  the product, not a harness bug, and the report says so per cell instead of inventing a number.
+- **Turkish is one genre.** The only labelled Turkish resource is 1,000 GPT-4 hotel reviews and
+  their human counterparts. Every Turkish number is measured on hotel reviews.
+- **The public splits are stratified by a text-hash shard**, not by a prompt template, because
+  the templates are not visible in the released data. Near-duplicates cannot straddle the split
+  (they share a normalized key and therefore a shard), but genuine template siblings that differ
+  in wording can, and that is an upward bias on every public-corpus number here.
+
+---
+
+# Findings log
+
+`eval/out/REPORT.md` is regenerated from scratch by a command; anything written by hand there is
+lost on the next run. This section is the hand-written record, and no command writes to it. Each
+entry names what was measured, one line of repro or a pointer, and the ruling that resolved it.
+
+## CAL lane
+
+**E3 — the public-dataset re-pull wedged on a kept-alive socket, four times.**
+`node eval/fetch-public-datasets.mjs` succeeded once and then hung on four consecutive re-pulls,
+each time on an open, idle connection to `datasets-server.huggingface.co` rather than on a refused
+or reset one. The most likely explanation is a per-client rate limit that stops answering instead of
+returning 429; **the root cause was not identified**. A 30-second `AbortController` timeout was added
+so the process now fails instead of hanging, but that is a symptom fix. **Run the fetcher under an
+external watchdog** (`timeout 900 node eval/fetch-public-datasets.mjs`) and do not assume a second
+pull will work. **The data of record is the first pull**, whose per-file sha256 sums are in
+`eval/data/public/manifest.json` and were verified. No ruling number: this is an operational note,
+not a design question.
+
+**E6 — an LLM imitating a telegraphic Turkish writer reaches `leaning_human` at 33 tokens.**
+The mimicry transform (d) produced two 33-token Turkish WhatsApp messages with **human channel 0.84
+and LLM channel exactly 0.000** — not one LLM-direction feature fired. The four human features it
+bought (`human_lexicon`, `tr_chat_morphology`, `tr_asciified_probe`, `all_lowercase`) are a slang
+list and a keyboard setting. Reproduce with fixture `tr-wa-8` in `llm-tr.jsonl`, or rows `L07`/`L08`
+of `verify-round-1.jsonl`:
+`node eval/gate-fixtures.mjs --out .scratch/tmp --real 0` and read CAL-E.
+Consequence: **human markers are promptable**, so the human side of the instrument is no harder to
+forge than the LLM side. Recorded in README §"Ways this detector will be confidently wrong" #8;
+`expected_evasion: true` on both rows so the gate documents it instead of asserting a fix.
+
+**E7 — the G4 dead band: prose between 50 and about 120 tokens abstains.**
+34 of the 50 authored LLM fixtures (90–110-token prose) returned `insufficient_text` with G1–G3
+passed and `too_few_active_features`, because the rhythm features switch on at 120–250 tokens. The
+measured `en:prose` 50–149 bucket says the instrument is barely useful there anyway (AUC 0.757, hard
+mode 0.603, TPR 4.7% at 1.1% FPR). **Ruling: HEAD-RULINGS R25** — G4 stays where it is; the band is
+documented as abstaining, and the ten prose humanization pairs (five per language) were rewritten at 160–260 tokens on
+both sides so the §F.3 collapse assertion became measurable. Measured effect: evaluable prose pairs
+went from **1 of 10 to 7 of 10** (total evaluable pairs 3 → 9). Read the `**R25 check**` line in
+CAL-B of `gate-fixtures.md`.
+
+**E8 — the shipped segmenter and `Intl.Segmenter` disagree on sentence count for 32.8% of 500
+documents**, mean |Δ| 0.75 sentences. Every rhythm feature (`sentence_len_cv`,
+`sentence_len_mode_mass`, `paragraph_uniformity`) is computed over that count, so a third of
+documents carry a rhythm value that a different, equally defensible segmenter would not produce.
+The tool ships its own segmenter on purpose (`Intl.Segmenter` is locale-dependent and would break
+determinism across ICU versions), so this is a *measurement of the uncertainty*, not a defect to
+fix. It is why `segmentation_suspect` exists. Repro: section 8 of `eval/out/REPORT.md`.
+
+## Verify round 1
+
+**The refuter — 130 attacks** (the head's count; the refuter's own table records 62 CLI runs plus
+the leak, markdown, unicode, suppression-window, batch and aggregate probe suites). Every attack text
+was authored in-session; none came from the corpus. Findings, and the ruling that closed each:
+
+- **A human reached `likely_llm` three separate ways, all through `assistant_frame_leak`.** (i) the
+  quotation-suppression window was ~100 characters from the match, so one intervening sentence let a
+  human retelling what ChatGPT said be accused on 182 words of ordinary prose; (ii) `assistant`,
+  `AI` and `LLM` were not suppression cues, so "the assistant my company installed" was accused;
+  (iii) the bare common noun `language model` fired as self-identification ("the spreadsheet has
+  never once told me it was a language model"). **→ HEAD-RULINGS R27.** Repro: rows `H23`, `N03`,
+  `H24`/`N06` of `verify-round-1.jsonl`.
+- **A configured machine marker inside a human-written message produced `likely_llm` with a human
+  channel of 0.602** — a human WhatsApp turn wrapped around a forwarded booking summary, which is
+  the SPEC §H.1 scenario the whole design exists to protect. **→ HEAD-RULINGS R28** (hybrid:
+  `uncertain` + `pasted_machine_text` + `hybrid_suspect`). Repro: row `H19`.
+- **19 of 30 assistant-leak paraphrases were missed**, including a double space, a single soft line
+  break, an NBSP, the hyphenated `knowledge cut-off`, the unhyphenated `real time`, and every
+  Turkish phrase written with the circumflex `zekâ`. **→ HEAD-RULINGS R27** (whitespace-normalised
+  matching, `zek[aâ]`, the added EN/TR patterns). Repro: rows `P01`–`P30`.
+- **Homoglyph and zero-width substitutions flipped `likely_llm` to `insufficient_text` with no
+  trace.** A Cyrillic `а`, a fullwidth `Ｈ` or a ZWSP each defeated the rule; the Cyrillic case left
+  `language.shares.other = 0.012` as its only evidence and nothing surfaced it. **→ HEAD-RULINGS
+  R30** (`homoglyph_suspect` plus a confusable-folded view for rule matching). Detection power
+  against a real adversary stays zero and the README keeps saying so.
+- **The planned register-only cap would have protected 0 of the 9 human texts that reached
+  `leaning_llm`.** The escape hatches were `llm_lexicon_weak` (one ordinary Turkish "ayrıca"),
+  `out_of_channel_register` (any ≥400-character two-paragraph WhatsApp message) and the prose
+  rhythm/connector trio. **→ HEAD-RULINGS R24**, which grew `REGISTER_PROXY_LLM` accordingly and
+  requires two non-proxy LLM signals from two groups before `leaning_llm`.
+
+**The code reviewer** (Unicode / regex / edge cases):
+
+- **Arabic text carrying an English fingerprint scored `likely_llm`** — an R22 violation, because
+  Arabic-script input must gate at `G3_lang` and never be scored. **Fixed by FIX-B1 in the core.**
+- **A cluster of Turkish `\b` and `//i` regexes.** JavaScript's `\b` is ASCII-only and its `i` flag
+  does not do Turkish case folding, so `ı`, `İ`, `ş`, `ğ` sat on the wrong side of a word boundary
+  or failed to match. **Core fix.**
+- **Curly-apostrophe parity**: `'` and `’` were not treated alike by the contraction features.
+- **Turkish ordinal over-splitting**: `3.` in `3. kat` was read as a sentence end.
+- **Astral-emoji boundary**: a surrogate pair could be split across a token boundary.
+- **An O(k²) overlap pass** in the rule matcher — no catastrophic backtracking, but a super-linear
+  path on pathological input.
+
+**The end-to-end test.** The installed agent ran for real from `~/.claude/agents/` through a
+headless session, resolved the tool via `LLM_DETECT_HOME`, read `RUBRIC.md`, applied the §E.1 table
+correctly on six texts and a six-row batch, and never printed a percentage on a verdict line. **The
+agent works end to end.** Its defects — a set-but-invalid `LLM_DETECT_HOME` treated as "fall back"
+rather than "missing", batch mode judging `insufficient_text` rows, the unreachable `--dry-run`
+branch, `--help` leaking a shell line, caveat labels drifting from the skeleton — are **ruled in
+HEAD-RULINGS R31** and fixed in `agent/llm-text-detector.md`, `RUBRIC.md` and `install.sh`. The
+`⚠` CONFLICT block was never rendered, because no test text split the two instruments; that path is
+recorded as untested.
+
+**Language ID.** A 14-word ASCII-folded Turkish WhatsApp line came back `language.primary = "en"` at
+confidence 0.25 with the note `latin_subid_no_votes`. ASCII-folded Turkish is the documented shape of
+real Turkish chat, so routing it into the `en` cell with English lexicons is the common case, not an
+edge. **→ HEAD-RULINGS R32**: zero-vote Latin is `mixed`, never `en`, and the ASCII-fied Turkish
+probe list, the chat-slang list and the folded suffix shapes all count as Turkish votes.
+
+**Second pass over the verify-round fixture (HEAD-RULINGS R34).** Running `verify-round-1.jsonl`
+through the fixed core found two remaining `assistant_frame_leak` false fires on human text — the
+Turkish common noun "yapay zeka asistanı" (row `N09`; the first-person suffix had been optional) and
+the old drafting pattern on "Here is the revised itinerary my colleague sent over" (row `N07`) — five
+rewritten email fixtures that abstained with every gate passed and **no `reason`** (the SPEC §D.3
+"no evidence either way" cell was silent), and a `code_switch_observed` note counting Turkish words
+that happen to be English function words. All three are core fixes under R34. Two measured findings
+were **not** tuned away: transform (b) is a no-op in prose on three of five pairs (its targets,
+`sentence_initial_caps` and `all_lowercase`, are chat-only features) and transform (c) *raised* one
+Turkish email's score; the §F.3 "a humanized variant scores lower" assertion is now measurable and
+partly false. Read the R25 check line and the pair table in CAL-B of `gate-fixtures.md`.
+
+## Ruling index
+
+| finding | ruling |
+|---|---|
+| fitted weights not promoted to default | R23 |
+| register-proxy evidence cannot carry `leaning_llm` | R24 |
+| G4 dead band; prose pairs rewritten at 160–260 tokens | R25 |
+| 12-decimal printing; `--quick` output directory; REPORT.md machine-generated only | R26 |
+| `assistant_frame_leak` precision and recall | R27 |
+| machine marker inside a human message is a hybrid | R28 |
+| aggregate-mode gates and features | R29 |
+| homoglyph / non-ASCII-Latin evasion warning | R30 |
+| agent, RUBRIC and installer defects from the E2E run | R31 |
+| zero-vote Latin is `mixed`; ASCII-fied Turkish votes Turkish | R32 |
+| the verify-round texts become a committed fixture and part of the gate | R33 |
+| second-pass leak-rule precision, silent abstention reason, code-switch note; transform (b)/(c) findings | R34 |

@@ -1,0 +1,48 @@
+# Turkish LLM-tell phrases — D1 §5.2 (42 rows), as amended by HEAD-RULINGS R1.
+# Written in natural Turkish. build-lexicon.mjs folds every row with toLocaleLowerCase('tr')
+# and strips the stray U+0307 (SPEC B.9) before writing lexicon.v1.json — never pre-fold by hand.
+# format: phrase | tag | domain | flags | note
+umarım bu bilgiler yardımcı olur | strong | general | - | a human agent closing a message writes this
+umarım yardımcı olmuştur | strong | general | - | a human agent closing a message writes this
+umarım bu yardımcı olur | strong | general | - | a human agent closing a message writes this
+başka bir sorunuz olursa | strong | cs | - | literally in human support snippet libraries
+size nasıl yardımcı olabilirim | strong | cs | - | what a human receptionist says all day
+yardımcı olmaktan memnuniyet duyarım | strong | cs | - | literally in human support snippet libraries
+elbette | strong | general | initial | sentence-initial only; ordinary Turkish affirmation
+tabii ki | weak | general | initial | sentence-initial only; ordinary Turkish affirmation
+öncelikle belirtmek gerekir ki | strong | general | - | Turkish essay-class register
+unutulmamalıdır ki | strong | general | - | Turkish essay-class register
+dikkat çekmektedir | strong | general | - | Turkish officialese; a lawyer writes this
+önem taşımaktadır | strong | general | - | Turkish officialese; a lawyer writes this
+önemli bir rol oynamaktadır | strong | general | - | Turkish officialese
+ön plana çıkmaktadır | strong | general | - | Turkish officialese
+göze çarpmaktadır | strong | general | - | Turkish officialese
+değerlendirilmektedir | weak | general | - | Turkish officialese
+bu bağlamda | weak | general | - | ordinary academic Turkish
+bu doğrultuda | weak | general | - | ordinary academic Turkish
+söz konusu | weak | formal | - | ordinary Turkish legal/administrative register
+göz önünde bulundurulduğunda | strong | general | - | Turkish essay-class register
+bunun yanı sıra | weak | general | - | taught as an essay connector
+buna ek olarak | weak | general | - | taught as an essay connector
+ayrıca | weak | general | initial | extremely common ordinary Turkish adverb
+diğer taraftan | weak | general | - | taught as an essay connector
+sonuç olarak | weak | essay | initial | taught as an essay closer
+özetle | weak | general | initial | taught as an essay closer
+kısacası | weak | general | initial | ordinary spoken Turkish too
+genel olarak | weak | general | initial | ordinary Turkish
+eşsiz bir deneyim | strong | travel | - | hotel marketing register
+unutulmaz bir deneyim | strong | travel | - | hotel marketing register
+konforlu bir konaklama | strong | travel | - | hotel marketing register
+şehrin kalbinde | strong | travel | - | human travel bloggers copied this from models
+muhteşem bir manzara | weak | travel | - | very common in genuine human reviews
+misafirperverliği ile öne çıkıyor | strong | travel | - | hotel marketing register
+her bütçeye uygun | weak | travel | - | hotel marketing register
+ihtiyaçlarınıza yönelik | weak | cs | - | in human support snippet libraries
+mükemmel bir uyum | strong | general | - | marketing register
+sizler için derledik | strong | content | - | Turkish listicle register
+keyifli bir tatil geçirmenizi dileriz | strong | travel | - | in human agency snippet libraries
+geri bildiriminiz bizim için değerli | weak | cs | - | literally in human support snippet libraries
+anlayışınız için teşekkür ederiz | weak | cs | - | literally in human support snippet libraries
+yaşadığınız olumsuzluk için özür dileriz | weak | cs | - | literally in human support snippet libraries
+hem … hem de | weak | general | - | ordinary Turkish correlative conjunction
+bir yapay zeka dil modeli | strong | general | - | narrowed variant; the rule covers self-identification

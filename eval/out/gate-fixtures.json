@@ -1,0 +1,4171 @@
+{
+  "generatedAt": "2026-09-09T10:59:00.466Z",
+  "detector": "stylometry.mjs",
+  "tau": 0.5,
+  "tauSource": "the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.",
+  "mustNotFire": {
+    "rows": 24,
+    "groupA": 12,
+    "groupB": 12,
+    "likely_llm_on_A": 0,
+    "likely_human_on_B": 0,
+    "abstained_on_B": 12,
+    "abstain_bar": 6,
+    "pass": true,
+    "arbitration": [],
+    "detail": [
+      {
+        "id": "A1",
+        "group": "A",
+        "truth": "human",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "L2 (Turkish-speaking) writer, textbook-formal, zero typos, tricolon, greeting and signoff, perfect punctuation. greeting_signoff_frame, terminal_punct_ratio, sentence_initial_caps, politeness_formula and low sentence_len_cv all point LLM at once.",
+        "cliError": null
+      },
+      {
+        "id": "A2",
+        "group": "A",
+        "truth": "human",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "A real project manager email. bold_lead_in_list is the highest-precision structural feature in the catalogue and it fires fully; greeting_signoff_frame fires; the closer is on the LLM lexicon.",
+        "cliError": null
+      },
+      {
+        "id": "A3",
+        "group": "A",
+        "truth": "human",
+        "lang": "tr",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_token_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "A lawyer complaint letter: -maktadır/-mektedir, nominalization, full diacritics, formal signoff. tr_formal_copula and greeting_signoff_frame fire together.",
+        "cliError": null
+      },
+      {
+        "id": "A4",
+        "group": "A",
+        "truth": "human",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": "A4 (Arabic MSA journalist prose — dropped per R22)",
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Replacement trap, same shape as the dropped Arabic row: a careful writer working in the standard register of the genre, with no slang, no typos, no idiom and uniform sentence length. sentence_len_cv, sentence_len_mode_mass and terminal_punct_ratio all point LLM. Standard register carries zero evidence by design.",
+        "cliError": null
+      },
+      {
+        "id": "A5",
+        "group": "A",
+        "truth": "human",
+        "lang": "en",
+        "shape": "chat",
+        "replaces": null,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "A support agent snippet. Every phrase is on the LLM strong lexicon and every one of them is literally in a human support snippet library.",
+        "cliError": null
+      },
+      {
+        "id": "A6",
+        "group": "A",
+        "truth": "human",
+        "lang": "tr",
+        "shape": "chat",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "A hotel guest on an iPhone with a Turkish keyboard and autocorrect. Perfect diacritics, correct capital İ, correct proper-noun apostrophes, every sentence terminated, sentence-initial capitals. It looks flawless because the keyboard is flawless.",
+        "cliError": null
+      },
+      {
+        "id": "A7",
+        "group": "A",
+        "truth": "human",
+        "lang": "tr",
+        "shape": "chat",
+        "replaces": "A7 (Arabic formal MSA chat — dropped per R22)",
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Replacement trap, same shape as the dropped Arabic row: a guest writing formally and correctly to a business, long enough to clear the 20-word gate so it is actually scored. Correct orthography, correct apostrophes, terminal punctuation everywhere, polite closer.",
+        "cliError": null
+      },
+      {
+        "id": "A8",
+        "group": "A",
+        "truth": "human",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": "A8 (Arabic vocalized quotation — dropped per R22)",
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Replacement trap, same shape as the dropped Arabic row: a human review with pasted machine-or-marketing text quoted inside it. The pasted span is not the author style, and the lexicon fires on the quotation rather than on the writer.",
+        "cliError": null
+      },
+      {
+        "id": "A9",
+        "group": "A",
+        "truth": "human",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human",
+          "leaning_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Human-written Turkish, machine-translated into English. Flat rhythm, no idioms, no typos, uniform sentence length: sentence_len_cv, sentence_len_mode_mass, paragraph_uniformity and terminal_punct_ratio all point LLM. MT and LLM decoding share a rhythm and this design does not pretend to separate them.",
+        "cliError": null
+      },
+      {
+        "id": "A10",
+        "group": "A",
+        "truth": "human",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "A professional editor writing a review: em dashes, semicolons, an Oxford comma, no typos. Several correlated typographic features fire at once, which is exactly the double-counting failure the joint fit exists to shrink.",
+        "cliError": null
+      },
+      {
+        "id": "A11",
+        "group": "A",
+        "truth": "human",
+        "lang": "en",
+        "shape": "chat",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human",
+          "leaning_llm",
+          "leaning_human",
+          "uncertain"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Terminal punctuation on every sentence, capitalized, polite, no human markers at all, 16 word tokens. The bottom-left cell of the verdict table: there is no information here.",
+        "cliError": null
+      },
+      {
+        "id": "A12",
+        "group": "A",
+        "truth": "human",
+        "lang": "tr",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "uncertain",
+        "score": 0.2,
+        "gateReason": null,
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "A human travel blogger writing SEO copy in the format the platform rewards: emoji-headed sections, a bulleted structure, marketing register. Humans copied this format FROM models, which makes marketing the worst confounder class in the catalogue.",
+        "cliError": null
+      },
+      {
+        "id": "B1",
+        "group": "B",
+        "truth": "llm",
+        "lang": "tr",
+        "shape": "chat",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Model prompted \"reply like a WhatsApp user\". tr_asciified_probe, all_lowercase, no terminal punctuation, tr_chat_morphology and human_lexicon (abi) all fire. Every human channel lights up at once.",
+        "cliError": null
+      },
+      {
+        "id": "B2",
+        "group": "B",
+        "truth": "llm",
+        "lang": "en",
+        "shape": "chat",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "likely_llm",
+          "leaning_llm",
+          "leaning_human",
+          "uncertain"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Three word tokens. Below G2 whatever it looks like.",
+        "cliError": null
+      },
+      {
+        "id": "B3",
+        "group": "B",
+        "truth": "llm",
+        "lang": "tr",
+        "shape": "chat",
+        "replaces": "B3 (Arabic Levantine dialect on demand — dropped per R22)",
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Replacement trap, same shape as the dropped Arabic row: a model asked for a specific casual register produces it on demand. tr_chat_morphology (napcaz, bakayim), human_lexicon (valla, abi), all_lowercase and absent terminal punctuation all fire. Register is promptable.",
+        "cliError": null
+      },
+      {
+        "id": "B4",
+        "group": "B",
+        "truth": "llm",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "leaning_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Model output post-processed with sed to replace em dashes with commas plus a lowercase pass on sentence openers. em_dash_in_chat, sentence_initial_caps and all_lowercase are neutralized for free; the structural and lexical features must carry it alone. Accept the recall loss, do not compensate by raising weights elsewhere.",
+        "cliError": null
+      },
+      {
+        "id": "B5",
+        "group": "B",
+        "truth": "hybrid",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "uncertain",
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_llm",
+          "likely_human",
+          "leaning_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Model draft, human rewrote about 30 percent and added two typos. Contradictory evidence in both directions at once.",
+        "cliError": null
+      },
+      {
+        "id": "B6",
+        "group": "B",
+        "truth": "llm",
+        "lang": "en",
+        "shape": "chat",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "likely_llm",
+          "leaning_llm",
+          "leaning_human",
+          "uncertain"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "A model-generated factual answer. There is nothing to measure.",
+        "cliError": null
+      },
+      {
+        "id": "B7",
+        "group": "B",
+        "truth": "llm",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "leaning_human",
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Model output with typos injected by a humanizer tool: teh, recieved, one dropped apostrophe. contraction_apostrophe_drop fires; letter_elongation and self_correction_marker are absent, because humanizers inject character noise, not conversational repair.",
+        "cliError": null
+      },
+      {
+        "id": "B8",
+        "group": "B",
+        "truth": "llm",
+        "lang": "tr",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "leaning_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Model output written in English and machine-translated into Turkish with full diacritics preserved. It reads like careful human Turkish and the Turkish lexicon misses, because the phrasing arrived through MT rather than from the model directly.",
+        "cliError": null
+      },
+      {
+        "id": "B9",
+        "group": "B",
+        "truth": "llm",
+        "lang": "tr",
+        "shape": "chat",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "likely_llm",
+          "leaning_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Model given five of the target writer real messages as few-shot examples. The style has been copied from a human; the stylometric signal has been replaced with the victim signal. There is no defence.",
+        "cliError": null
+      },
+      {
+        "id": "B10",
+        "group": "B",
+        "truth": "llm",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "leaning_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Output from a small open-weights model: repetitive, degenerate loop, not GPT-shaped. The strong LLM lexicon misses entirely and content_word_repeat actually points HUMAN.",
+        "cliError": null
+      },
+      {
+        "id": "B11",
+        "group": "B",
+        "truth": "llm",
+        "lang": "en",
+        "shape": "chat",
+        "replaces": "B11 (Arabizi on demand — dropped per R22)",
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Replacement trap, same shape as the dropped Arabizi row: a model asked to text like a friend produces letter_elongation, repeated_punct_emoticon and multi_exclam, which are the three highest-precision HUMAN markers in the catalogue, on demand.",
+        "cliError": null
+      },
+      {
+        "id": "B12",
+        "group": "B",
+        "truth": "hybrid",
+        "lang": "en",
+        "shape": "prose",
+        "replaces": null,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "allowed": [
+          "insufficient_text",
+          "uncertain"
+        ],
+        "criticalFailure": [
+          "likely_human",
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "why": "Marketing copy generated by a model, then lightly edited by the brand copywriter and published as a review. Hybrid plus marketing register: this row and A12 meeting in the middle is the honest picture of this problem ceiling.",
+        "cliError": null
+      }
+    ]
+  },
+  "llmFixtures": {
+    "rows": 50,
+    "byLang": {
+      "en": {
+        "leaning_llm": 7,
+        "insufficient_text": 11,
+        "uncertain": 6,
+        "leaning_human": 1
+      },
+      "tr": {
+        "leaning_llm": 5,
+        "uncertain": 9,
+        "insufficient_text": 10,
+        "leaning_human": 1
+      }
+    },
+    "byTransform": {
+      "none": {
+        "leaning_llm": 9,
+        "insufficient_text": 14,
+        "uncertain": 7
+      },
+      "b": {
+        "uncertain": 2,
+        "leaning_llm": 2,
+        "insufficient_text": 2
+      },
+      "c": {
+        "uncertain": 4,
+        "leaning_human": 1,
+        "leaning_llm": 1
+      },
+      "a": {
+        "insufficient_text": 4,
+        "uncertain": 2
+      },
+      "d": {
+        "insufficient_text": 1,
+        "leaning_human": 1
+      }
+    },
+    "gatedRate": 0.42,
+    "flaggedAtTau": 21,
+    "scored": 29,
+    "humanizationPairs": 12,
+    "evaluablePairs": 9,
+    "unpairedHumanized": [
+      {
+        "id": "en-hr-7",
+        "transform": "a",
+        "verdict": "insufficient_text",
+        "score": null
+      },
+      {
+        "id": "en-wa-6",
+        "transform": "a",
+        "verdict": "uncertain",
+        "score": 0.212556648764
+      },
+      {
+        "id": "en-wa-8",
+        "transform": "d",
+        "verdict": "insufficient_text",
+        "score": null
+      },
+      {
+        "id": "en-es-3",
+        "transform": "a",
+        "verdict": "insufficient_text",
+        "score": null
+      },
+      {
+        "id": "tr-hr-7",
+        "transform": "a",
+        "verdict": "insufficient_text",
+        "score": null
+      },
+      {
+        "id": "tr-wa-6",
+        "transform": "a",
+        "verdict": "uncertain",
+        "score": 0.35
+      },
+      {
+        "id": "tr-wa-8",
+        "transform": "d",
+        "verdict": "leaning_human",
+        "score": 0.35
+      },
+      {
+        "id": "tr-es-3",
+        "transform": "a",
+        "verdict": "insufficient_text",
+        "score": null
+      }
+    ],
+    "dropped": 2,
+    "meanDelta": -0.0176,
+    "deltas": [
+      {
+        "pairId": "en-hr-1",
+        "lang": "en",
+        "transform": "b",
+        "cleanId": "en-hr-1",
+        "cleanScore": 0.86976107489,
+        "cleanVerdict": "leaning_llm",
+        "humId": "en-hr-5",
+        "humScore": 0.802159836858,
+        "humVerdict": "uncertain",
+        "delta": -0.0676,
+        "evaluable": true,
+        "dropped": true
+      },
+      {
+        "pairId": "en-hr-2",
+        "lang": "en",
+        "transform": "c",
+        "cleanId": "en-hr-2",
+        "cleanScore": 0.850326924416,
+        "cleanVerdict": "leaning_llm",
+        "humId": "en-hr-6",
+        "humScore": 0.752750337562,
+        "humVerdict": "uncertain",
+        "delta": -0.0976,
+        "evaluable": true,
+        "dropped": true
+      },
+      {
+        "pairId": "en-pr-1",
+        "lang": "en",
+        "transform": "b",
+        "cleanId": "en-pr-1",
+        "cleanScore": 0.76228969482,
+        "cleanVerdict": "leaning_llm",
+        "humId": "en-pr-3",
+        "humScore": 0.76228969482,
+        "humVerdict": "leaning_llm",
+        "delta": 0,
+        "evaluable": true,
+        "dropped": false
+      },
+      {
+        "pairId": "en-wa-3",
+        "lang": "en",
+        "transform": "c",
+        "cleanId": "en-wa-3",
+        "cleanScore": 0.753803179608,
+        "cleanVerdict": "uncertain",
+        "humId": "en-wa-7",
+        "humScore": 0.753803179608,
+        "humVerdict": "uncertain",
+        "delta": 0,
+        "evaluable": true,
+        "dropped": false
+      },
+      {
+        "pairId": "en-em-1",
+        "lang": "en",
+        "transform": "b",
+        "cleanId": "en-em-1",
+        "cleanScore": null,
+        "cleanVerdict": "insufficient_text",
+        "humId": "en-em-3",
+        "humScore": null,
+        "humVerdict": "insufficient_text",
+        "delta": null,
+        "evaluable": false,
+        "dropped": null
+      },
+      {
+        "pairId": "en-em-2",
+        "lang": "en",
+        "transform": "c",
+        "cleanId": "en-em-2",
+        "cleanScore": null,
+        "cleanVerdict": "insufficient_text",
+        "humId": "en-em-4",
+        "humScore": 0.102333860869,
+        "humVerdict": "leaning_human",
+        "delta": null,
+        "evaluable": false,
+        "dropped": null
+      },
+      {
+        "pairId": "tr-hr-1",
+        "lang": "tr",
+        "transform": "b",
+        "cleanId": "tr-hr-1",
+        "cleanScore": 0.700205562708,
+        "cleanVerdict": "leaning_llm",
+        "humId": "tr-hr-5",
+        "humScore": 0.700205562708,
+        "humVerdict": "leaning_llm",
+        "delta": 0,
+        "evaluable": true,
+        "dropped": false
+      },
+      {
+        "pairId": "tr-hr-2",
+        "lang": "tr",
+        "transform": "c",
+        "cleanId": "tr-hr-2",
+        "cleanScore": 0.30646322762,
+        "cleanVerdict": "uncertain",
+        "humId": "tr-hr-6",
+        "humScore": 0.30646322762,
+        "humVerdict": "uncertain",
+        "delta": 0,
+        "evaluable": true,
+        "dropped": false
+      },
+      {
+        "pairId": "tr-pr-1",
+        "lang": "tr",
+        "transform": "b",
+        "cleanId": "tr-pr-1",
+        "cleanScore": 0.536634064086,
+        "cleanVerdict": "uncertain",
+        "humId": "tr-pr-3",
+        "humScore": 0.536634064086,
+        "humVerdict": "uncertain",
+        "delta": 0,
+        "evaluable": true,
+        "dropped": false
+      },
+      {
+        "pairId": "tr-wa-3",
+        "lang": "tr",
+        "transform": "c",
+        "cleanId": "tr-wa-3",
+        "cleanScore": 0.65,
+        "cleanVerdict": "uncertain",
+        "humId": "tr-wa-7",
+        "humScore": 0.65,
+        "humVerdict": "uncertain",
+        "delta": 0,
+        "evaluable": true,
+        "dropped": false
+      },
+      {
+        "pairId": "tr-em-1",
+        "lang": "tr",
+        "transform": "b",
+        "cleanId": "tr-em-1",
+        "cleanScore": null,
+        "cleanVerdict": "insufficient_text",
+        "humId": "tr-em-3",
+        "humScore": null,
+        "humVerdict": "insufficient_text",
+        "delta": null,
+        "evaluable": false,
+        "dropped": null
+      },
+      {
+        "pairId": "tr-em-2",
+        "lang": "tr",
+        "transform": "c",
+        "cleanId": "tr-em-2",
+        "cleanScore": 0.269878920342,
+        "cleanVerdict": "leaning_llm",
+        "humId": "tr-em-4",
+        "humScore": 0.276327380028,
+        "humVerdict": "leaning_llm",
+        "delta": 0.0064,
+        "evaluable": true,
+        "dropped": false
+      }
+    ],
+    "detail": [
+      {
+        "id": "en-hr-1",
+        "lang": "en",
+        "genre": "hotel_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 208,
+        "verdict": "leaning_llm",
+        "score": 0.86976107489,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-hr-2",
+        "lang": "en",
+        "genre": "hotel_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 205,
+        "verdict": "leaning_llm",
+        "score": 0.850326924416,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-hr-3",
+        "lang": "en",
+        "genre": "hotel_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 95,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-hr-4",
+        "lang": "en",
+        "genre": "hotel_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 104,
+        "verdict": "leaning_llm",
+        "score": 0.570373480558,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-hr-5",
+        "lang": "en",
+        "genre": "hotel_review",
+        "variant": "humanized",
+        "transform": "b",
+        "pairId": "en-hr-1",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 208,
+        "verdict": "uncertain",
+        "score": 0.802159836858,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-hr-6",
+        "lang": "en",
+        "genre": "hotel_review",
+        "variant": "humanized",
+        "transform": "c",
+        "pairId": "en-hr-2",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 205,
+        "verdict": "uncertain",
+        "score": 0.752750337562,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-hr-7",
+        "lang": "en",
+        "genre": "hotel_review",
+        "variant": "humanized",
+        "transform": "a",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 82,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-pr-1",
+        "lang": "en",
+        "genre": "product_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 205,
+        "verdict": "leaning_llm",
+        "score": 0.76228969482,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-pr-2",
+        "lang": "en",
+        "genre": "product_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 89,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-pr-3",
+        "lang": "en",
+        "genre": "product_review",
+        "variant": "humanized",
+        "transform": "b",
+        "pairId": "en-pr-1",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 205,
+        "verdict": "leaning_llm",
+        "score": 0.76228969482,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-wa-1",
+        "lang": "en",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 14,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-wa-2",
+        "lang": "en",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 15,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-wa-3",
+        "lang": "en",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 61,
+        "verdict": "uncertain",
+        "score": 0.753803179608,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-wa-4",
+        "lang": "en",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 58,
+        "verdict": "uncertain",
+        "score": 0.753803179608,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-wa-5",
+        "lang": "en",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 69,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-wa-6",
+        "lang": "en",
+        "genre": "whatsapp_booking",
+        "variant": "humanized",
+        "transform": "a",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 55,
+        "verdict": "uncertain",
+        "score": 0.212556648764,
+        "gateReason": null,
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-wa-7",
+        "lang": "en",
+        "genre": "whatsapp_booking",
+        "variant": "humanized",
+        "transform": "c",
+        "pairId": "en-wa-3",
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 62,
+        "verdict": "uncertain",
+        "score": 0.753803179608,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-wa-8",
+        "lang": "en",
+        "genre": "whatsapp_booking",
+        "variant": "humanized",
+        "transform": "d",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 18,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_token_floor",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-em-1",
+        "lang": "en",
+        "genre": "email_to_hotel",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 214,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-em-2",
+        "lang": "en",
+        "genre": "email_to_hotel",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 188,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-em-3",
+        "lang": "en",
+        "genre": "email_to_hotel",
+        "variant": "humanized",
+        "transform": "b",
+        "pairId": "en-em-1",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 214,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-em-4",
+        "lang": "en",
+        "genre": "email_to_hotel",
+        "variant": "humanized",
+        "transform": "c",
+        "pairId": "en-em-2",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 188,
+        "verdict": "leaning_human",
+        "score": 0.102333860869,
+        "gateReason": null,
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-es-1",
+        "lang": "en",
+        "genre": "travel_blurb",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 122,
+        "verdict": "leaning_llm",
+        "score": 0.629398833839,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "en-es-2",
+        "lang": "en",
+        "genre": "travel_blurb",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 113,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "en-es-3",
+        "lang": "en",
+        "genre": "travel_blurb",
+        "variant": "humanized",
+        "transform": "a",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 113,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-hr-1",
+        "lang": "tr",
+        "genre": "hotel_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 179,
+        "verdict": "leaning_llm",
+        "score": 0.700205562708,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-hr-2",
+        "lang": "tr",
+        "genre": "hotel_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 165,
+        "verdict": "uncertain",
+        "score": 0.30646322762,
+        "gateReason": null,
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-hr-3",
+        "lang": "tr",
+        "genre": "hotel_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 76,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-hr-4",
+        "lang": "tr",
+        "genre": "hotel_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 92,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-hr-5",
+        "lang": "tr",
+        "genre": "hotel_review",
+        "variant": "humanized",
+        "transform": "b",
+        "pairId": "tr-hr-1",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 179,
+        "verdict": "leaning_llm",
+        "score": 0.700205562708,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-hr-6",
+        "lang": "tr",
+        "genre": "hotel_review",
+        "variant": "humanized",
+        "transform": "c",
+        "pairId": "tr-hr-2",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 165,
+        "verdict": "uncertain",
+        "score": 0.30646322762,
+        "gateReason": null,
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-hr-7",
+        "lang": "tr",
+        "genre": "hotel_review",
+        "variant": "humanized",
+        "transform": "a",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 54,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-pr-1",
+        "lang": "tr",
+        "genre": "product_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 169,
+        "verdict": "uncertain",
+        "score": 0.536634064086,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-pr-2",
+        "lang": "tr",
+        "genre": "product_review",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 82,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-pr-3",
+        "lang": "tr",
+        "genre": "product_review",
+        "variant": "humanized",
+        "transform": "b",
+        "pairId": "tr-pr-1",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 169,
+        "verdict": "uncertain",
+        "score": 0.536634064086,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-wa-1",
+        "lang": "tr",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 13,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_token_floor",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-wa-2",
+        "lang": "tr",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 10,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_char_floor",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-wa-3",
+        "lang": "tr",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 47,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-wa-4",
+        "lang": "tr",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 38,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-wa-5",
+        "lang": "tr",
+        "genre": "whatsapp_booking",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 49,
+        "verdict": "leaning_llm",
+        "score": 0.65,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-wa-6",
+        "lang": "tr",
+        "genre": "whatsapp_booking",
+        "variant": "humanized",
+        "transform": "a",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 39,
+        "verdict": "uncertain",
+        "score": 0.35,
+        "gateReason": null,
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-wa-7",
+        "lang": "tr",
+        "genre": "whatsapp_booking",
+        "variant": "humanized",
+        "transform": "c",
+        "pairId": "tr-wa-3",
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 46,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-wa-8",
+        "lang": "tr",
+        "genre": "whatsapp_booking",
+        "variant": "humanized",
+        "transform": "d",
+        "pairId": null,
+        "shape": "chat",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 20,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-em-1",
+        "lang": "tr",
+        "genre": "email_to_hotel",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 201,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-em-2",
+        "lang": "tr",
+        "genre": "email_to_hotel",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 184,
+        "verdict": "leaning_llm",
+        "score": 0.269878920342,
+        "gateReason": null,
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-em-3",
+        "lang": "tr",
+        "genre": "email_to_hotel",
+        "variant": "humanized",
+        "transform": "b",
+        "pairId": "tr-em-1",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 201,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-em-4",
+        "lang": "tr",
+        "genre": "email_to_hotel",
+        "variant": "humanized",
+        "transform": "c",
+        "pairId": "tr-em-2",
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
+        "tokens": 183,
+        "verdict": "leaning_llm",
+        "score": 0.276327380028,
+        "gateReason": null,
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-es-1",
+        "lang": "tr",
+        "genre": "travel_blurb",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 106,
+        "verdict": "uncertain",
+        "score": 0.682521338644,
+        "gateReason": null,
+        "flagged": true,
+        "cliError": null
+      },
+      {
+        "id": "tr-es-2",
+        "lang": "tr",
+        "genre": "travel_blurb",
+        "variant": "clean",
+        "transform": "none",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 88,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      },
+      {
+        "id": "tr-es-3",
+        "lang": "tr",
+        "genre": "travel_blurb",
+        "variant": "humanized",
+        "transform": "a",
+        "pairId": null,
+        "shape": "prose",
+        "gen": "claude-opus-5 (1M context), in-session, no API call",
+        "tokens": 71,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "flagged": false,
+        "cliError": null
+      }
+    ],
+    "r25": {
+      "prosePairs": 10,
+      "proseEvaluable": 7,
+      "proseDropped": 2,
+      "proseMeanDelta": -0.0227,
+      "chatPairs": 2
+    }
+  },
+  "csSnippets": {
+    "rows": 30,
+    "tallyGeneral": {
+      "insufficient_text": 17,
+      "uncertain": 13
+    },
+    "tallyCs": {
+      "insufficient_text": 17,
+      "uncertain": 13
+    },
+    "gatedGeneral": 17,
+    "gatedCs": 17,
+    "aboveTauGeneral": 13,
+    "aboveTauCs": 13,
+    "meanDeltaWhenBothScored": -0.0061,
+    "domainSuppressionList": [],
+    "gatedByLang": {
+      "en": 2,
+      "tr": 15
+    },
+    "detail": [
+      {
+        "id": "cs-en-01",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "domain_suppressed",
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-en-02",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "domain_suppressed",
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-03",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "domain_suppressed",
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-04",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-en-05",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-06",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "register_only_evidence",
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-07",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-08",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-09",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-10",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-11",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "register_only_evidence",
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": -0.0394,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-12",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-13",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-14",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": 0,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-en-15",
+        "lang": "en",
+        "shape": "chat",
+        "general": {
+          "verdict": "uncertain",
+          "score": 0.65,
+          "warnings": [
+            "register_only_evidence",
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "uncertain",
+          "score": 0.610639233949,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": -0.0394,
+        "aboveTauGeneral": true,
+        "aboveTauCs": true
+      },
+      {
+        "id": "cs-tr-01",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-02",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-03",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "domain_suppressed",
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-04",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-05",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-06",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-07",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-08",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-09",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-10",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-11",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-12",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-13",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-14",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      },
+      {
+        "id": "cs-tr-15",
+        "lang": "tr",
+        "shape": "chat",
+        "general": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "cs": {
+          "verdict": "insufficient_text",
+          "score": null,
+          "warnings": [
+            "uncalibrated_weights"
+          ]
+        },
+        "delta": null,
+        "aboveTauGeneral": false,
+        "aboveTauCs": false
+      }
+    ]
+  },
+  "realRows": {
+    "poolSize": 1946,
+    "sampled": 200,
+    "seed": "cal-2026-09-09",
+    "channel": "whatsapp",
+    "byWriter": {
+      "R0": 197,
+      "R2": 3
+    },
+    "byLang": {
+      "tr": 150,
+      "en": 50
+    },
+    "tallyVerdict": {
+      "insufficient_text": 196,
+      "leaning_human": 2,
+      "uncertain": 2
+    },
+    "scored": 4,
+    "gated": 196,
+    "gateReasons": {
+      "below_char_floor": 188,
+      "below_token_floor": 5,
+      "too_few_active_features": 3
+    },
+    "flaggedAtTau": 0,
+    "llmLeaningOrWorse": 0,
+    "rulesFired": {},
+    "medianScoreScored": 0.35
+  },
+  "verifyRound1": {
+    "textRows": 43,
+    "humanRows": 35,
+    "llmRows": 8,
+    "probes": 40,
+    "gate_zero_likely_llm_on_human": {
+      "required": "0 of 33",
+      "measured": 0,
+      "pass": true,
+      "offenders": []
+    },
+    "gate_every_probe_correct": {
+      "required": "40 of 40",
+      "measured": 40,
+      "pass": true,
+      "missed": [],
+      "falseFires": []
+    },
+    "likely_human_on_llm": [],
+    "evasions": [
+      {
+        "id": "L07",
+        "verdict": "leaning_human",
+        "expected": true
+      },
+      {
+        "id": "L08",
+        "verdict": "leaning_human",
+        "expected": true
+      }
+    ],
+    "tallyHuman": {
+      "uncertain": 18,
+      "insufficient_text": 11,
+      "leaning_llm": 2,
+      "likely_llm": 2,
+      "leaning_human": 2
+    },
+    "tallyLlm": {
+      "leaning_llm": 5,
+      "insufficient_text": 1,
+      "leaning_human": 2
+    },
+    "arbitration": [],
+    "pass": true,
+    "detail": [
+      {
+        "id": "H01",
+        "truth": "human",
+        "class": "non_native_en_formal (SPEC §H.3)",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.443713629789,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H02",
+        "truth": "human",
+        "class": "non_native_en_formal (SPEC §H.3)",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H03",
+        "truth": "human",
+        "class": "non_native_en_formal (SPEC §H.3)",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.19410454743,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights",
+          "score_table_disagreement"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "known §G.2 confound",
+        "cliError": null
+      },
+      {
+        "id": "H04",
+        "truth": "human",
+        "class": "non_native_en_formal (SPEC §H.3)",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.840268937915,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "known §G.2 confound",
+        "cliError": null
+      },
+      {
+        "id": "H05",
+        "truth": "human",
+        "class": "non_native_en_formal (SPEC §H.3)",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H06",
+        "truth": "human",
+        "class": "non_native_en_formal (SPEC §H.3)",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H07",
+        "truth": "human",
+        "class": "careful_tr_orthography (SPEC §H.2, the A7 class)",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "R24: register_only_evidence is the intended mitigation; escapes today on llm_lexicon_weak (\"ayrıca\")",
+        "cliError": null
+      },
+      {
+        "id": "H08",
+        "truth": "human",
+        "class": "careful_tr_orthography (SPEC §H.2)",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H09",
+        "truth": "human",
+        "class": "careful_tr_orthography (SPEC §H.2)",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.385137086107,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H10",
+        "truth": "human",
+        "class": "careful_tr_orthography (SPEC §H.2)",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H11",
+        "truth": "human",
+        "class": "careful_tr_orthography (SPEC §H.2)",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H12",
+        "truth": "human",
+        "class": "careful_tr_orthography (SPEC §H.2)",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "--genre formal_letter correctly disables tr_formal_copula",
+        "cliError": null
+      },
+      {
+        "id": "H13",
+        "truth": "human",
+        "class": "support_desk_snippet (SPEC §H.4)",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.8,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "run WITHOUT --domain customer_service on purpose: the caller who forgets the flag accuses the support team",
+        "cliError": null
+      },
+      {
+        "id": "H14",
+        "truth": "human",
+        "class": "support_desk_snippet (SPEC §H.4)",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "run WITHOUT --domain customer_service on purpose",
+        "cliError": null
+      },
+      {
+        "id": "H15",
+        "truth": "human",
+        "class": "support_desk_snippet (SPEC §H.4)",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "run WITHOUT --domain customer_service on purpose",
+        "cliError": null
+      },
+      {
+        "id": "H16",
+        "truth": "human",
+        "class": "support_desk_snippet (SPEC §H.4)",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "run WITHOUT --domain customer_service on purpose",
+        "cliError": null
+      },
+      {
+        "id": "H17",
+        "truth": "human",
+        "class": "pasted_machine_template (SPEC §H.1)",
+        "lang": "en",
+        "context": "prose",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.2,
+        "gateReason": "too_few_active_features",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "uncalibrated_weights",
+          "score_table_disagreement"
+        ],
+        "allowed": [
+          "likely_llm",
+          "uncertain"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "MARKER ROW. Machine-written confirmation with no human turn around it, so R28 does NOT downgrade: likely_llm is the correct output when the marker fires. Without --markers the row must land in the human set.",
+        "cliError": null
+      },
+      {
+        "id": "H18",
+        "truth": "human",
+        "class": "forwarded_template_by_a_human (SPEC §H.1)",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.447994321122,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "escapes the register cap on out_of_channel_register",
+        "cliError": null
+      },
+      {
+        "id": "H19",
+        "truth": "human",
+        "class": "forwarded_template_by_a_human (SPEC §H.1)",
+        "lang": "tr",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.35,
+        "gateReason": null,
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "hybrid_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "MARKER ROW and refuter defect D4: a human WhatsApp turn wrapped around a forwarded summary, human channel 0.602. R28 requires uncertain + pasted_machine_text + hybrid_suspect, never likely_llm. Without --markers the row must land in the human set.",
+        "cliError": null
+      },
+      {
+        "id": "H20",
+        "truth": "human",
+        "class": "pasted_machine_template (SPEC §H.1)",
+        "lang": "en",
+        "context": "prose",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.2,
+        "gateReason": "too_few_active_features",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "uncalibrated_weights",
+          "score_table_disagreement"
+        ],
+        "allowed": [
+          "likely_llm",
+          "uncertain"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "MARKER ROW. Machine-written price list, no human turn: likely_llm is correct when the marker fires. Without --markers the row must land in the human set.",
+        "cliError": null
+      },
+      {
+        "id": "H21",
+        "truth": "human",
+        "class": "human_discussing_an_assistant",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "R27 quotation/discussion suppression",
+        "cliError": null
+      },
+      {
+        "id": "H22",
+        "truth": "human",
+        "class": "human_discussing_an_assistant",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.65,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "R27 quotation/discussion suppression",
+        "cliError": null
+      },
+      {
+        "id": "H23",
+        "truth": "human",
+        "class": "human_discussing_an_assistant",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.319924301943,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "refuter defect D1 (CRITICAL): the cue \"chatgpt\" is one sentence away from the matched span; the 100-char window let assistant_frame_leak fire on a human. R27 makes the cue search document-wide.",
+        "cliError": null
+      },
+      {
+        "id": "H24",
+        "truth": "human",
+        "class": "human_discussing_an_assistant",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.482186414995,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "refuter defect D3 (CRITICAL): bare common-noun \"language model\" fired as self-identification. R27 requires a first-person self-identification frame.",
+        "cliError": null
+      },
+      {
+        "id": "H25",
+        "truth": "human",
+        "class": "marketing_register_human (SPEC §H.6)",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.437100979983,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "--genre marketing is the documented mitigation (H25g came out uncertain + marketing_register)",
+        "cliError": null
+      },
+      {
+        "id": "H26",
+        "truth": "human",
+        "class": "marketing_register_human (SPEC §H.6)",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H27",
+        "truth": "human",
+        "class": "machine_translated_looking_human (SPEC §H.7)",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H28",
+        "truth": "human",
+        "class": "machine_translated_looking_human (SPEC §H.7)",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H29",
+        "truth": "human",
+        "class": "native_speaker_control",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.35,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H30",
+        "truth": "human",
+        "class": "native_speaker_control",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.236463723305,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H31",
+        "truth": "human",
+        "class": "native_speaker_control",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H32",
+        "truth": "human",
+        "class": "native_speaker_control",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.357886103663,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H33",
+        "truth": "human",
+        "class": "careful_tr_orthography (SPEC §H.2)",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.8,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "H34",
+        "truth": "human",
+        "class": "non_native_en_formal (SPEC §H.3) / careful native formal chat",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.8,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "escapes the register cap on out_of_channel_register",
+        "cliError": null
+      },
+      {
+        "id": "H35",
+        "truth": "human",
+        "class": "careful_tr_orthography (SPEC §H.2)",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "R2: plain dash bullets must never fire markdown_in_chat",
+        "cliError": null
+      },
+      {
+        "id": "L01",
+        "truth": "llm",
+        "class": "llm_base",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.888873878289,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "",
+        "cliError": null
+      },
+      {
+        "id": "L02",
+        "truth": "llm",
+        "class": "llm_base",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "rule markdown_in_chat fires (double-asterisk bold)",
+        "cliError": null
+      },
+      {
+        "id": "L03",
+        "truth": "llm",
+        "class": "llm_base",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "rule markdown_in_chat fires",
+        "cliError": null
+      },
+      {
+        "id": "L04",
+        "truth": "llm",
+        "class": "llm_transform_a",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "transform (a) prompt-level casual/lowercase: one prompt line moved a leaning_llm at 0.889 to insufficient_text",
+        "cliError": null
+      },
+      {
+        "id": "L05",
+        "truth": "llm",
+        "class": "llm_transform_b",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.888873878289,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "transform (b) was a pure no-op in prose (score unchanged to 6 dp): sentence_initial_caps and all_lowercase are chat-only",
+        "cliError": null
+      },
+      {
+        "id": "L06",
+        "truth": "llm",
+        "class": "llm_transform_c",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.683749442608,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "transform (c) injected typos + dropped apostrophes",
+        "cliError": null
+      },
+      {
+        "id": "L07",
+        "truth": "llm",
+        "class": "llm_transform_d_mimicry",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "CAL E6: 33 tokens and one prompt line buy leaning_human — human channel 0.837, llm channel exactly 0.000",
+        "cliError": null
+      },
+      {
+        "id": "L08",
+        "truth": "llm",
+        "class": "llm_transform_d_mimicry",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "note": "CAL E6: 33 tokens and one prompt line buy leaning_human — human channel 0.794, llm channel exactly 0.000",
+        "cliError": null
+      }
+    ],
+    "probeDetail": [
+      {
+        "id": "P01",
+        "lang": "en",
+        "probe": "as a large language model",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P02",
+        "lang": "en",
+        "probe": "I'm just an AI",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss — added as an EN self-identification pattern"
+      },
+      {
+        "id": "P03",
+        "lang": "en",
+        "probe": "I am merely an AI assistant",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P04",
+        "lang": "en",
+        "probe": "my knowledge cut-off (hyphen)",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss — the unhyphenated form fired, the hyphenated one did not"
+      },
+      {
+        "id": "P05",
+        "lang": "en",
+        "probe": "my knowledge cutoff",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P06",
+        "lang": "en",
+        "probe": "as of my last update",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P07",
+        "lang": "en",
+        "probe": "as of my latest training",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P08",
+        "lang": "en",
+        "probe": "as of my last training data",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P09",
+        "lang": "en",
+        "probe": "real time (no hyphen)",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss — real[- ]time"
+      },
+      {
+        "id": "P10",
+        "lang": "en",
+        "probe": "real-time (hyphen)",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P11",
+        "lang": "en",
+        "probe": "no access to the internet",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P12",
+        "lang": "en",
+        "probe": "unable to browse the web",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P13",
+        "lang": "en",
+        "probe": "here is a revised draft",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P14",
+        "lang": "en",
+        "probe": "here's your revised version",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P15",
+        "lang": "en",
+        "probe": "I have rewritten it below",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P16",
+        "lang": "en",
+        "probe": "I was trained on data",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P17",
+        "lang": "tr",
+        "probe": "bir yapay zeka modeli olarak",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P18",
+        "lang": "tr",
+        "probe": "bir yapay zekâ modeli olarak (circumflex)",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss (D6) — zek[aâ]"
+      },
+      {
+        "id": "P19",
+        "lang": "tr",
+        "probe": "yapay zeka asistanıyım",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P20",
+        "lang": "tr",
+        "probe": "yapay zekâ asistanıyım (circumflex)",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss (D6)"
+      },
+      {
+        "id": "P21",
+        "lang": "tr",
+        "probe": "bilgi kesim tarihim",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P22",
+        "lang": "tr",
+        "probe": "bilgi kesim tarihi",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "fired before R27"
+      },
+      {
+        "id": "P23",
+        "lang": "tr",
+        "probe": "eğitim verilerim",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P24",
+        "lang": "tr",
+        "probe": "bir dil modeli olarak",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P25",
+        "lang": "tr",
+        "probe": "gerçek zamanlı erişimim yok",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss"
+      },
+      {
+        "id": "P26",
+        "lang": "en",
+        "probe": "split across a line break",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss (D5) — whitespace-normalised matching"
+      },
+      {
+        "id": "P27",
+        "lang": "en",
+        "probe": "double spaces",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss (D5)"
+      },
+      {
+        "id": "P28",
+        "lang": "en",
+        "probe": "NBSP between words",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss (D5) — U+00A0"
+      },
+      {
+        "id": "P29",
+        "lang": "en",
+        "probe": "language model across a line break",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss (D5)"
+      },
+      {
+        "id": "P30",
+        "lang": "tr",
+        "probe": "yapay zeka split across a line break",
+        "expectRule": true,
+        "fired": true,
+        "correct": true,
+        "verdict": "likely_llm",
+        "notes": [],
+        "note": "R27 miss (D5)"
+      },
+      {
+        "id": "N01",
+        "lang": "en",
+        "probe": "quoted directly, cue adjacent",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [
+          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: chatgpt — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+        ],
+        "note": "suppressed correctly before R27; must stay suppressed"
+      },
+      {
+        "id": "N02",
+        "lang": "en",
+        "probe": "cue one sentence away (refuter D1 / H23 shape)",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [
+          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: chatgpt — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+        ],
+        "note": "refuter D1: the ~100-char window let this fire on a human. R27 moves the cue search to the whole document."
+      },
+      {
+        "id": "N03",
+        "lang": "en",
+        "probe": "cue word \"assistant\"",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [
+          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: assistant — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+        ],
+        "note": "refuter D2: \"assistant\" was not in the suppression cue list"
+      },
+      {
+        "id": "N04",
+        "lang": "en",
+        "probe": "cue word \"AI\"",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [
+          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: ai — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+        ],
+        "note": "refuter D2: bare \"AI\" was not a cue"
+      },
+      {
+        "id": "N05",
+        "lang": "en",
+        "probe": "cue word \"LLM\"",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [
+          "assistant_frame_suppressed: \"I do not have real-time\" — possible_quotation_or_discussion: llm — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+        ],
+        "note": "refuter D2: \"LLM\" was not a cue"
+      },
+      {
+        "id": "N06",
+        "lang": "en",
+        "probe": "bare common-noun \"language model\" (refuter D3 / H24 shape)",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [],
+        "note": "refuter D3: bare \"language model\" fired as self-identification. R27 requires a first-person frame."
+      },
+      {
+        "id": "N07",
+        "lang": "en",
+        "probe": "human self-identification frame is NOT present",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [],
+        "note": "a human saying \"here is the revised itinerary\" is not a drafting frame; only draft/revised/rewritten/polished VERSION|DRAFT|TEXT frames fire"
+      },
+      {
+        "id": "N08",
+        "lang": "en",
+        "probe": "curly-quoted leak inside human prose",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [
+          "assistant_frame_suppressed: \"I do not have access to real-time\" — possible_quotation_or_discussion: quotation marks — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+        ],
+        "note": "curly quotes plus a cue: suppressed correctly before R27, must stay suppressed"
+      },
+      {
+        "id": "N09",
+        "lang": "tr",
+        "probe": "human discussing yapay zeka",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [
+          "assistant_frame_suppressed: \"yapay zeka modeli olarak\" — possible_quotation_or_discussion: yapay zeka — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+        ],
+        "note": "TR cue yapay zek[aâ] must suppress a human quoting the bot"
+      },
+      {
+        "id": "N10",
+        "lang": "tr",
+        "probe": "human discussing a bot with the circumflex spelling",
+        "expectRule": false,
+        "fired": false,
+        "correct": true,
+        "verdict": "insufficient_text",
+        "notes": [
+          "assistant_frame_suppressed: \"bilgi kesim tarih\" — possible_quotation_or_discussion: yapay zekâ — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+        ],
+        "note": "the cue must fold â as well, or R27 trades one false fire for another"
+      }
+    ]
+  },
+  "wallClockSec": 17.9
+}

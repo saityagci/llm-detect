@@ -1,0 +1,21 @@
+{
+  "name": "llm-detect",
+  "version": "1.0.0",
+  "description": "Deterministic, zero-dependency human-vs-LLM text triage for English and Turkish.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "bin": { "llm-detect": "./stylometry.mjs" },
+  "main": "./stylometry.mjs",
+  "exports": { ".": "./stylometry.mjs" },
+  "files": [
+    "stylometry.mjs", "lib/", "lexicon.v1.json", "weights.v1.json", "markers.json",
+    "lexicon-src/", "build-lexicon.mjs", "selftest.mjs", "README.md", "RUBRIC.md", "LICENSE"
+  ],
+  "scripts": {
+    "selftest": "node selftest.mjs",
+    "eval": "node eval/run-eval.mjs",
+    "build-lexicon": "node build-lexicon.mjs"
+  }
+}
