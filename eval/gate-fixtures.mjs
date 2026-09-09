@@ -81,6 +81,22 @@ function arabicShare(s) {
 const pct = (x) => (x === null || x === undefined || Number.isNaN(x) ? 'n/a' : `${(100 * x).toFixed(1)}%`);
 const num = (x, d = 3) => (x === null || x === undefined ? 'null' : Number(x).toFixed(d));
 
+/**
+ * JSON.stringify replacer: every finite non-integer number is written at 6 decimals.
+ *
+ * The CLI prints score, channels.* and scoring.scoreUncapped at 12 decimals (HEAD-RULINGS R26) so
+ * that the contribution-sum invariant holds from the JSON alone. Copying those verbatim into
+ * gate-fixtures.json puts a 12-digit run in a tracked file, and the owner's acceptance check for
+ * phone numbers is the literal `grep -rE "\+?[0-9]{10,15}"` over every tracked file. Six decimals
+ * is what weights.fitted.json already rounds to, for the same reason. This rounds only what this
+ * file WRITES; nothing here re-enters the detector, and the 12-decimal invariant lives in the CLI's
+ * own output, which is untouched.
+ */
+const round6 = (key, value) =>
+  (typeof value === 'number' && Number.isFinite(value) && !Number.isInteger(value)
+    ? Number(value.toFixed(6))
+    : value);
+
 /** One CLI invocation, one row, that row's own flags. Returns the parsed report. */
 function runOne(detector, text, opts) {
   const args = [detector, '--text', text, '--allow-uncalibrated', '--json'];
@@ -635,7 +651,7 @@ function main() {
   emit(`_CAL fixture gate wall-clock: ${R.wallClockSec}s. tau source: ${tauSource}._`);
   emit('');
 
-  writeFileSync(jsonPath, JSON.stringify(R, null, 2) + '\n');
+  writeFileSync(jsonPath, JSON.stringify(R, round6, 2) + '\n');
   writeFileSync(mdPath, L.join('\n'));
   if (opts.append) appendFileSync(opts.append, '\n' + L.join('\n'));
 

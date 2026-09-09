@@ -1,6 +1,6 @@
 # LLM-detect evaluation report
 
-generated 2026-09-09T10:58:51.997Z · node v24.5.0 · detector `stylometry.mjs`
+generated 2026-09-09T11:03:42.881Z · node v24.5.0 · detector `stylometry.mjs`
 
 Language scope is **English and Turkish only** (HEAD-RULINGS R22). Arabic-script rows were
 excluded upstream by make-splits.mjs and are never scored.

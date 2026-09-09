@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-09T10:59:00.466Z",
+  "generatedAt": "2026-09-09T11:03:51.392Z",
   "detector": "stylometry.mjs",
   "tau": 0.5,
   "tauSource": "the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.",
@@ -675,7 +675,7 @@
         "id": "en-wa-6",
         "transform": "a",
         "verdict": "uncertain",
-        "score": 0.212556648764
+        "score": 0.212557
       },
       {
         "id": "en-wa-8",
@@ -722,10 +722,10 @@
         "lang": "en",
         "transform": "b",
         "cleanId": "en-hr-1",
-        "cleanScore": 0.86976107489,
+        "cleanScore": 0.869761,
         "cleanVerdict": "leaning_llm",
         "humId": "en-hr-5",
-        "humScore": 0.802159836858,
+        "humScore": 0.80216,
         "humVerdict": "uncertain",
         "delta": -0.0676,
         "evaluable": true,
@@ -736,10 +736,10 @@
         "lang": "en",
         "transform": "c",
         "cleanId": "en-hr-2",
-        "cleanScore": 0.850326924416,
+        "cleanScore": 0.850327,
         "cleanVerdict": "leaning_llm",
         "humId": "en-hr-6",
-        "humScore": 0.752750337562,
+        "humScore": 0.75275,
         "humVerdict": "uncertain",
         "delta": -0.0976,
         "evaluable": true,
@@ -750,10 +750,10 @@
         "lang": "en",
         "transform": "b",
         "cleanId": "en-pr-1",
-        "cleanScore": 0.76228969482,
+        "cleanScore": 0.76229,
         "cleanVerdict": "leaning_llm",
         "humId": "en-pr-3",
-        "humScore": 0.76228969482,
+        "humScore": 0.76229,
         "humVerdict": "leaning_llm",
         "delta": 0,
         "evaluable": true,
@@ -764,10 +764,10 @@
         "lang": "en",
         "transform": "c",
         "cleanId": "en-wa-3",
-        "cleanScore": 0.753803179608,
+        "cleanScore": 0.753803,
         "cleanVerdict": "uncertain",
         "humId": "en-wa-7",
-        "humScore": 0.753803179608,
+        "humScore": 0.753803,
         "humVerdict": "uncertain",
         "delta": 0,
         "evaluable": true,
@@ -795,7 +795,7 @@
         "cleanScore": null,
         "cleanVerdict": "insufficient_text",
         "humId": "en-em-4",
-        "humScore": 0.102333860869,
+        "humScore": 0.102334,
         "humVerdict": "leaning_human",
         "delta": null,
         "evaluable": false,
@@ -806,10 +806,10 @@
         "lang": "tr",
         "transform": "b",
         "cleanId": "tr-hr-1",
-        "cleanScore": 0.700205562708,
+        "cleanScore": 0.700206,
         "cleanVerdict": "leaning_llm",
         "humId": "tr-hr-5",
-        "humScore": 0.700205562708,
+        "humScore": 0.700206,
         "humVerdict": "leaning_llm",
         "delta": 0,
         "evaluable": true,
@@ -820,10 +820,10 @@
         "lang": "tr",
         "transform": "c",
         "cleanId": "tr-hr-2",
-        "cleanScore": 0.30646322762,
+        "cleanScore": 0.306463,
         "cleanVerdict": "uncertain",
         "humId": "tr-hr-6",
-        "humScore": 0.30646322762,
+        "humScore": 0.306463,
         "humVerdict": "uncertain",
         "delta": 0,
         "evaluable": true,
@@ -834,10 +834,10 @@
         "lang": "tr",
         "transform": "b",
         "cleanId": "tr-pr-1",
-        "cleanScore": 0.536634064086,
+        "cleanScore": 0.536634,
         "cleanVerdict": "uncertain",
         "humId": "tr-pr-3",
-        "humScore": 0.536634064086,
+        "humScore": 0.536634,
         "humVerdict": "uncertain",
         "delta": 0,
         "evaluable": true,
@@ -876,10 +876,10 @@
         "lang": "tr",
         "transform": "c",
         "cleanId": "tr-em-2",
-        "cleanScore": 0.269878920342,
+        "cleanScore": 0.269879,
         "cleanVerdict": "leaning_llm",
         "humId": "tr-em-4",
-        "humScore": 0.276327380028,
+        "humScore": 0.276327,
         "humVerdict": "leaning_llm",
         "delta": 0.0064,
         "evaluable": true,
@@ -898,7 +898,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 208,
         "verdict": "leaning_llm",
-        "score": 0.86976107489,
+        "score": 0.869761,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -914,7 +914,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 205,
         "verdict": "leaning_llm",
-        "score": 0.850326924416,
+        "score": 0.850327,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -946,7 +946,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call",
         "tokens": 104,
         "verdict": "leaning_llm",
-        "score": 0.570373480558,
+        "score": 0.570373,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -962,7 +962,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 208,
         "verdict": "uncertain",
-        "score": 0.802159836858,
+        "score": 0.80216,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -978,7 +978,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 205,
         "verdict": "uncertain",
-        "score": 0.752750337562,
+        "score": 0.75275,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1010,7 +1010,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 205,
         "verdict": "leaning_llm",
-        "score": 0.76228969482,
+        "score": 0.76229,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1042,7 +1042,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 205,
         "verdict": "leaning_llm",
-        "score": 0.76228969482,
+        "score": 0.76229,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1090,7 +1090,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call",
         "tokens": 61,
         "verdict": "uncertain",
-        "score": 0.753803179608,
+        "score": 0.753803,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1106,7 +1106,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call",
         "tokens": 58,
         "verdict": "uncertain",
-        "score": 0.753803179608,
+        "score": 0.753803,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1138,7 +1138,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call",
         "tokens": 55,
         "verdict": "uncertain",
-        "score": 0.212556648764,
+        "score": 0.212557,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1154,7 +1154,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call",
         "tokens": 62,
         "verdict": "uncertain",
-        "score": 0.753803179608,
+        "score": 0.753803,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1234,7 +1234,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 188,
         "verdict": "leaning_human",
-        "score": 0.102333860869,
+        "score": 0.102334,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1250,7 +1250,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call",
         "tokens": 122,
         "verdict": "leaning_llm",
-        "score": 0.629398833839,
+        "score": 0.629399,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1298,7 +1298,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 179,
         "verdict": "leaning_llm",
-        "score": 0.700205562708,
+        "score": 0.700206,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1314,7 +1314,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 165,
         "verdict": "uncertain",
-        "score": 0.30646322762,
+        "score": 0.306463,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1362,7 +1362,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 179,
         "verdict": "leaning_llm",
-        "score": 0.700205562708,
+        "score": 0.700206,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1378,7 +1378,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 165,
         "verdict": "uncertain",
-        "score": 0.30646322762,
+        "score": 0.306463,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1410,7 +1410,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 169,
         "verdict": "uncertain",
-        "score": 0.536634064086,
+        "score": 0.536634,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1442,7 +1442,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 169,
         "verdict": "uncertain",
-        "score": 0.536634064086,
+        "score": 0.536634,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1602,7 +1602,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 184,
         "verdict": "leaning_llm",
-        "score": 0.269878920342,
+        "score": 0.269879,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1634,7 +1634,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 183,
         "verdict": "leaning_llm",
-        "score": 0.276327380028,
+        "score": 0.276327,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1650,7 +1650,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call",
         "tokens": 106,
         "verdict": "uncertain",
-        "score": 0.682521338644,
+        "score": 0.682521,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1814,14 +1814,14 @@
         "shape": "chat",
         "general": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
         },
         "cs": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
@@ -1881,14 +1881,14 @@
         "shape": "chat",
         "general": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
         },
         "cs": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
@@ -1955,7 +1955,7 @@
         },
         "cs": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
@@ -1970,14 +1970,14 @@
         "shape": "chat",
         "general": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
         },
         "cs": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
@@ -1992,14 +1992,14 @@
         "shape": "chat",
         "general": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
         },
         "cs": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
@@ -2044,7 +2044,7 @@
         },
         "cs": {
           "verdict": "uncertain",
-          "score": 0.610639233949,
+          "score": 0.610639,
           "warnings": [
             "uncalibrated_weights"
           ]
@@ -2471,7 +2471,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.443713629789,
+        "score": 0.443714,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -2528,7 +2528,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.19410454743,
+        "score": 0.194105,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -2558,7 +2558,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.840268937915,
+        "score": 0.840269,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -2700,7 +2700,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.385137086107,
+        "score": 0.385137,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -2957,7 +2957,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.447994321122,
+        "score": 0.447994,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3104,7 +3104,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.319924301943,
+        "score": 0.319924,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3132,7 +3132,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.482186414995,
+        "score": 0.482186,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3161,7 +3161,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.437100979983,
+        "score": 0.437101,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3302,7 +3302,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.236463723305,
+        "score": 0.236464,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3358,7 +3358,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.357886103663,
+        "score": 0.357886,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3471,7 +3471,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.888873878289,
+        "score": 0.888874,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3596,7 +3596,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.888873878289,
+        "score": 0.888874,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3626,7 +3626,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.683749442608,
+        "score": 0.683749,
         "gateReason": null,
         "rules": [],
         "warnings": [
