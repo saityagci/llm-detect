@@ -1,0 +1,10 @@
+# private calibration data (contains real chat messages / PII) — never committed
+eval/data/
+# design documents that quote private corpus rows — scrub before ever publishing
+docs/design/private/
+node_modules/
+.env
+*.log
+.DS_Store
+eval/out/*.tmp
+.scratch/
