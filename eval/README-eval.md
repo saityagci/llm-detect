@@ -10,8 +10,14 @@ filtered out by `make-splits.mjs` and counted, and there is no `llm-ar.jsonl`.
 ## The pipeline
 
 ```bash
-# 1. optional, network: five public corpora into eval/data/public/ (gitignored)
+# 1. optional, network: six public corpora into eval/data/public/ (gitignored)
 node eval/fetch-public-datasets.mjs                 # --list, --dry-run, --only, --cap
+node eval/fetch-public-datasets.mjs --probe <dataset> [--probe-where <expr>] --probe-out <dir>
+#   R42(e): ask datasets-server what a CANDIDATE dataset is — configs, splits, field names and
+#   types, row counts, declared licence, low-cardinality column value frequencies, and the LENGTHS
+#   of two sample field values. It downloads no row set and prints no text. Results are recorded
+#   under "probes" in the manifest; --import-probes folds a scratch probe manifest into the
+#   manifest of record.
 
 # 2. dedup, cross-label collisions, group-aware fit/val/test split, contamination scan,
 #    and the scrubbed human-chat.jsonl. Reads eval/data/corpus_user_messages.json.
@@ -37,16 +43,17 @@ no corpus row in it — and over deliberately corrupted copies written to a scra
 asserts **exit codes and structure only**. It never asserts a rate: nothing measured on synthetic
 text says anything about the detector, and a self-test that pinned an AUC here would pin a fiction.
 
-**Ten green checks prove the guards refuse planted faults; the correctness of the numbers
+**Eleven green checks prove the guards refuse planted faults; the correctness of the numbers
 printed when nothing fires rests on the independent re-derivation of R36, which a fixture
-cannot replace.**
+cannot replace.** (R37 wrote "ten"; the eleventh is the R42(e) essay check added with the essay
+row set. The sentence R37(c) fixes is otherwise unchanged.)
 
 The synthetic **"human" class is shaped to reach code paths**, not to model human writing: its
 sentences are capitalised and terminated so the rows clear gate G4 and a model can be fitted at all
 (HEAD-RULINGS R37(d)). An all-lowercase pool left fewer than ten scoreable fitting-side humans and
 therefore no fitted cell to validate. Nothing about that class resembles a real writer.
 
-The ten checks: a clean run exits 0 with sections 1-13 and a fitted-weights file the CLI actually
+The eleven checks: a clean run exits 0 with sections 1-13 and a fitted-weights file the CLI actually
 loads · a planted `persona::` straddle exits 5 naming the group kind · a planted duplicate string on
 two sides exits 5 · a planted both-label string on two sides exits 5 and reports the cross-label
 count · `headline()` exits 4 for a non-test row, for a test-labelled summary over val-side rows, and
@@ -54,7 +61,10 @@ for being handed no rows at all · `emit()` exits 4 on an unmarked fitting-side 
 same line with `(reference only)` · the CAL append guard exempts exactly the three named quoted
 probe phrases and refuses a fourth · a fitted-weights file the shipped loader could not read is
 never written (exit 6) · two runs are byte-identical apart from the timestamp and the out path ·
-`INSUFFICIENT` and `NO COVERAGE` placeholders print the counts and the measured confusion they claim.
+`INSUFFICIENT` and `NO COVERAGE` placeholders print the counts and the measured confusion they claim ·
+the essay genre's holdout unit is the PROMPT, the essay table measures and refuses on its own
+counts, its threshold is re-picked on essay validation rows, and an essay row moved off its
+prompt's side exits 5 (R42(e)).
 
 It writes only under `--work` (default `.scratch/selftest-eval/`, removed on success, kept with
 `--keep`). It never reads `eval/data/` and never touches `eval/out/`.
@@ -106,13 +116,13 @@ Naming the side "fit" keeps that guard from tripping over the harness's own pros
 
 | file | what it does |
 |---|---|
-| `fetch-public-datasets.mjs` | The only file in the project that touches the network, and only `datasets-server.huggingface.co` (plus one documented Zenodo attempt, gated behind `--include-arabic`, which R22 leaves off). Caps at 1500 rows per label per dataset, pages `/rows` at 100, retries with Retry-After-aware backoff on 500/429, writes a manifest with per-file sha256, licence, cap, actual counts and the sampling strategy. A 500 from this API means "the index is loading", not "the dataset is gone". |
-| `make-splits.mjs` | SPEC §D.5 steps 1-3. Normalized-key dedup; cross-label strings forced to one side; group-aware split (writer for humans, persona for generated personas, source row / template family for public corpora); Arabic-script exclusion with counts; near-duplicate contamination scan; the R8 scrub. |
+| `fetch-public-datasets.mjs` | The only file in the project that touches the network, and only `datasets-server.huggingface.co` (plus one documented Zenodo attempt, gated behind `--include-arabic`, which R22 leaves off). Caps at 1500 rows per label per dataset, pages `/rows` at 100, retries with Retry-After-aware backoff on 500/429, writes a manifest with per-file sha256, licence, cap, actual counts and the sampling strategy. A 500 from this API means "the index is loading", not "the dataset is gone". `--probe` (R42(e)) describes a CANDIDATE dataset — configs, splits, fields, row counts, licence, low-cardinality column frequencies and two rows' field-value LENGTHS — without downloading a row set or printing any text; `--probe-where` counts a slice through `/filter`; `--import-probes` folds a scratch probe manifest into the manifest of record. A source may declare `locate` (find a labelled block by paging metadata when `/filter` is unavailable), `crossCheck` (a second, data-side statement of the label mapping that fails the whole source on a contradiction), `promptKey` and `noPairKey`. |
+| `make-splits.mjs` | SPEC §D.5 steps 1-3. Normalized-key dedup; cross-label strings forced to one side; group-aware split (writer for humans, persona for generated personas, source row / template family for public corpora, and the ESSAY PROMPT where a source ships one — R42(e), `shardKeyOf` = prompt → pair → normalised text); pair- and prompt-coverage tables with their straddle counts; Arabic-script exclusion with counts; near-duplicate contamination scan; the R8 scrub. |
 | `gate-fixtures.mjs` | The CAL lane's gate. Runs the SHIPPED CLI over `must-not-fire.jsonl` (SPEC §I gate), the 50 authored LLM rows (§F.3 verdicts and the humanization delta), the 30 support-desk snippets at both `--domain` settings, a deterministic sample of real corpus messages, and `verify-round-1.jsonl` (R33). Sections A, B, C and E run **one process per row with that row's own flags**; section D is **one shared `--jsonl` batch** with `--channel whatsapp`, and the header now says so (R36(h)). Exits 3 if the §I gate or either R33 gate line fails, 4 if the section it would append to `REPORT.md` trips the honesty guard; a row outside its `allowed` set is reported as arbitration, never silently fixed. `--out` is a directory (default `eval/out`). It fits nothing and never touches the network. |
-| `run-eval.mjs` | SPEC §D.5 steps 4-10 and the §G.1 tables. Hand-rolled logistic regression, PAVA isotonic calibration, rank AUC, ECE, fairness-limited threshold, hard mode, leave-one-writer-out, negative controls (a)-(e), base-rate table. |
+| `run-eval.mjs` | SPEC §D.5 steps 4-10 and the §G.1 tables. Hand-rolled logistic regression, PAVA isotonic calibration, rank AUC, ECE, fairness-limited threshold, hard mode, leave-one-writer-out, negative controls (a)-(e), base-rate table. Section 3b (R42(e)) restricts the §G.1 table to `genre = essay` rows, re-picks the fairness-limited threshold on the essay validation side, prints hard mode beside it, and carries the essay base rates, the essay negative control and the unmeasured-stratum statement. |
 | `adapters/supabase-messages.cjs` | Optional. Rebuilds `corpus_user_messages.json` from a Supabase message table. Not zero-dependency and not in `package.json` — see below. |
 | `fixtures/*.jsonl` | Committed. See the table further down. |
-| `selftest-eval.mjs` | The harness self-test — see "Harness self-test" above, and step 3 of the release sequence (R37(a)). Drives the shipped harness over a synthetic corpus and asserts the refusals it documents. Zero dependency, ~6 s, default work dir `.scratch/selftest-eval/`. Ten green checks prove the guards refuse planted faults; the correctness of the numbers printed when nothing fires rests on the independent re-derivation of R36, which a fixture cannot replace. |
+| `selftest-eval.mjs` | The harness self-test — see "Harness self-test" above, and step 3 of the release sequence (R37(a)). Drives the shipped harness over a synthetic corpus and asserts the refusals it documents. Zero dependency, ~6 s, default work dir `.scratch/selftest-eval/`. Eleven green checks (R37's ten plus the R42(e) essay check) prove the guards refuse planted faults; the correctness of the numbers printed when nothing fires rests on the independent re-derivation of R36, which a fixture cannot replace. |
 | `fixtures/synthetic-split/` | The authored corpus the self-test corrupts, plus its generator. No corpus row, no real text, no result. See its own `README.md`. |
 | `data/` | Gitignored. Real chat messages live here. Never commit anything from it. |
 | `out/` | Where the release `REPORT.md` and `weights.fitted.json` land. `out/quick/` is where `--quick` lands (R26). |
@@ -268,10 +278,140 @@ the correct direction to err.
   the product, not a harness bug, and the report says so per cell instead of inventing a number.
 - **Turkish is one genre.** The only labelled Turkish resource is 1,000 GPT-4 hotel reviews and
   their human counterparts. Every Turkish number is measured on hotel reviews.
-- **The public splits are stratified by a text-hash shard**, not by a prompt template, because
+- **Most public splits are stratified by a text-hash shard**, not by a prompt template, because
   the templates are not visible in the released data. Near-duplicates cannot straddle the split
   (they share a normalized key and therefore a shard), but genuine template siblings that differ
-  in wording can, and that is an upward bias on every public-corpus number here.
+  in wording can, and that is an upward bias on every public-corpus number here. The one
+  exception is the essay source, which ships the assignment prompt: there the holdout unit is the
+  PROMPT (R42(e)), and section 1 of `REPORT.md` prints the coverage and the straddle count.
+- **The essay genre is one corpus, one unnamed generator family, and no language-background
+  labels.** See "Essay genre (R42(e))" below before quoting any essay number.
+
+## Essay genre (R42(e))
+
+The owner's platform receives **student essays**. Every English number this project had before this
+round was measured on product reviews and QA answers, so R42(e) asked for the best fetchable
+human-essay vs LLM-essay resource, a split by essay prompt, and an `en:prose` essay row with hard
+mode beside it. This section is what that produced, including the parts that failed.
+
+### The probe mode
+
+`fetch-public-datasets.mjs --probe <dataset>` asks `datasets-server.huggingface.co` what a
+candidate dataset **is**, and downloads no row set:
+
+* `/splits` — configs and splits, and the 401 that means "gated or gone";
+* `/info` — declared licence, per-split row counts, download size, the field schema;
+* `/statistics` — per column: for a LOW-cardinality column the value frequencies (this is how
+  "does this corpus have an essay domain, and what is the label column called" gets answered), for
+  a free-text column a character-length summary and never the values;
+* `/rows?length=2` — two rows, described as `field=type/length`. **A probe never prints a text
+  value.** `--probe-where` counts a labelled slice through `/filter` instead.
+
+Every probe is recorded in `eval/data/public/manifest.json` under `probes` (25 records, 21 distinct
+datasets). `--import-probes` folds a scratch probe manifest into the manifest of record, so probing
+can be done in `.scratch/` and imported rather than re-run against the release directory.
+
+**Licences are a known gap in this route.** `datasets-server /info` declared a licence for *none*
+of the twenty-one datasets probed — the licence lives on the dataset card, on `huggingface.co`, which
+this project does not fetch. Where a licence is stated in the registry it is either carried over
+from `docs/design/R1-research.md` (which read the cards in the design round) or marked **UNDECLARED**.
+No public row is committed, so this bounds redistribution, not measurement.
+
+### What was probed, and what happened
+
+| dataset | status | why it is in or out |
+|---|---|---|
+| `dmitva/human_ai_generated_text` | **REGISTERED** as `essays-en-pairs` | 1,000,000 rows; `human_text` / `ai_text` / `instructions` parallel on one row. School-assignment essays, both labels in one dataset, original capitalisation and punctuation, and a shared prompt. |
+| `Jinyan1/COLING_2025_MGT_en` | fetchable, **rejected on balance** | `sub_source = outfox` is 43,135 genuine school essays with 11 named modern generators and correct orthography, and its model-vs-label cross-check passed on all 424 rows pulled. But `/filter` answers 502/503/timeout for this dataset, the slice is uniformly interleaved (5 of 81 evenly spaced probes hit it; 424 of 6,000 rows examined = 7.07%, the slice's own share), and only **5.4% of the slice is human** (23 of 424). Reaching 500 human essays needs ~130,000 rows ≈ 220 MB, against R9's 60 MB. Kept in the registry, disabled, with the reason. |
+| `andythetechnerd03/AI-human-text` | fetchable, **rejected on form** | 462,873 rows, both labels, right genre — and **both halves are lower-cased with punctuation stripped** (0 of 150 human rows in a verification pull carried a capital or a terminal stop). Every orthography feature would be measuring the corpus builder's normaliser and the segmenter would see one unbounded sentence. Kept in the registry, disabled, with the reason. |
+| `SJTU-CL/ArguGPT` | fetchable, not registered | 3,338 essays with `prompt_id`, `exam_type` (gre / toefl / weccl) and 7 generators — but **machine-only**: all 3,338 rows carry a model. Pairing its machine half with another corpus's human half would make the essay cell a source classifier. The best candidate for a future round if a licensed learner-essay human half arrives. |
+| `liamdugan/raid` | fetchable, not on task | 2.27M rows, but `domain` is `news` / `poetry` / `abstracts` / `books`. No student essays. |
+| `artem9k/ai-text-detection-pile` | fetchable, not on task | 1.39M rows, `source` = `human` or a model name, no genre column; its human head is IvyPanda essays but nothing in the schema separates essays from the rest. |
+| `qwedsacf/ivypanda-essays` (128,293), `nid989/EssayFroum-Dataset` (25,571) | fetchable, **human-only** | Essays with no machine half. Usable only by pairing across corpora, which is the confound above. |
+| `Ateeqq/AI-and-Human-Generated-Text` | fetchable, not on task | `title` + `abstract` + `label`: academic abstracts, not essays. |
+| `Hello-SimpleAI/HC3` | already pulled | QA prose, not essays. |
+| `thedrcat/daigt-v2-train-dataset`, `thedrcat/daigt-v4-train-dataset`, `PJMixers/thedrcat_daigt-v2-train-dataset`, `nbroad/persuade_corpus_2.0` (and its `persaude` misspelling), `tasksource/persuade`, `ryuryukke/OUTFOX` (both cases), `MBZUAI-NLP/M4GT-Bench`, `NicolaiSivesind/human-vs-machine` | **HTTP 401** | Gated or gone: "does not exist, or is not accessible without authentication". The DAIGT mirrors and every PERSUADE mirror probed are in this row — which is why the ELL / non-native stratum below is unmeasured. |
+| `yaful/DeepfakeTextDetect` | **HTTP 404** | "The dataset has been renamed." Its current name, `yaful/MAGE`, is already registered. |
+
+### The registered essay source
+
+`essays-en-pairs` = `dmitva/human_ai_generated_text`, **licence UNDECLARED through the permitted
+host** (no row of it is committed). Pulled under the R9 caps: **1,500 human + 1,500 machine essays**
+from 1,500 source rows (15 pages, 6.2 MB), sha256 in the manifest. Human essays run ~424 words at
+the median, machine essays ~197 — **the two halves are not the same length**, which is why every
+essay number is reported per length bucket and never pooled.
+
+What the pull verified, and what it cannot: datasets-server proves the slice exists, its size, its
+balance and its text lengths. The *genre* was verified by inspecting a 150-pair verification pull
+locally (school-assignment prompts, human rows carrying capitals, terminal punctuation and student
+misspellings) — nothing about the writers, their age or their language background is established,
+and the corpus names no generator, so `modelFamiliesCovered` records one unspecified family.
+
+### How the prompt split works
+
+`make-splits.mjs` shards a public row on the first key it has: **prompt → pair → normalised text**
+(`shardKeyOf`). The shard fixes the side and is part of the group string, so every essay answering
+one prompt lands on one side, human and machine alike; a machine essay is never scored against a
+model fitted on the human answer to its own prompt. Measured on this pull: **3,000 rows, 100%
+prompt coverage, 1,206 distinct prompts, median 2 essays per prompt (max 4), 1,206 prompts carrying
+both labels, 0 prompts straddling two sides** — printed in section 1 of `REPORT.md` beside the pair
+table, and 0 non-writer group straddles overall. Sources with no prompt key are unaffected: their
+shard is exactly what it was before this ruling.
+
+### The essay numbers (TEST side, `eval/out/REPORT.md` §3b)
+
+| cell | bucket | n_human | n_llm | AUC | AUC hard | ECE | FPR@t | TPR@t | TPR@t hard | precision@t |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| en:prose essay | 150–499 tok | 224 | 248 | 0.935 | **0.964** | 0.095 | 0.4% | 28.2% | 44.0% | 0.986 |
+| en:prose essay | 50–149 tok | 6 | 77 | INSUFFICIENT (n<100 per side) | | | | | | |
+| en:prose essay | 500+ tok | 95 | 0 | INSUFFICIENT (n<100 per side) | | | | | | |
+
+`t_essay` = 0.853, re-picked on the essay rows' own validation side under the same fairness limit
+(≤2% FPR on every binding stratum); the cell-wide t is 0.853 as well this round, so the two tables
+agree — that is a coincidence of this corpus, not a property. Coverage: **28.4% of essay rows are
+gated** (`insufficient_text`) and count as documents that never fire. Base rates for that row:
+**P@50% 0.984 · P@20% 0.940 · P@10% 0.875 · P@5% 0.769 · P@2% 0.563 · P@1% 0.390.**
+Negative control, essay flavour: **2 of 325 human essays flagged at t on TEST (0.6%)**; in the
+measurable bucket, 1 of 224 (0.4%), with 19 of those 224 gated.
+
+Read alongside:
+- **Hard mode is HIGHER than standard here (0.964 vs 0.935)** — the only cell in this project where
+  deleting every orthography and format feature *helps*. Both halves of this corpus are clean,
+  capitalised, terminated prose, so the format features carry no signal and cost the fit; what
+  separates the classes is rhythm and connectives. It also means the essay signal is **not** the
+  spelling signal, which is the one piece of good news in this section.
+- **The three-humans caveat still applies to everything else in the report**, and a fourth caveat
+  applies here: these essay writers are an unknown number of unknown students, and the threshold is
+  still fitted over a corpus whose in-house human side is three people.
+- **The non-native stratum is UNMEASURED.** No essay row carries `non_native_en` (that stratum is
+  defined as an English message written by one of the Turkish-speaking corpus writers, and no essay
+  row has a writer), and the essay source ships no L1, ELL or nationality column. Both PERSUADE
+  mirrors probed — the corpora that DO carry `ell_status` — are behind authentication. The
+  literature puts vendor-default false-flag rates on non-native essays at up to 61% (R1 §3); this
+  release does not measure it and **nothing here licenses an estimate of it**.
+- **Not exam answers.** These are take-home-shaped school essays. No exam-answer corpus was
+  fetchable at all, so the other half of the owner's product (R42) is unmeasured.
+- **One generator family, unnamed.** No per-generator recall, and no claim about any 2025-2026 model.
+- **A precision of 0.986 is measured at this corpus's own prior** (≈53% machine in that bucket).
+  The base-rate row above is the one to quote at a school's real prior, which nobody has measured.
+
+### What the essay rows did to the numbers that were already there
+
+The essay rows join the **fitting** side like any other public source (R42(e)), so the `en:prose`
+cell is now fitted and thresholded over a row set that is ~20% essays, and section 3 moved:
+
+| cell / bucket | before this round | after |
+|---|---|---|
+| en:prose 150–499 AUC / hard | 0.884 / 0.857 | 0.878 / 0.859 |
+| en:prose 150–499 FPR@t / TPR@t | 7.6% / 65.0% | **2.5% / 32.5%** |
+| en:prose 50–149 AUC / hard | 0.739 / 0.623 | 0.752 / 0.672 |
+| en:prose 50–149 FPR@t / TPR@t | 1.1% / 3.7% | 0.8% / 2.8% |
+
+Ranking barely moved; the **operating point** moved a lot, because t is picked on a validation side
+that now contains 522 essay rows. Recall halved and the false-flag rate fell by two thirds. Neither
+number is better or worse than the other — they are two points on a curve whose shape the essay
+rows changed. Nothing about how the cells are fitted or reported was altered to produce this.
+
 
 ---
 
@@ -322,6 +462,52 @@ documents carry a rhythm value that a different, equally defensible segmenter wo
 The tool ships its own segmenter on purpose (`Intl.Segmenter` is locale-dependent and would break
 determinism across ICU versions), so this is a *measurement of the uncertainty*, not a defect to
 fix. It is why `segmentation_suspect` exists. Repro: section 8 of `eval/out/REPORT.md`.
+
+## Essay lane (R42(e))
+
+**E9 — twenty-one datasets probed, three essay corpora fetchable, one usable.** `--probe` (new this
+round) reached 21 datasets without downloading a row set. Nine answered **HTTP 401** — every DAIGT
+mirror and every PERSUADE mirror tried, which is also why the ELL stratum is unmeasured. Of the
+three fetchable school-essay corpora, one is lower-cased and de-punctuated on both halves
+(`andythetechnerd03/AI-human-text`), one is 5% human and behind a broken `/filter`
+(`Jinyan1/COLING_2025_MGT_en`), and one — `dmitva/human_ai_generated_text` — carries both halves,
+original orthography and the assignment prompt. Both rejects stay in the registry, disabled, with
+their reason, so the next lane does not spend the attempt again. Repro: `node
+eval/fetch-public-datasets.mjs --probe <dataset> --probe-out .scratch/<lane>` and read `probes` in
+`eval/data/public/manifest.json`. No ruling number: this is the R42(e) work item, done.
+
+**E10 — `/filter` is not usable on a large dataset from this host.** Four attempts against
+`Jinyan1/COLING_2025_MGT_en` (610,767 rows) returned 30-second timeouts, one 502 and one 503, at a
+200-second per-request abort as well as the default 30. `/rows`, `/splits`, `/info` and
+`/statistics` on the same dataset answered normally throughout, so this is the filter index, not
+the rate limiter and not the E3 wedge. Consequence: a labelled slice of a large corpus has to be
+LOCATED by paging (`locate` in `pullSource`: single-row metadata requests at evenly spaced offsets,
+then a stride inside the window), and a slice that is uniformly interleaved rather than contiguous
+cannot be pulled economically at all. That is what killed the outfox essay slice.
+
+**E11 — a corpus that is right in every column can still be unusable, and only the text says so.**
+`andythetechnerd03/AI-human-text` passes every metadata check: 462,873 English rows, both labels,
+essay-length texts, apache-2.0 on its card. The 150-row verification pull showed **0 of 150 human
+rows carrying a capital letter or a terminal stop** — both halves are normalised. A detector whose
+features include `terminal_punct_ratio`, `sentence_initial_caps` and three rhythm features computed
+over segmented sentences would have measured the corpus builder's `.lower()`. **Rule adopted for
+this lane: inspect a small pull locally before registering any source; the probe cannot do it,
+because a probe is forbidden to print text.**
+
+**E12 — hard mode is HIGHER than standard on essays (0.964 vs 0.935).** The only cell in this
+project where deleting every orthography and format feature improves the fit. Both halves of the
+essay corpus are clean capitalised prose, so the format features carry no class signal and cost the
+model degrees of freedom; the separation is rhythm and connectives, which survive a prompt change.
+Read with R24's warning attached: those same rhythm and connective features are what an L2 essay
+built on taught connectors produces for free, and this corpus has no language-background labels to
+measure that with.
+
+**E13 — adding the essay corpus moved the `en:prose` operating point by more than it moved the
+ranking.** The essay rows join the fitting side like any public source, so the cell's threshold is
+now picked on a validation side that is ~20% essays: AUC 0.884 → 0.878 (hard 0.857 → 0.859), but
+FPR@t 7.6% → 2.5% and TPR@t 65.0% → 32.5%. Anyone quoting the pre-essay recall of 65% is quoting a
+threshold that no longer exists. Both tables are in `eval/out/REPORT.md`; the comparison is in
+"Essay genre (R42(e))" above.
 
 ## Verify round 1
 
@@ -629,3 +815,5 @@ measurement of the judge.
 | refuter round 2: reported-speech suppression, name-cues, 20 new self-identification patterns, math/fullwidth homoglyphs, the human checklist road, the support-desk retag, out-of-scope Latin | R38 |
 | the agent gate's first run: judge `likely_llm` is a column not a final, the flag-mapping table, T11's length, T14's eval-data dependency | R39 |
 | the probe tables print rule names, never probe text; the honesty guard's exemption list is deleted | R40 |
+| English first; Turkish supported but unscheduled | R41 |
+| the school-platform round: essay calibration, `--probe`, the by-prompt split, the essay-genre report row | R42, R42(e) |

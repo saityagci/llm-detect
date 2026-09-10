@@ -37,7 +37,23 @@ const USAGE = `usage: node eval/fetch-public-datasets.mjs [options]
   --cap <n>            rows per label per dataset (default ${CAP_PER_LABEL}; R9 says do not raise it silently)
   --include-arabic     re-enable the Arabic sources and the one ALHD attempt (OFF: Arabic is out per R22)
   --list               print the registry and exit
-  --dry-run            resolve configs/splits and row counts, fetch no rows`;
+  --dry-run            resolve configs/splits and row counts, fetch no rows
+  --probe <dataset>    HEAD-RULINGS R42(e): ask datasets-server what a candidate dataset IS —
+                       configs, splits, field names and types, row counts, declared licence, and
+                       the field-value LENGTHS of two sample rows. Never prints a text value and
+                       never downloads a row set. Repeatable; results are recorded in the manifest
+                       under "probes". Combine with --probe-out <dir> to keep them out of the
+                       release manifest.
+  --probe-where <expr> applies to the --probe it follows: count and sample that SLICE through
+                       /filter (e.g. --probe-where "\"sub_source\"='outfox' AND \"label\"=0"),
+                       which is how a labelled slice of a large corpus is counted without paging it
+  --probe-out <dir>    where a --probe run records its manifest (default: --out)
+  --import-probes <f>  merge the "probes" array of another manifest (e.g. a scratch one) into the
+                       manifest in --out. Probing is read-only and its result is a note, so a probe
+                       run may be done in a scratch directory and imported rather than re-run.
+  --probe-timeout <s>  per-request abort for a probe (default 30). datasets-server builds a
+                       DuckDB index the first time a large dataset is filtered, and that first
+                       /filter can outlast the default abort.`;
 
 // ---------------------------------------------------------------- registry (SPEC §F.1)
 
@@ -110,6 +126,97 @@ const REGISTRY = [
     generator: (r) => (Number(r.label) === 0 ? String(r.src || 'unknown') : null),
     note: 'LABEL IS INVERTED: 0 = machine, 1 = human. assertMageMapping() below is the unit test SPEC §F.1 demands; getting it backwards is the likeliest silent bug in the eval.',
   },
+  {
+    // ---- HEAD-RULINGS R42(e): THE ESSAY SOURCE. -------------------------------------------
+    // The school platform's genre is student essays; every English number this project had
+    // before this round was measured on product reviews and QA answers. Twenty-one candidates were
+    // probed (`--probe`, all recorded in the manifest under `probes`); this is the one that is
+    // fetchable unauthenticated, carries BOTH labels in ONE dataset, is school-essay genre, keeps
+    // its original capitalisation and punctuation, and ships a shared PROMPT for the two halves.
+    //
+    // Row shape: `human_text` and `ai_text` are parallel columns on one row, both answering the
+    // `instructions` on that row — so one source row yields a matched pair, and `instructions`
+    // is the essay prompt the R42(e) split holds out.
+    //
+    // WHAT WAS VERIFIED, AND HOW (nothing here is assumed):
+    //   · fetchable, 1,000,000 rows, fields id/human_text/ai_text/instructions — probe, in the manifest;
+    //   · genre and orthography — a 150-pair pull inspected locally before this entry was enabled:
+    //     school-assignment prompts ("write a persuasive essay on…", "advantages of a four-day
+    //     school week"), 150/150 human rows carrying capitals and 149/150 terminal punctuation,
+    //     student misspellings intact. Two rival candidates failed exactly this check and stay
+    //     below, disabled, so the check is not repeated by the next lane.
+    //   · length: human median ~424 words, machine median ~197. THE TWO HALVES ARE NOT THE SAME
+    //     LENGTH, which is why every essay number is reported per length bucket and never pooled.
+    // WHAT IS NOT VERIFIED: who wrote the human half, when, or by what selection; the licence
+    // (datasets-server declares none for it).
+    name: 'essays-en-pairs', dataset: 'dmitva/human_ai_generated_text',
+    licence: 'NOT DECLARED through datasets-server /info, and this project does not fetch huggingface.co to read a card. Treat as undeclared: usable for a local measurement, NOT cleared for redistribution, and no row of it is committed.',
+    role: 'EN school essays, human vs LLM, matched on the assignment prompt — the school-platform genre (HEAD-RULINGS R42(e)).',
+    lang: 'en', genre: 'essay', enabled: true, stride: true, pairs: true,
+    keep: () => true,
+    // No numeric label column at all: the label is the FIELD NAME, exactly as in hc3-en. A renamed
+    // column would therefore yield rows of one class labelled as the other, which is what the
+    // expand() assertion in assertMageMapping() exists to catch.
+    expand: (r) => {
+      const out = [];
+      if (r.human_text && String(r.human_text).trim()) out.push({ text: r.human_text, label: 'human', generator: null });
+      if (r.ai_text && String(r.ai_text).trim()) out.push({ text: r.ai_text, label: 'llm', generator: 'unspecified-essay-generator' });
+      return out;
+    },
+    // The holdout unit R42(e) asks for: every essay answering one prompt lands on one side.
+    // Hashed, because the raw instruction is a long string that would be repeated on every row.
+    promptKey: (r) => (r.instructions && String(r.instructions).trim()
+      ? 'prompt:' + createHash('sha256').update(String(r.instructions).replace(/\s+/g, ' ').trim().toLowerCase()).digest('hex').slice(0, 16)
+      : null),
+    note: 'parallel columns human_text / ai_text on one row, both answering `instructions`. The machine half records one unspecified generator family — the dataset names no model, and inventing one would be a fiction in modelFamiliesCovered.',
+  },
+  {
+    // Probed, pulled small, INSPECTED, and rejected — recorded so the next lane does not spend the
+    // attempt again. 462,873 EN rows, `generated` 0/1, both labels in one dataset, and the genre is
+    // right (school essays). But BOTH HALVES ARE LOWER-CASED AND STRIPPED OF PUNCTUATION: a
+    // 150-row inspection found 0 capitals and no terminal punctuation on either side. Every
+    // orthography feature this detector has is destroyed identically on both halves, the sentence
+    // segmenter sees one unbounded sentence, and the rhythm features that follow from it are
+    // computed over a segmentation the source text does not have. A number measured there would be
+    // measured on a corpus no school platform will ever receive.
+    name: 'ai-human-essays-en-normalized', dataset: 'andythetechnerd03/AI-human-text',
+    licence: 'apache-2.0 per the dataset card as recorded in docs/design/R1-research.md §6.1(8)',
+    role: 'EN essays, human vs LLM — REJECTED: text is case- and punctuation-normalised.',
+    lang: 'en', genre: 'essay', enabled: false,
+    disabledReason: 'Both halves are lower-cased with punctuation stripped (verified on a 150-row pull: 0 of 150 human rows carry a capital or a terminal stop). The detector\'s orthography and rhythm features would be measuring the corpus builder\'s normaliser, not the writer.',
+  },
+  {
+    // Probed, pulled, cross-checked and rejected for BALANCE, not for quality — recorded so the
+    // next lane does not spend the attempt again. `sub_source = 'outfox'` inside a 610,767-row
+    // multi-source English corpus is a genuine school-essay slice with correct orthography and
+    // eleven named modern generators (gpt4o, llama3-70b, mixtral-8x7b, gemma, cohere, …), and the
+    // pull's model-vs-label cross-check passed on all 424 rows it reached.
+    // What killed it: /filter answers 502/503/timeout for this dataset, the slice is UNIFORMLY
+    // INTERLEAVED through the corpus (5 of 81 evenly spaced probes hit it; 424 of 6,000 rows
+    // examined = 7.07%, the slice's own share of the corpus), and only 5.4% of the slice is human
+    // (23 of 424). Reaching 500 human essays would mean paging ~130,000 rows ≈ 220 MB, over R9's
+    // 60 MB budget by a factor of four, for one of the two halves.
+    name: 'coling-mgt-essays-en', dataset: 'Jinyan1/COLING_2025_MGT_en',
+    licence: 'not declared through datasets-server /info',
+    role: 'EN school essays, human vs 11 generators — REJECTED: the human half is 5% of the slice and unreachable under the R9 byte budget.',
+    lang: 'en', genre: 'essay', enabled: false,
+    disabledReason: 'The human half is ~5% of the outfox slice and the slice is uniformly interleaved through a 610k-row corpus whose /filter endpoint is unavailable (502/503/timeout). A balanced pull would need ~220 MB of paging, against R9\'s 60 MB budget. The 424 rows one pass reached (23 human / 401 machine) are not a measurable cell and are not kept.',
+    locate: { field: 'sub_source', value: 'outfox', probes: 80, maxPages: 60 },
+    keep: (r) => String(r.sub_source) === 'outfox' && String(r.lang || 'en') === 'en',
+    // 0 = human, 1 = machine — the ordinary direction, NOT MAGE's. Kept and asserted even though
+    // the source is disabled: a re-enable must not have to re-derive it.
+    label: (r) => (Number(r.label) === 1 ? 'llm' : (Number(r.label) === 0 ? 'human' : null)),
+    text: (r) => r.text,
+    generator: (r) => (Number(r.label) === 1 ? String(r.model || 'unknown') : null),
+    crossCheck: (r) => {
+      const isHumanModel = String(r.model || '').toLowerCase() === 'human';
+      const isHumanLabel = Number(r.label) === 0;
+      return isHumanModel === isHumanLabel
+        ? null
+        : `row with model="${r.model}" carries label=${r.label}: the model column and the label column disagree about who wrote it`;
+    },
+    note: 'PASSED its model-vs-label cross-check on 424 rows before being rejected for balance. If a future round gets /filter working for this dataset, this entry pulls a genuinely multi-generator essay set.',
+  },
 ];
 
 const ALHD = {
@@ -125,7 +232,7 @@ let lastRequestAt = 0;
 // The unauthenticated datasets-server rate-limits hard. Paced requests plus a long,
 // Retry-After-aware backoff on 429 is the difference between "dataset gone" and "wait".
 let PACE_MS = 500;
-const REQUEST_TIMEOUT_MS = 30000;   // CAL: no request may hang the run forever
+let REQUEST_TIMEOUT_MS = 30000;   // CAL: no request may hang the run forever (--probe-timeout raises it)
 
 async function getJson(url, { attempts = 7, label = '' } = {}) {
   let lastErr = null;
@@ -195,6 +302,149 @@ async function fetchRows(dataset, config, split, offset, length) {
   return { rows: (j.rows || []).map((r) => r.row), total: j.num_rows_total ?? null };
 }
 
+// ---------------------------------------------------------------- --probe (HEAD-RULINGS R42(e))
+
+/**
+ * Describe a candidate dataset without downloading it and WITHOUT PRINTING ANY TEXT.
+ *
+ * The essay round needs to know, for a dozen candidates, whether a dataset is fetchable at all,
+ * what its label column is called, whether it carries an essay PROMPT id (the holdout unit the
+ * split needs) and roughly how long its texts are. Every one of those questions is answerable
+ * from /splits, /info and two rows — and the answer to the last one is a NUMBER, not a sample.
+ * So this prints field names, types and value LENGTHS, never a value. Nothing here writes a
+ * corpus file; a probe is a note in the manifest.
+ */
+function describeValue(v) {
+  if (v === null || v === undefined) return { type: v === null ? 'null' : 'undefined', length: null };
+  if (typeof v === 'string') return { type: 'string', length: v.length, words: (v.match(/[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu) || []).length };
+  if (Array.isArray(v)) {
+    const inner = v.length ? describeValue(v[0]) : null;
+    return { type: `array[${v.length}]`, length: v.length, first_item: inner };
+  }
+  if (typeof v === 'object') return { type: 'object', length: Object.keys(v).length, keys: Object.keys(v).slice(0, 12) };
+  if (typeof v === 'number') return { type: 'number', length: null, value_is_small_int: Number.isInteger(v) && Math.abs(v) < 1000 ? v : null };
+  return { type: typeof v, length: null };
+}
+
+async function probeDataset(dataset, where = null) {
+  const rec = { dataset, where: where || null, probedAt: new Date().toISOString(), status: 'unknown' };
+  process.stderr.write(`- probe ${dataset}${where ? ` WHERE ${where}` : ''}\n`);
+
+  // 1. /splits — the cheapest liveness check, and the one that reports auth walls.
+  try {
+    const j = await getJson(`${HOST}/splits?${q({ dataset })}`, { attempts: 3, label: `${dataset} /splits` });
+    rec.splits = (j.splits || []).map((s) => ({ config: s.config, split: s.split }));
+  } catch (e) {
+    rec.status = 'unavailable';
+    rec.reason = `/splits failed: ${String(e.message).slice(0, 200)}`;
+    process.stderr.write(`  UNAVAILABLE: ${rec.reason}\n`);
+    return rec;
+  }
+  if (!rec.splits.length) {
+    rec.status = 'unavailable';
+    rec.reason = '/splits returned no splits';
+    process.stderr.write(`  UNAVAILABLE: ${rec.reason}\n`);
+    return rec;
+  }
+  rec.configs = [...new Set(rec.splits.map((s) => s.config))];
+
+  // 2. /info — declared licence, per-split row counts, download size, field schema.
+  try {
+    const j = await getJson(`${HOST}/info?${q({ dataset })}`, { attempts: 3, label: `${dataset} /info` });
+    const infos = j.dataset_info || {};
+    rec.info = {};
+    for (const [cfg, di] of Object.entries(infos)) {
+      rec.info[cfg] = {
+        licence: di.license || null,
+        features: Object.keys(di.features || {}),
+        feature_types: Object.fromEntries(Object.entries(di.features || {}).map(([k, v]) => [k, v && (v.dtype || v._type || (Array.isArray(v) ? 'sequence' : typeof v))])),
+        splits: Object.fromEntries(Object.entries(di.splits || {}).map(([s, v]) => [s, v.num_examples ?? null])),
+        download_size_bytes: di.download_size ?? null,
+        dataset_size_bytes: di.dataset_size ?? null,
+      };
+    }
+    const lic = Object.values(rec.info).map((i) => i.licence).find(Boolean);
+    rec.licence = lic || 'not declared in /info — read the dataset card before redistributing';
+  } catch (e) {
+    rec.info_error = `/info failed: ${String(e.message).slice(0, 200)}`;
+    rec.licence = 'unknown (/info failed)';
+  }
+
+  // 3. two rows, described by LENGTH. Prefer a train-ish split of the first config.
+  const pickCfg = rec.configs[0];
+  const inCfg = rec.splits.filter((s) => s.config === pickCfg);
+  const pickSplit = (inCfg.find((s) => s.split === 'train') || inCfg[0]).split;
+  rec.sampled = { config: pickCfg, split: pickSplit };
+  try {
+    // With --probe-where the slice is counted through /filter, which reports num_rows_total for
+    // the FILTERED set — that is how "how many essay rows does this 610k-row corpus actually hold,
+    // per label" is answered without paging 6,000 times.
+    const url = where
+      ? `${HOST}/filter?${q({ dataset, config: pickCfg, split: pickSplit, where, offset: 0, length: 2 })}`
+      : `${HOST}/rows?${q({ dataset, config: pickCfg, split: pickSplit, offset: 0, length: 2 })}`;
+    const j = await getJson(url, { attempts: 3, label: `${dataset} ${where ? '/filter' : '/rows'}` });
+    const rowsR = (j.rows || []).map((r) => r.row);
+    rec.rows_total = j.num_rows_total ?? null;
+    rec.fields = rowsR.length ? Object.keys(rowsR[0]) : [];
+    rec.sample_field_shapes = rowsR.map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, describeValue(v)])));
+    rec.status = 'fetchable';
+  } catch (e) {
+    rec.status = 'rows_unavailable';
+    rec.reason = `/rows failed: ${String(e.message).slice(0, 200)}`;
+    process.stderr.write(`  ROWS UNAVAILABLE: ${rec.reason}\n`);
+    return rec;
+  }
+
+  // 4. /statistics — the column summary. For a LOW-CARDINALITY column datasets-server returns the
+  // value frequencies (`string_label` / `class_label`), which is how a probe answers "does this
+  // corpus have an essay domain, and what is its label column called" without reading a document.
+  // For a free-text column it returns a LENGTH histogram and never the values, which is exactly
+  // the contract this probe wants: categories yes, prose no.
+  try {
+    if (where) throw new Error('/statistics does not accept a filter; skipped for a --probe-where probe');
+    const j = await getJson(`${HOST}/statistics?${q({ dataset, config: pickCfg, split: pickSplit })}`,
+      { attempts: 2, label: `${dataset} /statistics` });
+    rec.column_stats = {};
+    for (const c of (j.statistics || [])) {
+      const s = c.column_statistics || {};
+      if (c.column_type === 'string_label' || c.column_type === 'class_label' || c.column_type === 'bool') {
+        rec.column_stats[c.column_name] = { type: c.column_type, n_unique: s.n_unique ?? null, frequencies: s.frequencies || null };
+      } else if (c.column_type === 'string_text') {
+        rec.column_stats[c.column_name] = { type: 'string_text (character counts, no values)', min: s.min, max: s.max, mean: s.mean, median: s.median };
+      } else {
+        rec.column_stats[c.column_name] = { type: c.column_type, min: s.min ?? null, max: s.max ?? null, n_unique: s.n_unique ?? null };
+      }
+    }
+    for (const [k, v] of Object.entries(rec.column_stats)) {
+      if (v.frequencies) process.stderr.write(`  stats ${k}: ${v.n_unique} distinct — ${Object.entries(v.frequencies).slice(0, 24).map(([kk, n]) => `${kk}=${n}`).join(' ')}\n`);
+      else process.stderr.write(`  stats ${k}: ${v.type}${v.min === undefined || v.min === null ? '' : ` min=${v.min} median=${v.median ?? '—'} max=${v.max}`}\n`);
+    }
+  } catch (e) {
+    rec.statistics_error = `/statistics failed: ${String(e.message).slice(0, 160)}`;
+    process.stderr.write(`  /statistics unavailable: ${rec.statistics_error}\n`);
+  }
+
+  // 5. the two questions this round actually asks of a candidate.
+  const f = rec.fields.map((x) => x.toLowerCase());
+  const has = (re) => rec.fields.filter((x) => re.test(x.toLowerCase()));
+  rec.looks_like = {
+    label_like_fields: has(/^(label|generated|is_ai|ai|human|class|target|source|src|model|generator)$/),
+    text_like_fields: has(/(text|essay|answer|content|body|abstract|response|completion|document)/),
+    prompt_key_fields: has(/(prompt|topic|question|task|assignment|title|instruction|essay_?id|source_?text)/),
+    lang_fields: has(/(lang|language)/),
+    l1_or_native_fields: has(/(l1|native|nationality|country|proficiency|esl|efl)/),
+  };
+  rec.usable_note = null;
+  process.stderr.write(`  ${rec.status}: ${rec.configs.length} config(s), ${rec.rows_total} rows in ${pickCfg}/${pickSplit}, `
+    + `fields ${rec.fields.join(',')}\n`);
+  process.stderr.write(`  licence: ${rec.licence}\n`);
+  if (rec.looks_like.prompt_key_fields.length) process.stderr.write(`  prompt-key candidates: ${rec.looks_like.prompt_key_fields.join(',')}\n`);
+  for (const [i, shapes] of rec.sample_field_shapes.entries()) {
+    process.stderr.write(`  row ${i} value lengths: ${Object.entries(shapes).map(([k, d]) => `${k}=${d.type}${d.length === null ? '' : `/${d.length}`}`).join(' ')}\n`);
+  }
+  return rec;
+}
+
 // ---------------------------------------------------------------- the MAGE unit test
 
 function assertMageMapping() {
@@ -239,8 +489,53 @@ function assertMageMapping() {
   if (hc3.expand({}).length !== 0) {
     throw new Error('hc3-en expand() is wrong: a row with neither answer field must yield no rows, not a throw and not a mislabelled one.');
   }
+  // HEAD-RULINGS R42(e): the essay source. Like hc3-en it has NO label column — the label is the
+  // field name — so a renamed column yields rows of one class wearing the other's label with
+  // nothing else to catch it. Its prompt key is the split's holdout unit, so it is asserted too:
+  // two rows carrying the same instruction must produce the same key, and a row without an
+  // instruction must produce null rather than a key every prompt-less row would share.
+  const es = REGISTRY.find((s) => s.name === 'essays-en-pairs');
+  const esOut = es.expand({ human_text: 'H', ai_text: 'A', instructions: 'Task: write an essay' });
+  if (esOut.length !== 2
+    || esOut.filter((x) => x.label === 'human').map((x) => x.text).join() !== 'H'
+    || esOut.filter((x) => x.label === 'llm').map((x) => x.text).join() !== 'A') {
+    throw new Error(`essays-en-pairs expand() is wrong: human_text must yield label "human" and ai_text label "llm". Got ${JSON.stringify(esOut)}.`);
+  }
+  if (es.expand({}).length !== 0 || es.expand({ human_text: '   ' }).length !== 0) {
+    throw new Error('essays-en-pairs expand() is wrong: a row with no usable text must yield no rows, not a blank one.');
+  }
+  if (esOut.some((x) => x.label === 'human' && x.generator !== null)) {
+    throw new Error('essays-en-pairs expand() is wrong: the human half must record no generator.');
+  }
+  const k1 = es.promptKey({ instructions: 'Task:  Write an essay\n on school ' });
+  const k2 = es.promptKey({ instructions: 'task: write an essay on school' });
+  if (!k1 || k1 !== k2) {
+    throw new Error('essays-en-pairs promptKey() is wrong: two rows carrying the same instruction, differing only in case and whitespace, must share a prompt key — that key is the holdout unit for the essay split.');
+  }
+  if (es.promptKey({}) !== null || es.promptKey({ instructions: '   ' }) !== null) {
+    throw new Error('essays-en-pairs promptKey() is wrong: a row with no instruction must yield null, not a key that every prompt-less row would share (which would put them all on one side).');
+  }
+  // The two rejected essay candidates keep their mappings asserted so that re-enabling either one
+  // is a one-line change and not a re-derivation.
+  const cm = REGISTRY.find((s) => s.name === 'coling-mgt-essays-en');
+  if (cm.label({ label: 0 }) !== 'human' || cm.label({ label: 1 }) !== 'llm' || cm.label({ label: 7 }) !== null) {
+    throw new Error('coling-mgt-essays-en label mapping is wrong: 0 = human, 1 = machine — the OPPOSITE of MAGE, which lives in this same file.');
+  }
+  if (cm.crossCheck({ model: 'human', label: 0 }) !== null || cm.crossCheck({ model: 'gpt-35', label: 1 }) !== null
+    || !cm.crossCheck({ model: 'human', label: 1 }) || !cm.crossCheck({ model: 'gpt-35', label: 0 })) {
+    throw new Error('coling-mgt-essays-en crossCheck is wrong: it must pass an agreeing row and report a row whose model column and label column disagree.');
+  }
+  if (cm.keep({ sub_source: 'reddit', lang: 'en' }) || !cm.keep({ sub_source: 'outfox', lang: 'en' })) {
+    throw new Error('coling-mgt-essays-en keep() is wrong: it must accept ONLY the essay slice (sub_source = outfox).');
+  }
+  const disabledEssay = REGISTRY.filter((s) => s.genre === 'essay' && !s.enabled).map((s) => s.name);
+  if (!disabledEssay.includes('ai-human-essays-en-normalized') || !disabledEssay.includes('coling-mgt-essays-en')) {
+    throw new Error('the two rejected essay candidates must stay in the registry, disabled, with their reason — that record is what stops the next lane spending the attempt again.');
+  }
   return 'MAGE 0=machine/1=human asserted; fake-reviews-gpt2era 0=human/1=machine, modern-fake-reviews OR=human/CG=machine, '
-    + 'maide-up-tr source 0=human/1=gpt-4 and hc3-en human_answers=human/chatgpt_answers=llm all asserted non-inverted';
+    + 'maide-up-tr source 0=human/1=gpt-4, hc3-en human_answers=human/chatgpt_answers=llm and '
+    + 'essays-en-pairs human_text=human/ai_text=llm (plus its prompt key) all asserted non-inverted; '
+    + 'the two rejected essay candidates keep their mappings asserted while disabled';
 }
 
 // ---------------------------------------------------------------- one source
@@ -285,19 +580,63 @@ async function pullSource(src, opts) {
     return { rec, rows: [] };
   }
 
-  const pageBudget = src.needsFullScan ? 1000 : MAX_PAGES_PER_SOURCE;
+  // ---- R42(e): locate a labelled BLOCK inside a large multi-source split without /filter.
+  // Single-row requests at evenly spaced offsets read one metadata field and nothing else; the
+  // first and last hit bound a window, and the pull then strides inside that window. This is how
+  // a 43k-row essay slice is taken out of a 610k-row corpus when the server's filter endpoint
+  // answers 502/503 (recorded in the manifest as `locate`), instead of paging the whole split.
+  let window = null;
+  if (src.locate && total) {
+    const nProbes = src.locate.probes || 80;
+    const step = Math.max(1, Math.floor(total / nProbes));
+    const hits = [];
+    let probed = 0, probeErr = null;
+    for (let off = 0; off < total; off += step) {
+      let b;
+      try { b = await fetchRows(src.dataset, split.config, split.split, off, 1); }
+      catch (e) { probeErr = `${e.message} at offset ${off}`; break; }
+      probed++;
+      const r0 = b.rows[0];
+      if (r0 && String(r0[src.locate.field]) === src.locate.value) hits.push(off);
+    }
+    rec.locate = {
+      field: src.locate.field, value: src.locate.value,
+      offsets_probed: probed, probe_step: step, hits: hits.length,
+      first_hit: hits[0] ?? null, last_hit: hits.at(-1) ?? null,
+      error: probeErr,
+      method: 'single-row metadata requests at evenly spaced offsets; the window is [first hit - step, last hit + step]. /filter was unavailable for this dataset (502/503/timeout), and paging the whole split would have blown the R9 byte budget.',
+    };
+    if (!hits.length) {
+      rec.status = 'failed';
+      rec.reason = `locate: no row with ${src.locate.field}="${src.locate.value}" found in ${probed} probes across ${total} rows`;
+      process.stderr.write(`  FAILED: ${rec.reason}\n`);
+      return { rec, rows: [] };
+    }
+    window = [Math.max(0, hits[0] - step), Math.min(total, hits.at(-1) + step)];
+    rec.locate.window = window;
+    process.stderr.write(`  locate ${src.locate.field}=${src.locate.value}: ${hits.length} of ${probed} probe offsets hit; window ${window[0]}..${window[1]} of ${total}\n`);
+  }
+
+  const pageBudget = src.needsFullScan ? 1000 : (src.locate ? (src.locate.maxPages || 60) : MAX_PAGES_PER_SOURCE);
   const maxPages = Math.min(pageBudget, total ? Math.ceil(total / PAGE) : pageBudget);
   // Spread the sampled offsets across the WHOLE split. The obvious formula,
   // floor(total / (maxPages*PAGE)) * PAGE, collapses to PAGE (i.e. plain sequential paging)
   // whenever the split is smaller than maxPages*PAGE, which silently confines a 60k-row
   // dataset to its first 30k rows — and MAGE is ordered by generator, so that is a
   // single-generator sample wearing the name of a many-generator corpus.
-  const stride = src.stride && total ? Math.max(PAGE, Math.floor(total / maxPages)) : PAGE;
+  const stride = window
+    ? Math.max(PAGE, Math.floor((window[1] - window[0]) / maxPages))
+    : (src.stride && total ? Math.max(PAGE, Math.floor(total / maxPages)) : PAGE);
+
+  const dupKeys = new Set();
+  let intraSourceDuplicates = 0, crossCheckFailures = [];
 
   for (let p = 0; p < maxPages; p++) {
-    const offset = src.stride ? Math.min((total || 0) - 1, p * stride) : p * PAGE;
+    const offset = window
+      ? Math.min(window[1] - 1, window[0] + p * stride)
+      : (src.stride ? Math.min((total || 0) - 1, p * stride) : p * PAGE);
     let batch;
-    if (p === 0 && !src.stride) batch = first;
+    if (p === 0 && !src.stride && !window) batch = first;
     else {
       try { batch = await fetchRows(src.dataset, split.config, split.split, offset, PAGE); }
       catch (e) { rec.partial_error = `stopped at offset ${offset}: ${e.message}`; break; }
@@ -308,17 +647,36 @@ async function pullSource(src, opts) {
       examined++;
       if (src.keep && !src.keep(r)) continue;
       matchedFilter++;
+      // A second, independent statement of the label mapping, checked against the DATA. A registry
+      // entry can be wrong in a way no unit test sees; a corpus that carries both a generator name
+      // and a numeric label can contradict itself, and if it does, this source is not usable at all.
+      if (src.crossCheck) {
+        const bad = src.crossCheck(r);
+        if (bad) { crossCheckFailures.push(bad); continue; }
+      }
       const items = src.expand ? src.expand(r) : [{ text: src.text(r), label: src.label(r), generator: src.generator ? src.generator(r) : null }];
-      const pair = `${src.name}#${examined}`;   // every item from ONE source row shares this key
+      // A source with no matched-pair or prompt key gets NO `pair` key, so make-splits shards it by
+      // normalised text and two identical documents cannot land on two sides. Handing every row a
+      // unique synthetic pair key would silently disable that fallback.
+      const pair = src.noPairKey ? null : `${src.name}#${examined}`;   // every item from ONE source row shares this key
+      const prompt = src.promptKey ? src.promptKey(r) : null;          // the essay-prompt holdout unit, when the dataset has one
       for (const it of items) {
         if (!it.label || !it.text) continue;
         const text = String(it.text).trim();
         if (text.length < 20) continue;
         if (kept[it.label].length >= opts.cap) continue;
+        if (src.noPairKey) {
+          // Within-source dedup on a cheap normalised key: an exact repeat of a document already
+          // kept is dropped and counted. Duplicates are the one thing that can force run-eval to
+          // exit 5 (a duplicate group straddling the split), so they are removed at the source.
+          const k = text.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{Nd}]+/gu, ' ').trim();
+          if (dupKeys.has(k)) { intraSourceDuplicates++; continue; }
+          dupKeys.add(k);
+        }
         kept[it.label].push({
           id: `${src.name}-${it.label}-${kept[it.label].length}`,
           dataset: src.dataset, text, label: it.label, lang: src.lang, genre: src.genre,
-          generator: it.generator || null, pair,
+          generator: it.generator || null, pair, prompt,
         });
       }
     }
@@ -330,6 +688,20 @@ async function pullSource(src, opts) {
   // budget) was still recorded as 'ok' with the reason demoted to a note. A truncated pull that
   // says "ok" is exactly the silent cap R9 forbids: the Turkish anchor is a full scan, so a stop
   // at offset 5300 of 19985 yields a fifth of the rows under an unchanged status word.
+  if (crossCheckFailures.length) {
+    // Not a warning. A corpus whose two label columns disagree cannot be used as ground truth,
+    // and a source that fails this check is dropped whole rather than pulled with the bad rows
+    // filtered out — the disagreement says the mapping is not understood.
+    rec.status = 'failed';
+    rec.reason = `label cross-check failed on ${crossCheckFailures.length} of ${matchedFilter} matching rows: ${crossCheckFailures[0]}`;
+    rec.label_cross_check = { failures: crossCheckFailures.length, examples: crossCheckFailures.slice(0, 3) };
+    process.stderr.write(`  FAILED: ${rec.reason}\n`);
+    return { rec, rows: [] };
+  }
+  if (src.crossCheck) {
+    rec.label_cross_check = { failures: 0, rule: 'every kept row satisfies (model === "human") === (label === 0)', rows_checked: matchedFilter };
+  }
+  if (src.noPairKey) rec.intra_source_duplicates_dropped = intraSourceDuplicates;
   rec.status = rec.partial_error ? 'partial' : 'ok';
   rec.pages_fetched = pages;
   rec.rows_examined = examined;
@@ -381,10 +753,19 @@ function requireIgnored(dir) {
 
 async function main() {
   const argv = process.argv.slice(2);
-  const opts = { out: 'eval/data/public', only: null, cap: CAP_PER_LABEL, includeArabic: false, dryRun: false };
+  const opts = { out: 'eval/data/public', only: null, cap: CAP_PER_LABEL, includeArabic: false, dryRun: false, probe: [], probeOut: null, importProbes: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--out') opts.out = argv[++i];
+    else if (a === '--probe') opts.probe.push({ dataset: String(argv[++i]), where: null });
+    else if (a === '--probe-where') {
+      const w = String(argv[++i]);
+      if (!opts.probe.length) { process.stderr.write('--probe-where must follow a --probe\n'); process.exit(1); }
+      opts.probe[opts.probe.length - 1].where = w;   // applies to the probe it follows
+    }
+    else if (a === '--probe-out') opts.probeOut = argv[++i];
+    else if (a === '--import-probes') opts.importProbes = argv[++i];
+    else if (a === '--probe-timeout') { const t = Number(argv[++i]); if (!Number.isFinite(t) || t < 1) { process.stderr.write('--probe-timeout must be seconds\n'); process.exit(1); } REQUEST_TIMEOUT_MS = t * 1000; }
     else if (a === '--only') opts.only = String(argv[++i]).split(',').map((s) => s.trim());
     else if (a === '--cap') opts.cap = Number(argv[++i]);
     else if (a === '--include-arabic') opts.includeArabic = true;
@@ -397,6 +778,47 @@ async function main() {
     else { process.stderr.write(`unknown flag: ${a}\n${USAGE}\n`); process.exit(1); }
   }
   if (!Number.isFinite(opts.cap) || opts.cap < 1) { process.stderr.write('--cap must be a positive integer\n'); process.exit(1); }
+
+  // ---- --import-probes: fold a scratch probe manifest into the manifest of record.
+  if (opts.importProbes) {
+    const pDir = requireIgnored(opts.out);
+    mkdirSync(pDir, { recursive: true });
+    const dstPath = path.join(pDir, 'manifest.json');
+    const src = JSON.parse(readFileSync(opts.importProbes, 'utf8'));
+    let dst = {};
+    try { dst = JSON.parse(readFileSync(dstPath, 'utf8')); } catch { dst = { generatedAt: new Date().toISOString(), host: HOST, sources: [], files: [] }; }
+    const incoming = Array.isArray(src.probes) ? src.probes : [];
+    const keyOf = (x) => `${x.dataset}|${x.where || ''}`;
+    const seen = new Set(incoming.map(keyOf));
+    dst.probes = [...(Array.isArray(dst.probes) ? dst.probes : []).filter((x) => !seen.has(keyOf(x))), ...incoming];
+    dst.probes_note = src.probes_note || dst.probes_note || null;
+    dst.probes_imported_from = path.relative(process.cwd(), path.resolve(opts.importProbes));
+    writeFileSync(dstPath, JSON.stringify(dst, null, 2) + '\n', 'utf8');
+    process.stderr.write(`imported ${incoming.length} probe record(s) into ${dstPath}\n`);
+    return;
+  }
+
+  // ---- --probe: describe candidates, download nothing, record the result in a manifest.
+  if (opts.probe.length) {
+    const pDir = requireIgnored(opts.probeOut || opts.out);
+    mkdirSync(pDir, { recursive: true });
+    const pPath = path.join(pDir, 'manifest.json');
+    let mf = {};
+    try { mf = JSON.parse(readFileSync(pPath, 'utf8')); } catch { mf = { generatedAt: new Date().toISOString(), host: HOST, sources: [], files: [] }; }
+    mf.probes = Array.isArray(mf.probes) ? mf.probes : [];
+    mf.probes_note = 'HEAD-RULINGS R42(e): a probe asks datasets-server what a candidate dataset is (configs, splits, '
+      + 'fields, row counts, declared licence, and the LENGTHS of two sample field values). No row set is downloaded and '
+      + 'no text value is ever printed or stored. A probe is a note, not data.';
+    for (const d of opts.probe) {
+      const rec = await probeDataset(d.dataset, d.where);
+      mf.probes = mf.probes.filter((p) => !(p.dataset === d.dataset && (p.where || null) === (d.where || null)));
+      mf.probes.push(rec);
+      mf.bytes_downloaded_probing = bytesDownloaded;
+      writeFileSync(pPath, JSON.stringify(mf, null, 2) + '\n', 'utf8');   // flush after every probe
+    }
+    process.stderr.write(`\n${opts.probe.length} probe(s) recorded in ${pPath}; ~${(bytesDownloaded / 1024).toFixed(0)} KB read, no rows downloaded\n`);
+    return;
+  }
 
   const outDir = requireIgnored(opts.out);
   mkdirSync(outDir, { recursive: true });

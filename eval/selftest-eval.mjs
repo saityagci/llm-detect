@@ -20,7 +20,8 @@
  * It writes only under --work (default .scratch/selftest-eval, HEAD-RULINGS R37(b)) and reads only
  * eval/fixtures/, lib/ and the repo root. It never reads eval/data/ and never touches eval/out/.
  *
- * WHAT A GREEN RUN MEANS (HEAD-RULINGS R37(c)): ten green checks prove the guards refuse planted
+ * WHAT A GREEN RUN MEANS (HEAD-RULINGS R37(c)): eleven green checks — R37's ten, plus the R42(e)
+ * essay-genre check added with the essay row set — prove the guards refuse planted
  * faults; the correctness of the numbers printed when nothing fires rests on the independent
  * re-derivation of R36, which a fixture cannot replace.
  */
@@ -348,6 +349,56 @@ check('10', 'placeholders: an under-100 bucket prints INSUFFICIENT; an all-gated
     must(c[10] === '—', `the TPR@t-hard cell should be an em dash, got ${JSON.stringify(c[10])} — a literal there was the hardcoded 0.0%`);
     must(/^\d+(\.\d+)?%$/.test(c[8]) && /^\d+(\.\d+)?%$/.test(c[9]), `FPR@t and TPR@t must be measured rates: ${l}`);
   }
+  return true;
+});
+
+// ---------------------------------------------------------------- 11
+check('11', 'essay genre (R42(e)): the prompt is the holdout unit, the essay table measures and refuses on its own counts, and a planted prompt straddle exits 5', () => {
+  const rep = readFileSync(path.join(clean.out, 'REPORT.md'), 'utf8');
+
+  // (a) section 1 carries the prompt-holdout table and says the unit is the PROMPT.
+  must(/\*\*Prompt holdout, per public source\*\*/.test(rep), 'REPORT.md has no prompt-holdout table in section 1');
+  // Both the pair table and the prompt table have a row starting with the same source name, so
+  // read the prompt one out of the prompt table's own slice of the report.
+  const promptSection = rep.slice(rep.indexOf('**Prompt holdout, per public source**'));
+  const promptRow = promptSection.split('\n').find((l) => /^\| `public:synthetic-essays` \|/.test(l));
+  must(promptRow, 'the prompt-holdout table has no row for the synthetic essay source');
+  must(/PROMPT/.test(promptRow), `the essay source's holdout unit should be the PROMPT: ${promptRow}`);
+  const straddleCell = promptRow.split('|').map((x) => x.trim())[8];
+  must(straddleCell === '0', `prompts straddling two sides should be 0 on a clean fixture, got ${JSON.stringify(straddleCell)}`);
+
+  // (b) the essay section exists, measures its own rows, and refuses the thin bucket.
+  must(/^## 3b\. The essay genre/m.test(rep), 'REPORT.md has no section 3b (the essay genre)');
+  const essayRows = rep.split('\n').filter((l) => /^\| en:prose essay \| (<20|20-49|50-149|150-499|500\+) \|/.test(l));
+  must(essayRows.length >= 2, `the essay table should carry a measured bucket and a refused one, got ${essayRows.length} row(s)`);
+  const measured = essayRows.filter((l) => !/INSUFFICIENT|NO COVERAGE/.test(l));
+  const refused = essayRows.filter((l) => /INSUFFICIENT — placeholder/.test(l));
+  must(measured.length >= 1, 'no measured essay bucket — the fixture should have one over 100 per side');
+  must(refused.length >= 1, 'no INSUFFICIENT essay bucket — the essay table must refuse on its own counts, not on the cell\'s');
+  for (const l of refused) {
+    const c = l.split('|').map((x) => x.trim());
+    must(Number(c[3]) < 100 || Number(c[4]) < 100, `essay INSUFFICIENT printed for ${c[3]}/${c[4]}`);
+    must(!/%/.test(l), `an essay INSUFFICIENT placeholder must not carry a rate: ${l}`);
+  }
+
+  // (c) the essay threshold is re-picked on essay validation rows, and both thresholds are shown.
+  must(/t_essay = \*\*/.test(rep), 'the essay section does not report its own re-picked threshold');
+  must(/the cell-wide t of section 5 is/.test(rep), 'the essay section does not print the cell-wide t beside t_essay');
+  must(/human essays flagged at t \(TEST side only\)/.test(rep), 'the essay section has no negative-control table');
+  must(/The non-native stratum is UNMEASURED on essays/.test(rep), 'the essay section does not state that the non-native stratum is unmeasured');
+
+  // (d) the planted fault: one essay row of a prompt moved to another side. The prompt is the
+  // shard and the shard is in the group, so this is a non-writer group straddle and run-eval
+  // must refuse to publish anything measured over it.
+  const dir = dataVariant('prompt-straddle', (rows) => {
+    const victim = rows.find((r) => r.genre === 'essay' && r.side === 'test' && r.label === 'llm');
+    must(victim, 'the fixture has no test-side essay row to move');
+    victim.side = 'fit';
+    return rows;
+  });
+  const r = runEval(dir, 'prompt-straddle');
+  must(r.code === 5, `expected exit 5 for an essay prompt on two sides, got ${r.code}\n${r.stderr.slice(-400)}`);
+  must(/non-writer group/i.test(r.stderr), 'stderr does not say a non-writer group straddled');
   return true;
 });
 

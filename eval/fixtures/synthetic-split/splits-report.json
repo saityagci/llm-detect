@@ -5,7 +5,7 @@
   "synthetic": true,
   "synthetic_note": "Authored by eval/fixtures/synthetic-split/generate.mjs. No corpus row, no real human or real LLM text. Structure only: nothing measured on this corpus is a result.",
   "corpus": {
-    "raw": 624,
+    "raw": 1100,
     "recorded_split_reuse": {
       "unit": "group (writer:: for human rows, persona:: for generated rows)",
       "rule": "HEAD-RULINGS R36(b): synthetic fixture — every row was assigned at group level by construction.",
@@ -52,6 +52,24 @@
       "pair_protection": "n/a — source does not claim matched pairs",
       "straddling_pairs": null
     },
+    "public:synthetic-essays": {
+      "rows": 436,
+      "with_pair_key": 436,
+      "coverage_pct": 100,
+      "distinct_pairs": 218,
+      "claims_matched_pairs": false,
+      "pair_protection": "ACTIVE (source does not claim matched pairs)",
+      "straddling_pairs": 0
+    },
+    "public:synthetic-mid": {
+      "rows": 40,
+      "with_pair_key": 0,
+      "coverage_pct": 0,
+      "distinct_pairs": 0,
+      "claims_matched_pairs": false,
+      "pair_protection": "n/a — source does not claim matched pairs",
+      "straddling_pairs": null
+    },
     "public:synthetic-tr": {
       "rows": 30,
       "with_pair_key": 0,
@@ -63,8 +81,109 @@
     }
   },
   "pair_key_note": "HEAD-RULINGS R36(e). Synthetic fixture.",
+  "prompt_key_coverage": {
+    "public:synthetic-reviews": {
+      "genres": [
+        "review"
+      ],
+      "rows": 176,
+      "with_prompt_key": 0,
+      "coverage_pct": 0,
+      "distinct_prompts": 0,
+      "essays_per_prompt_median": null,
+      "essays_per_prompt_max": null,
+      "prompts_with_both_labels": 0,
+      "prompts_straddling_two_sides": null,
+      "holdout_unit": "text-hash shard — this source ships no prompt key, so the by-prompt holdout cannot bind and near-duplicate protection is all there is"
+    },
+    "public:fake-reviews-gpt2era": {
+      "genres": [
+        "review"
+      ],
+      "rows": 40,
+      "with_prompt_key": 0,
+      "coverage_pct": 0,
+      "distinct_prompts": 0,
+      "essays_per_prompt_median": null,
+      "essays_per_prompt_max": null,
+      "prompts_with_both_labels": 0,
+      "prompts_straddling_two_sides": null,
+      "holdout_unit": "text-hash shard — this source ships no prompt key, so the by-prompt holdout cannot bind and near-duplicate protection is all there is"
+    },
+    "public:synthetic-pairs": {
+      "genres": [
+        "qa_prose"
+      ],
+      "rows": 60,
+      "with_prompt_key": 0,
+      "coverage_pct": 0,
+      "distinct_prompts": 0,
+      "essays_per_prompt_median": null,
+      "essays_per_prompt_max": null,
+      "prompts_with_both_labels": 0,
+      "prompts_straddling_two_sides": null,
+      "holdout_unit": "text-hash shard — this source ships no prompt key, so the by-prompt holdout cannot bind and near-duplicate protection is all there is"
+    },
+    "public:synthetic-shorts": {
+      "genres": [
+        "auto"
+      ],
+      "rows": 210,
+      "with_prompt_key": 0,
+      "coverage_pct": 0,
+      "distinct_prompts": 0,
+      "essays_per_prompt_median": null,
+      "essays_per_prompt_max": null,
+      "prompts_with_both_labels": 0,
+      "prompts_straddling_two_sides": null,
+      "holdout_unit": "text-hash shard — this source ships no prompt key, so the by-prompt holdout cannot bind and near-duplicate protection is all there is"
+    },
+    "public:synthetic-essays": {
+      "genres": [
+        "essay"
+      ],
+      "rows": 436,
+      "with_prompt_key": 436,
+      "coverage_pct": 100,
+      "distinct_prompts": 218,
+      "essays_per_prompt_median": 2,
+      "essays_per_prompt_max": 2,
+      "prompts_with_both_labels": 218,
+      "prompts_straddling_two_sides": 0,
+      "holdout_unit": "PROMPT — every essay answering one prompt is on one side (HEAD-RULINGS R42(e))"
+    },
+    "public:synthetic-mid": {
+      "genres": [
+        "review"
+      ],
+      "rows": 40,
+      "with_prompt_key": 0,
+      "coverage_pct": 0,
+      "distinct_prompts": 0,
+      "essays_per_prompt_median": null,
+      "essays_per_prompt_max": null,
+      "prompts_with_both_labels": 0,
+      "prompts_straddling_two_sides": null,
+      "holdout_unit": "text-hash shard — this source ships no prompt key, so the by-prompt holdout cannot bind and near-duplicate protection is all there is"
+    },
+    "public:synthetic-tr": {
+      "genres": [
+        "review"
+      ],
+      "rows": 30,
+      "with_prompt_key": 0,
+      "coverage_pct": 0,
+      "distinct_prompts": 0,
+      "essays_per_prompt_median": null,
+      "essays_per_prompt_max": null,
+      "prompts_with_both_labels": 0,
+      "prompts_straddling_two_sides": null,
+      "holdout_unit": "text-hash shard — this source ships no prompt key, so the by-prompt holdout cannot bind and near-duplicate protection is all there is"
+    }
+  },
+  "prompt_key_note": "HEAD-RULINGS R42(e). Synthetic fixture: prompts_straddling_two_sides must be 0 wherever a prompt key exists.",
   "group_straddle": {
-    "groups": 83,
+    "groups": 107,
     "straddling": 3,
     "by_kind": {
       "writer": 3
@@ -75,7 +194,7 @@
   },
   "contamination": {
     "metric": "synthetic fixture: no contamination scan was run, the bands below are declared zero by construction",
-    "n_llm_rows": 274,
+    "n_llm_rows": 512,
     "pct": {
       ">=0.5": 0,
       ">=0.7": 0,

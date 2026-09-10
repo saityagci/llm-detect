@@ -382,6 +382,32 @@ async function main() {
           emit('');
         }
       }
+      // HEAD-RULINGS R42(e): the essay genre's holdout unit is the assignment PROMPT. This table is
+      // the check that it bound — a prompt on two sides would mean a machine essay scored against a
+      // model fitted on the human answer to its own prompt.
+      if (sr.prompt_key_coverage && Object.values(sr.prompt_key_coverage).some((e) => e.with_prompt_key > 0)) {
+        emit('');
+        emit('**Prompt holdout, per public source** (HEAD-RULINGS R42(e)). Where a source ships the essay');
+        emit('prompt, every essay answering one prompt is held out together, human and machine alike.');
+        emit('Where it does not, the holdout falls back to the text-hash shard, which stops near-duplicates');
+        emit('from straddling and nothing else.');
+        emit('');
+        emit('| source | genre | rows | rows with a prompt key | distinct prompts | essays/prompt (median, max) | prompts with both labels | prompts straddling | holdout unit |');
+        emit('|---|---|---:|---:|---:|---:|---:|---:|---|');
+        for (const [src, e] of Object.entries(sr.prompt_key_coverage)) {
+          if (!e.with_prompt_key) continue;
+          emit(`| \`${src}\` | ${(e.genres || []).join(', ')} | ${e.rows} | ${e.with_prompt_key} (${fmt(e.coverage_pct, 1)}%) | ${e.distinct_prompts} | ${e.essays_per_prompt_median}, ${e.essays_per_prompt_max} | ${e.prompts_with_both_labels} | ${e.prompts_straddling_two_sides === null ? 'n/a' : e.prompts_straddling_two_sides} | ${String(e.holdout_unit).split(' — ')[0]} |`);
+        }
+        emit('');
+        const noPrompt = Object.entries(sr.prompt_key_coverage).filter(([, e]) => !e.with_prompt_key).map(([k]) => k);
+        if (noPrompt.length) emit(`- no prompt key at all: ${noPrompt.map((k) => '`' + k + '`').join(', ')} — those sources are sharded by normalised text and their template siblings can straddle. That is the upward bias section 3 already carries, unchanged by this ruling.`);
+        const straddled = Object.entries(sr.prompt_key_coverage).filter(([, e]) => e.prompts_straddling_two_sides > 0);
+        if (straddled.length) {
+          emit('');
+          emit(`> **A prompt straddles two sides in ${straddled.map(([k]) => '`' + k + '`').join(', ')}.** The essay numbers below are measured on a stream where a machine essay may answer a prompt whose human answer was on the fitting side.`);
+        }
+        emit('');
+      }
       if (sr.contamination) {
         emit('**Contamination of the generated in-house side against the real one** (SPEC §F.2). The');
         emit('generated side was built by replaying real transcripts, so a nonzero rate is expected and is');
@@ -636,6 +662,212 @@ async function main() {
   emit('counted as a document that never fires. That is the number a deployment sees. AUC and ECE are');
   emit('computed on the scored subset only, because an abstention has no score to rank.');
   emit('');
+
+  // ---------------------------------------------------------------- §3b essay genre (R42(e))
+  //
+  // The school platform's genre is student essays. Sections 3-5 are measured over every row of a
+  // cell — reviews, QA answers and essays together — so this section restricts the same table to
+  // the essay rows and re-picks the fairness-limited threshold on the essay rows' OWN validation
+  // side. Nothing about how a cell is FITTED changes here: the essay rows joined the fitting side
+  // like any other public source, the model and mu/sigma are section 3's, and only the row set and
+  // the threshold are essay-specific.
+  emit('## 3b. The essay genre, on its own rows (HEAD-RULINGS R42(e))');
+  emit('');
+  const essayAll = scored.filter((r) => r.genre === 'essay');
+  const essaySources = [...new Set(essayAll.map((r) => r.source))].sort();
+  if (!essayAll.length) {
+    emit('- **the essay cell is unmeasured.** No row in the split carries `genre: "essay"`. R42(e)');
+    emit('  anticipated this outcome: "if no such resource is fetchable, the report says the essay');
+    emit('  cell is unmeasured". Run `node eval/fetch-public-datasets.mjs` and `node eval/make-splits.mjs` first.');
+    emit('');
+  } else {
+    emit('Every English number in sections 3-5 is measured over a cell that is mostly product reviews and');
+    emit('QA answers. The platform this tool is being calibrated for receives student essays, so this');
+    emit('section restricts the section 3 table to `genre = essay` rows and re-picks t on the essay rows\'');
+    emit('own validation side. **The model, mu/sigma and the coefficients are section 3\'s** — the essay');
+    emit('rows joined the fitting side like any other public source, and the fit is not re-run per genre.');
+    emit('');
+    emit(`- essay rows in the split: **${essayAll.length}** from ${essaySources.map((x) => '`' + x + '`').join(', ')} · ` +
+      `fit ${essayAll.filter((r) => r.side === 'fit').length} / val ${essayAll.filter((r) => r.side === 'val').length} / test ${essayAll.filter((r) => r.side === 'test').length}`);
+    {
+      const g = essayAll.filter((r) => r.gated).length;
+      emit(`- gated by the length/feature floor (\`insufficient_text\`): **${g}** of ${essayAll.length} (${pct(g / essayAll.length)}) — the essay coverage that produced every number below`);
+      const byGen = {};
+      for (const r of essayAll) if (r.y === 1) byGen[r.generator || 'unrecorded'] = (byGen[r.generator || 'unrecorded'] || 0) + 1;
+      emit(`- machine half by recorded generator: ${Object.entries(byGen).sort().map(([k, v]) => `\`${k}\` ${v}`).join(', ')}`);
+    }
+    emit('');
+
+    const essayCells = [...new Set(essayAll.map((r) => r.cell))].sort();
+    const essayHeadline = [];
+    const essayTaus = {};
+    emit('| cell | length bucket | n_human | n_llm | AUC | AUC hard | ECE | FPR@t_essay | TPR@t_essay | TPR@t_essay hard | precision@t_essay |');
+    emit('|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|');
+    for (const cell of essayCells) {
+      const R = results.standard[cell];
+      const HM = results.hard[cell];
+      const testRows = essayAll.filter((r) => r.side === 'test' && r.cell === cell);
+      if (!R) {
+        for (const bucket of BUCKETS) {
+          const rowsB = testRows.filter((r) => r.bucket === bucket);
+          if (!rowsB.length) continue;
+          emit(`| ${cell} | ${bucket} | ${rowsB.filter((r) => r.y === 0).length} | ${rowsB.filter((r) => r.y === 1).length} | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |`);
+        }
+        continue;
+      }
+      // The threshold is re-picked on the essay rows' own validation side, under the same
+      // fairness limit as section 5 (2% FPR on every binding stratum), and the hard-mode
+      // threshold is re-picked on the hard-mode essay validation side.
+      const valE = evaluate(R.model, essayAll.filter((r) => r.side === 'val' && r.cell === cell));
+      const tE = pickTau(valE);
+      const valEH = HM ? evaluate(HM.model, essayAll.filter((r) => r.side === 'val' && r.cell === cell)) : null;
+      const tEH = valEH ? pickTau(valEH) : null;
+      essayTaus[cell] = { tE, tEH, nVal: valE.length };
+      const testE = evaluate(R.model, testRows);
+      const testEH = HM ? evaluate(HM.model, testRows) : null;
+      for (const bucket of BUCKETS) {
+        const rowsB = testE.filter((r) => r.bucket === bucket);
+        const scoredB = rowsB.filter((r) => r.p !== null);
+        const nH = rowsB.filter((r) => r.y === 0).length, nL = rowsB.filter((r) => r.y === 1).length;
+        if (!nH && !nL) continue;
+        const row = headline({ side: 'test', cell: cell + ' essay', bucket, nH, nL }, rowsB);
+        if (nH < 100 || nL < 100) {
+          emit(`| ${cell} essay | ${bucket} | ${nH} | ${nL} | INSUFFICIENT — placeholder, not a measurement | | | | | | |`);
+          continue;
+        }
+        if (scoredB.length < 40) {
+          const cNC = confusion(rowsB, tE.tau);
+          emit(`| ${cell} essay | ${bucket} | ${nH} | ${nL} | NO COVERAGE — ${rowsB.length - scoredB.length} of ${rowsB.length} rows are below the floor and were never scored | — | — | ${pct(cNC.fpr)} | ${pct(cNC.tpr)} | — | ${cNC.precision === null ? '—' : fmt(cNC.precision)} |`);
+          continue;
+        }
+        const a = auc(scoredB.map((r) => r.p), scoredB.map((r) => r.y));
+        const e = ece(scoredB.map((r) => r.p), scoredB.map((r) => r.y));
+        const c = confusion(rowsB, tE.tau);
+        let aHard = null, tprHard = null;
+        if (testEH && tEH) {
+          const hb = testEH.filter((r) => r.bucket === bucket);
+          const hs = hb.filter((r) => r.p !== null);
+          if (hs.length >= 40) { aHard = auc(hs.map((r) => r.p), hs.map((r) => r.y)); tprHard = confusion(hb, tEH.tau).tpr; }
+        }
+        row.auc = a; row.ece = e; row.c = c; row.tau = tE.tau; row.aucHard = aHard; row.tprHard = tprHard;
+        row.cellTau = R.tau; row.cellConfusion = confusion(rowsB, R.tau);
+        essayHeadline.push(row);
+        emit(`| ${cell} essay | ${bucket} | ${nH} | ${nL} | ${fmt(a)} | ${aHard === null ? '—' : fmt(aHard)} | ${fmt(e)} | ${pct(c.fpr)} | ${pct(c.tpr)} | ${tprHard === null ? '—' : pct(tprHard)} | ${fmt(c.precision)} |`);
+      }
+    }
+    emit('');
+    emit('`t_essay` is the fairness-limited threshold re-picked on the ESSAY rows of the validation side');
+    emit('(same rule as section 5: the smallest threshold holding every binding stratum at or under 2%');
+    emit('FPR). It is not section 5\'s cell-wide t, and the two are printed side by side below.');
+    emit('');
+    for (const [cell, t] of Object.entries(essayTaus)) {
+      const R = results.standard[cell];
+      emit(`- \`${cell}\`: t_essay = **${fmt(t.tE.tau)}** (${t.tE.tauSource}, picked over ${t.nVal} essay validation rows) · the cell-wide t of section 5 is ${fmt(R.tau)}` +
+        (t.tEH ? ` · hard-mode t_essay = ${fmt(t.tEH.tau)}` : ''));
+      const strataLines = Object.entries(t.tE.strata).filter(([, v]) => v.n > 0);
+      if (strataLines.length) {
+        emit(`  - fairness strata on the essay validation side: ${strataLines.map(([k, v]) => `\`${k}\` n=${v.n} FPR ${pct(v.fpr_at_tau)}${v.binding ? '' : ' (not binding, n<20)'}`).join(' · ')}`);
+      }
+    }
+    emit('');
+    // The same rows at the cell-wide threshold, so the head can see what the platform gets today
+    // if it uses the shipped per-cell threshold rather than an essay-specific one.
+    if (essayHeadline.length) {
+      emit('The same essay rows at section 5\'s cell-wide t, which is what a caller gets today if the');
+      emit('threshold is not re-picked per genre:');
+      emit('');
+      emit('| cell | bucket | t_essay | FPR@t_essay | TPR@t_essay | cell-wide t | FPR@cell t | TPR@cell t |');
+      emit('|---|---|---:|---:|---:|---:|---:|---:|');
+      for (const h of essayHeadline) {
+        emit(`| ${h.cell} | ${h.bucket} | ${fmt(h.tau)} | ${pct(h.c.fpr)} | ${pct(h.c.tpr)} | ${fmt(h.cellTau)} | ${pct(h.cellConfusion.fpr)} | ${pct(h.cellConfusion.tpr)} |`);
+      }
+      emit('');
+    }
+
+    // ---- base rates for the essay rows (SPEC §G.1 / R42(a): never a precision without its prior)
+    emit('**Base rates for the essay rows.** Precision recomputed from the essay rows\' own measured');
+    emit('FPR and recall. A school platform\'s prior is the share of submissions that are actually');
+    emit('AI-written, which nobody in this project has measured — the row to read is the one matching');
+    emit('the head\'s own estimate of that share, not the friendliest one.');
+    emit('');
+    if (!essayHeadline.length) {
+      emit('- no essay bucket reached the 100-per-side bar, so there is no measured FPR/recall pair to project.');
+    } else {
+      emit('| cell | bucket | FPR | recall | P@50% | P@20% | P@10% | P@5% | P@2% | P@1% |');
+      emit('|---|---|---:|---:|---:|---:|---:|---:|---:|---:|');
+      for (const h of essayHeadline) {
+        const ps = [0.5, 0.2, 0.1, 0.05, 0.02, 0.01].map((pr) => fmt(precisionAtPrior(pr, h.c.tpr, h.c.fpr)));
+        emit(`| ${h.cell} | ${h.bucket} | ${pct(h.c.fpr)} | ${pct(h.c.tpr)} | ${ps.join(' | ')} |`);
+      }
+      emit('');
+      // A measured FPR of exactly 0 makes every precision in its row print 1.000, which reads as
+      // "never wrong" and is not what the data says. It says "no false positive was observed in n
+      // rows". The rule of three gives the 95% upper bound on the true rate, 3/n, and the
+      // precision is recomputed there so the optimistic row is never the only one on the page.
+      for (const h of essayHeadline) {
+        if (h.c.fpr !== 0) continue;
+        const nH = h.nH;
+        const bound = nH ? 3 / nH : null;
+        emit(`- \`${h.cell}\` ${h.bucket}: the FPR in that row is **measured as zero over ${nH} human essays**, which is not the same as being zero. ` +
+          `The rule-of-three 95% upper bound is 3/${nH} = **${pct(bound, 2)}**; at that bound the precision would be ` +
+          `${fmt(precisionAtPrior(0.2, h.c.tpr, bound))} at a 20% prior and ${fmt(precisionAtPrior(0.05, h.c.tpr, bound))} at 5%, not 1.000. ` +
+          'Read the 1.000s in this row as "no false positive was seen in this sample", and nothing more.');
+      }
+    }
+    emit('');
+
+    // ---- negative control (a) in the essay genre: human essays flagged at t, TEST side only.
+    emit('**Negative control, essay flavour: human essays flagged at t (TEST side only).** This is the');
+    emit('number a student feels. A gated essay counts as a document that never fires, and the gated');
+    emit('column is printed beside it so a silent instrument cannot look like a safe one.');
+    emit('');
+    emit('| cell | bucket | human essays (test) | gated | scored | flagged at t_essay | FPR | flagged at cell-wide t | FPR |');
+    emit('|---|---|---:|---:|---:|---:|---:|---:|---:|');
+    for (const cell of essayCells) {
+      const R = results.standard[cell];
+      if (!R) continue;
+      const t = essayTaus[cell];
+      const humansE = evaluate(R.model, essayAll.filter((r) => r.side === 'test' && r.cell === cell && r.y === 0));
+      for (const bucket of [...BUCKETS, 'ALL']) {
+        const rowsB = bucket === 'ALL' ? humansE : humansE.filter((r) => r.bucket === bucket);
+        if (!rowsB.length) continue;
+        const scoredB = rowsB.filter((r) => r.p !== null);
+        const flagE = scoredB.filter((r) => r.p >= t.tE.tau).length;
+        const flagC = scoredB.filter((r) => r.p >= R.tau).length;
+        const anecdote = rowsB.length < 100 ? ' — INSUFFICIENT (n<100), an anecdote' : '';
+        emit(`| ${cell} essay | ${bucket} | ${rowsB.length} | ${rowsB.length - scoredB.length} | ${scoredB.length} | ${flagE} | ${pct(flagE / rowsB.length)}${anecdote} | ${flagC} | ${pct(flagC / rowsB.length)}${anecdote} |`);
+      }
+    }
+    emit('');
+
+    // ---- the non-native stratum, which R42(a) says is unmeasured until something measures it
+    {
+      const nn = essayAll.filter((r) => (r.strata || []).includes('non_native_en')).length;
+      const fr = essayAll.filter((r) => (r.strata || []).includes('formal_register')).length;
+      emit(`**The non-native stratum is UNMEASURED on essays.** ${nn} essay row(s) carry the`);
+      emit('`non_native_en` stratum, because that stratum is defined as "an English message written by');
+      emit('one of the Turkish-speaking corpus writers" and no essay row has a writer. The essay source');
+      emit('ships no L1, ELL or nationality column — the two probed corpora that do carry an ELL flag');
+      emit('(`nbroad/persuade_corpus_2.0` and its misspelling) are gated behind authentication and were');
+      emit('not fetchable. So the single most important fairness number for a school platform — the');
+      emit('false-flag rate on essays written by non-native English speakers, which the literature puts');
+      emit('at up to 61% at vendor defaults (R1 §3) — is **not measured here and must not be inferred**');
+      emit(`from the rows above. ${fr} essay row(s) do carry the \`formal_register\` proxy; that is a`);
+      emit('register proxy, not a language-background one, and it is not a substitute.');
+      emit('');
+    }
+
+    emit('**What the essay rows are, and are not.** Provenance is stated because it bounds every number');
+    emit('above: the source is a public English corpus of school-assignment essays whose two halves —');
+    emit('a human essay and a machine essay answering the SAME assignment prompt — sit on one row, so');
+    emit('the prompt is the holdout unit and no machine essay is scored against a model fitted on the');
+    emit('human answer to its own prompt (section 1\'s prompt-coverage table is the check). What is NOT');
+    emit('established: who the student writers were, their age, their language background, or how the');
+    emit('machine half was generated — the corpus names no model, so `modelFamiliesCovered` records one');
+    emit('unspecified family and every generator-specific claim is out of reach. These are school');
+    emit('essays, not exam answers under time pressure, and no exam-answer corpus was fetchable at all.');
+    emit('');
+  }
 
   // ---------------------------------------------------------------- hard mode
   emit('## 4. Hard mode — the headline number for any adversary who is trying');

@@ -87,8 +87,16 @@ const sideOf = (group, seed) => { const r = fnv1a(seed + '|' + group) / 0xffffff
 // (matched pairs) or from the normalized text (so near-duplicates cannot straddle), and the
 // shard-to-side map is FIXED and shared by both labels. Hashing each (family, label) group
 // independently is what put a whole label on one side of the split in the first draft.
+//
+// HEAD-RULINGS R42(e): when a public row carries an essay PROMPT, the prompt is the holdout unit —
+// every essay answering one prompt lands on one side, human and machine alike, so a model cannot
+// be tested on the machine answer to a prompt whose human answer it was fitted on. The prompt
+// beats the pair key (a prompt groups pairs), the pair key beats the text (matched pairs), and the
+// normalised text is the last resort (near-duplicates cannot straddle). Sources that carry no
+// prompt are unaffected: their shard is exactly what it was before this ruling.
 const SHARDS = 20;
-const shardOf = (r) => fnv1a('shard|' + (r.pair || normKey(r.text))) % SHARDS;
+const shardKeyOf = (r) => (r.prompt ? 'prompt|' + r.prompt : (r.pair || normKey(r.text)));
+const shardOf = (r) => fnv1a('shard|' + shardKeyOf(r)) % SHARDS;
 const sideOfShard = (sh) => (sh < 12 ? 'fit' : (sh < 16 ? 'val' : 'test'));
 
 // ---------------------------------------------------------------- R8 scrub
@@ -196,6 +204,7 @@ function loadPublic(dataDir) {
           + '::shard' + shardOf(r),
         shard: shardOf(r),
         pair: r.pair || null,
+        prompt: r.prompt || null,        // R42(e): the essay-prompt holdout unit, when the source has one
         generator: r.generator || null,   // feeds modelFamiliesCovered in weights.fitted.json
         shape: 'prose', channel: 'web',
       });
@@ -453,6 +462,54 @@ function main() {
     report.pair_key_note = 'HEAD-RULINGS R36(e). Whether a pair straddles is not measurable from a file without the key: index alignment is not recoverable. INACTIVE means unknown, not zero.';
   }
 
+  // ---- HEAD-RULINGS R42(e): prompt coverage and the by-prompt holdout, per public source.
+  // The essay genre's holdout unit is the assignment prompt. This reports, per source, how many
+  // rows carry one, how many distinct prompts there are, how many essays the median prompt has,
+  // and — the assertion — how many prompts straddle two sides. It must be 0 wherever the key
+  // exists; a source with no key says so and falls back to the text-hash shard, which is a weaker
+  // guarantee and is named as one rather than left to look like a pass.
+  {
+    const cov = {};
+    for (const r of pub) {
+      const e = (cov[r.source] ||= { rows: 0, with_prompt: 0, prompts: new Map(), genres: new Set() });
+      e.rows++;
+      e.genres.add(r.genre || 'na');
+      if (r.prompt) {
+        e.with_prompt++;
+        if (!e.prompts.has(r.prompt)) e.prompts.set(r.prompt, { sides: new Set(), rows: 0, labels: new Set() });
+        const pe = e.prompts.get(r.prompt);
+        pe.rows++; pe.sides.add(r.side); pe.labels.add(r.label);
+      }
+    }
+    report.prompt_key_coverage = {};
+    for (const [src, e] of Object.entries(cov)) {
+      const sizes = [...e.prompts.values()].map((x) => x.rows).sort((a, b) => a - b);
+      const straddling = [...e.prompts.values()].filter((x) => x.sides.size > 1).length;
+      const bothLabels = [...e.prompts.values()].filter((x) => x.labels.size > 1).length;
+      report.prompt_key_coverage[src] = {
+        genres: [...e.genres],
+        rows: e.rows,
+        with_prompt_key: e.with_prompt,
+        coverage_pct: e.rows ? Number((100 * e.with_prompt / e.rows).toFixed(2)) : 0,
+        distinct_prompts: e.prompts.size,
+        essays_per_prompt_median: sizes.length ? sizes[Math.floor(sizes.length / 2)] : null,
+        essays_per_prompt_max: sizes.length ? sizes[sizes.length - 1] : null,
+        prompts_with_both_labels: bothLabels,
+        prompts_straddling_two_sides: e.with_prompt ? straddling : null,
+        holdout_unit: e.with_prompt === e.rows && e.rows
+          ? 'PROMPT — every essay answering one prompt is on one side (HEAD-RULINGS R42(e))'
+          : (e.with_prompt === 0
+            ? 'text-hash shard — this source ships no prompt key, so the by-prompt holdout cannot bind and near-duplicate protection is all there is'
+            : 'MIXED — some rows carry a prompt and some do not; the prompt-less rows fall back to the text-hash shard'),
+      };
+    }
+    report.prompt_key_note = 'HEAD-RULINGS R42(e). prompts_straddling_two_sides must be 0 wherever a prompt key exists. null means the source has no key, which is not the same as zero.';
+    const badPrompt = Object.entries(report.prompt_key_coverage).filter(([, e]) => e.prompts_straddling_two_sides > 0);
+    if (badPrompt.length) {
+      process.stderr.write(`LEAK: prompt(s) straddle two sides in ${badPrompt.map(([k]) => k).join(', ')}\n`);
+    }
+  }
+
   // ---- HEAD-RULINGS R36(b)/(c): the straddle assertion, broken down by group kind.
   // Only `writer::` groups may straddle — human rows are split chronologically INSIDE a writer by
   // design (SPEC §F.2). Every other kind straddling is a leak.
@@ -551,6 +608,11 @@ function main() {
   process.stderr.write(`in-house dedup: human ${dedup.REAL.duplicate_rate_pct}% duplicate, generated ${dedup.SYNTH.duplicate_rate_pct}% duplicate\n`);
   process.stderr.write(`Arabic-script rows excluded (R22): human ${arabicExcluded.REAL}, generated ${arabicExcluded.SYNTH}  per writer ${JSON.stringify(arabicExcluded.byWriter)}\n`);
   if (report.contamination) process.stderr.write(`contamination of the generated side against real messages: ${JSON.stringify(report.contamination.pct)}\n`);
+  for (const [src, e] of Object.entries(report.prompt_key_coverage || {})) {
+    if (!e.with_prompt_key) continue;
+    process.stderr.write(`prompt holdout ${src}: ${e.distinct_prompts} prompts over ${e.rows} rows `
+      + `(${e.prompts_with_both_labels} carry both labels), straddling ${e.prompts_straddling_two_sides}\n`);
+  }
   process.stderr.write(`wrote ${splitFile}\nwrote ${repFile}\nwrote ${hcFile} (gitignored, never committed)\n`);
 }
 

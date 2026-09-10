@@ -1,8 +1,8 @@
-# HANDOFF — state as of 2026-09-10, end of build + verify rounds 1–3
+# HANDOFF — state as of 2026-09-10, end of the school-platform round (R41–R44)
 
 ## What exists now (all committed, all verified by running)
 - `stylometry.mjs` + `lib/` — zero-dependency EN/TR detector, importable and CLI; `node selftest.mjs`
-  → 707 assertions, exit 0, no arbitration items; `node eval/selftest-eval.mjs` → 10/10 guard checks. Prior weights (`weights.v1.json`) are the default.
+  → 818 assertions, exit 0, no arbitration items; `node eval/selftest-eval.mjs` → 11/11 guard checks. Prior weights (`weights.v1.json`) are the default.
 - `eval/` — public-dataset fetcher (5 EN/TR sources, 13,991 rows on disk, sha256-verified),
   group-aware splits, `run-eval.mjs` (held-out metrics, hard mode, leave-one-writer-out, negative
   controls, base-rate table, `weights.fitted.json`), `gate-fixtures.mjs` (fixture gates through the
@@ -10,22 +10,23 @@
 - `agent/llm-text-detector.md` (898 words, `model: opus`) installed at `~/.claude/agents/` by
   `install.sh`; exercised END TO END through the installed copy on six texts and a six-row batch.
 - `README.md`, `RUBRIC.md`, `eval/README-eval.md` (findings log + ruling index), `LICENSE`.
-- `docs/design/HEAD-RULINGS.md` Part 3 — R23–R40, the build/verify-round rulings. They override SPEC.
+- `docs/design/HEAD-RULINGS.md` Part 3 — R23–R44, the build/verify/platform-round rulings. They override SPEC.
 
 ## The honest numbers (TEST only, `eval/out/REPORT.md`; three human writers, R0 holds 92 % of the
 ## surviving human rows after the Arabic filter — every threshold is valid for them and nobody else)
 | cell | bucket | n_h / n_llm | AUC | AUC hard | FPR@t | TPR@t |
 |---|---|---|---|---|---|---|
-| en:prose | 150–499 tok | 224 / 297 | 0.884 | 0.857 | 7.6 % | 65.0 % |
-| en:prose | 50–149 tok | 359 / 356 | 0.739 | 0.623 | 1.1 % | 3.7 % |
+| en:prose ESSAY (R44) | 150–499 tok | 224 / 248 | 0.935 | 0.964 | 0.4 % | 28.2 % |
+| en:prose (all genres) | 150–499 tok | 448 / 545 | 0.878 | 0.859 | 2.5 % | 32.5 % |
+| en:prose | 50–149 tok | 365 / 433 | 0.752 | 0.672 | 0.8 % | 2.8 % |
 | en:prose | <50, 500+ | — | NO COVERAGE / INSUFFICIENT | | | |
 | en:chat, tr:prose | all | — | no model (too few rows survive the gates) | | | |
 | tr:chat | all | — | INSUFFICIENT / NO COVERAGE; cell-level AUC 0.975 → **0.450 in hard mode** | | | |
-Coverage (`insufficient_text` rate): en:chat 98.5 %, tr:chat 91.2 %, tr:prose 97.6 %, en:prose 72.2 %.
+Coverage (`insufficient_text` rate): en:chat 98.5 %, tr:chat 91.2 %, tr:prose 97.6 %, en:prose 63.4 % (essays 28.4 %).
 Real WhatsApp messages (200, R0/R2, Latin script): 196 `insufficient_text`, 2 `uncertain`, 2 `leaning_human`,
 0 false positives — the FPR of silence; 2 % of real chat gets a score at all.
-Leave-one-writer-out: R0 25 of 33 scored rows flagged (75.8 %; 2.1 % of all 1,194 rows); R1/R2 INSUFFICIENT (n<20).
-Base rate: at a 1 % prior, en:prose 150–499 precision is 0.080 — twelve wrong flags per right one.
+Leave-one-writer-out: R0 27 of 33 scored rows flagged (81.8 %; 2.3 % of all 1,194 rows); R1/R2 INSUFFICIENT (n<20).
+Base rate: at a 1 % prior, essay 150–499 precision is 0.390 and general en:prose 0.118; at a 20 % prior 0.940 / 0.768.
 Fixture gates: must-not-fire PASS (0/12 `likely_llm`, 0/12 `likely_human`, 24/24 abstained);
 verify-round-1 PASS (0/33 human `likely_llm`, 40/40 leak probes); verify-round-2 PASS (0/37, 37/37 probes,
 11/11 languages); agent gate `judge-tests.jsonl` 10 PASS / 0 CRITICAL / 3 fixture errors fixed (R39).

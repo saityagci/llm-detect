@@ -151,6 +151,7 @@ function row(o) {
     created_at: o.created_at || null,
     generator: o.generator || null,
     pair: o.pair || null,
+    prompt: o.prompt || null,       // HEAD-RULINGS R42(e): the essay holdout unit
     tokens,
     bucket: bucketOf(tokens),
     strata: o.strata || [],
@@ -232,6 +233,44 @@ for (const [p, side] of [['P0', 'fit'], ['P1', 'val'], ['P2', 'test']]) {
   }
 }
 
+// ---- G. HEAD-RULINGS R42(e): essay-genre rows carrying a PROMPT key, so the essay section of
+// the report has a bucket it can measure, a bucket it must refuse, and a prompt-holdout table.
+// The prompt is the holdout unit: both rows of a prompt carry the same group and therefore the
+// same side, which is what selftest-eval plants a violation of.
+for (const [side, nPrompts] of [['fit', 70], ['val', 30], ['test', 110]]) {
+  for (let i = 0; i < nPrompts; i++) {
+    const prompt = `prompt:${side}-${i}`;
+    const g = `public:synthetic-essays::essay::shard${shardFor(side, i)}`;
+    rows.push(row({
+      text: doc(EN_HUMAN, 12, 16), label: 'human', lang: 'en', source: 'public:synthetic-essays',
+      group: g, side, shape: 'prose', channel: 'web', genre: 'essay', prompt,
+      pair: `synthetic-essays#${side}-${i}`,
+    }));
+    rows.push(row({
+      text: doc(EN_LLM, 12, 16), label: 'llm', lang: 'en', source: 'public:synthetic-essays',
+      group: g, side, shape: 'prose', channel: 'web', genre: 'essay', prompt,
+      pair: `synthetic-essays#${side}-${i}`, generator: 'synthetic-generator-v1',
+    }));
+  }
+}
+// A short essay bucket that cannot reach 100 per side, so the essay table prints INSUFFICIENT
+// beside a measured row rather than only when everything is thin.
+for (let i = 0; i < 8; i++) {
+  const prompt = `prompt:short-${i}`;
+  const g = `public:synthetic-essays::essay::shard${shardFor('test', 100 + i)}`;
+  rows.push(row({ text: pick(SHORT_EN), label: 'human', lang: 'en', source: 'public:synthetic-essays', group: g, side: 'test', shape: 'prose', channel: 'web', genre: 'essay', prompt, pair: `synthetic-essays#short-${i}` }));
+  rows.push(row({ text: pick(SHORT_EN), label: 'llm', lang: 'en', source: 'public:synthetic-essays', group: g, side: 'test', shape: 'prose', channel: 'web', genre: 'essay', prompt, pair: `synthetic-essays#short-${i}`, generator: 'synthetic-generator-v1' }));
+}
+
+// ---- H. a mid-length en:prose bucket that stays UNDER 100 per side on the test set, so the
+// headline table keeps printing an INSUFFICIENT placeholder next to a measured row. Section G
+// pushed the 150-499 bucket past the bar; this keeps the placeholder branch covered.
+for (let i = 0; i < 20; i++) {
+  const g = `public:synthetic-mid::review::shard${shardFor('test', 200 + i)}`;
+  rows.push(row({ text: doc(EN_HUMAN, 4, 6), label: 'human', lang: 'en', source: 'public:synthetic-mid', group: g, side: 'test', shape: 'prose', channel: 'web', genre: 'review' }));
+  rows.push(row({ text: doc(EN_LLM, 4, 6), label: 'llm', lang: 'en', source: 'public:synthetic-mid', group: g, side: 'test', shape: 'prose', channel: 'web', genre: 'review', generator: 'synthetic-generator-v1' }));
+}
+
 // ---- F. a handful of Turkish prose rows, so the report has a second language and a cell that
 // cannot be fitted (the `{status:"not fitted"}` shape the loader falls back from).
 for (const [side, n] of [['fit', 6], ['val', 3], ['test', 6]]) {
@@ -272,6 +311,39 @@ for (const [src, e] of Object.entries(pairCov)) {
   };
 }
 
+// HEAD-RULINGS R42(e): the prompt-holdout table, in the shape make-splits.mjs writes it.
+const promptCov = {};
+for (const r of rows) {
+  if (!String(r.source).startsWith('public:')) continue;
+  const e = (promptCov[r.source] ||= { rows: 0, with_prompt: 0, prompts: new Map(), genres: new Set() });
+  e.rows++;
+  e.genres.add(r.genre || 'na');
+  if (r.prompt) {
+    e.with_prompt++;
+    if (!e.prompts.has(r.prompt)) e.prompts.set(r.prompt, { sides: new Set(), rows: 0, labels: new Set() });
+    const pe = e.prompts.get(r.prompt);
+    pe.rows++; pe.sides.add(r.side); pe.labels.add(r.label);
+  }
+}
+const prompt_key_coverage = {};
+for (const [src, e] of Object.entries(promptCov)) {
+  const sizes = [...e.prompts.values()].map((x) => x.rows).sort((a, b) => a - b);
+  prompt_key_coverage[src] = {
+    genres: [...e.genres], rows: e.rows, with_prompt_key: e.with_prompt,
+    coverage_pct: e.rows ? Number((100 * e.with_prompt / e.rows).toFixed(2)) : 0,
+    distinct_prompts: e.prompts.size,
+    essays_per_prompt_median: sizes.length ? sizes[Math.floor(sizes.length / 2)] : null,
+    essays_per_prompt_max: sizes.length ? sizes[sizes.length - 1] : null,
+    prompts_with_both_labels: [...e.prompts.values()].filter((x) => x.labels.size > 1).length,
+    prompts_straddling_two_sides: e.with_prompt ? [...e.prompts.values()].filter((x) => x.sides.size > 1).length : null,
+    holdout_unit: e.with_prompt === e.rows && e.rows
+      ? 'PROMPT — every essay answering one prompt is on one side (HEAD-RULINGS R42(e))'
+      : (e.with_prompt === 0
+        ? 'text-hash shard — this source ships no prompt key, so the by-prompt holdout cannot bind and near-duplicate protection is all there is'
+        : 'MIXED — some rows carry a prompt and some do not; the prompt-less rows fall back to the text-hash shard'),
+  };
+}
+
 const report = {
   generatedAt: '2026-09-10T00:00:00.000Z',
   seed: 'synthetic-split-20260910',
@@ -289,6 +361,8 @@ const report = {
   },
   pair_key_coverage,
   pair_key_note: 'HEAD-RULINGS R36(e). Synthetic fixture.',
+  prompt_key_coverage,
+  prompt_key_note: 'HEAD-RULINGS R42(e). Synthetic fixture: prompts_straddling_two_sides must be 0 wherever a prompt key exists.',
   group_straddle: {
     groups: byGroup.size,
     straddling: Object.values(straddleByKind).reduce((a, b) => a + b, 0),
