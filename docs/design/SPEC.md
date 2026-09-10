@@ -72,7 +72,7 @@ These are **rules**, reported in `rules[]`, separate from `score`. R1 §5.5: the
 |---|---|---|---|---|
 | `assistant_frame_leak` | LLM↑ | any | **0** | Any of: `/\bas an ai\b/i`, `/\bi'?m an ai\b/i`, `/\blanguage model\b/i`, `/\bmy (training\|knowledge) (data\|cutoff)\b/i`, `/\bi hope (this\|that) helps\b/i`, `/\blet me know if you (need\|have\|'d like)\b/i`, `/\bwould you like me to\b/i`, `/\bfeel free to (ask\|reach out)\b/i`, `/\bhere('?s\| is) (a\|an\|the) (draft\|revised\|rewritten)\b/i`, `/^(sure\|certainly\|absolutely\|of course)[,!]/i`; TR `/\bumarım (bu )?(bilgiler )?(yardımcı )?ol(ur\|muştur)\b/i`, `/\bbaşka bir sorunuz olursa\b/i`, `/\bsize nasıl yardımcı olabilirim\b/i`, `/\bbir yapay zeka\b/i`; AR `نأمل أن (تكون|يكون)`, `هل تود مني`, `كنموذج ذكاء اصطناعي`, `لا تتردد في التواصل`. **Suppressed** (→ `note:'possible_quotation'`, rule does not fire) when the match is inside quotation marks or within 100 chars of `chatgpt\|yapay zeka\|bot\|ذكاء اصطناعي\|claude\|gpt`. |
 | `markdown_in_chat` | LLM↑ | any | 0 | Only when `shape==='chat' \|\| channel==='whatsapp'`. Fires on ≥1 of: `/^\s{0,3}#{1,6}\s+\S/m` (header — **the space is mandatory**, `#hashtag` is human), `/\*\*[^*\n]{2,80}\*\*/` (**DOUBLE** asterisk), `/^\s{0,3}[-*+]\s+\S/m` on ≥2 lines, `` /^```/m ``, `/^\s{0,3}\|.*\|/m`. **WhatsApp trap, do not invert:** WhatsApp's own bold is a *single* `*bold*` — that is a human WhatsApp user, weak HUMAN↑ (feature `wa_single_asterisk`, §B.4). Double asterisk is a model that did not know where it was writing. |
-| `own_bot_marker` | LLM↑ + provenance | any | 0 | `/⟡V3⟡/` or `/\bTRV-[A-Z0-9]{4,}\b/`. **Mandatory** `warnings:['pasted_machine_text']` and the report must say: the string is machine-written, the sender is a customer forwarding it. (DATA §4.1: the single highest-scoring "human" in the held-out set was a customer pasting our own confirmation back. This is the most likely wrongful flag in production.) |
+| `own_bot_marker` | LLM↑ + provenance | any | 0 | `<the product's bot-marker regex>` or `<its reference-code regex>` (both kept out of this public repo; see HEAD-RULINGS R17: the shipped rule is the generic `known_machine_marker` reading `markers.json`). **Mandatory** `warnings:['pasted_machine_text']` and the report must say: the string is machine-written, the sender is a customer forwarding it. (DATA §4.1: the single highest-scoring "human" in the held-out set was a customer pasting our own confirmation back. This is the most likely wrongful flag in production.) |
 | `near_duplicate` | LLM↑ | any | 20 words | Requires `--corpus <index.jsonl>`. 5-gram word shingles over `foldedLex`, 64-bit FNV-1a hashes, Jaccard ≥ **0.80** against any document with a *different* `sender`. Reports the matched id and the Jaccard. R1: "the single thing most worth building first" — language-agnostic, length-tolerant, adversary-resistant. |
 | `invisible_chars` | LLM↑ (**corroborator only**) | any | 0 | Count of `[​‌‍⁠﻿­]` **excluding** ZWJ inside emoji sequences, ZWNJ/ZWJ adjacent to Arabic letters, and U+200E/200F in any text containing Arabic; plus `[    ]`. **Never fires alone** — it is a "passed through a rich-text surface" fact (Word, Notion, a webpage), not an LLM fact. Requires ≥1 other rule or ≥2 LLM-direction features to appear in `rules[]` at all; otherwise it is a `note`. |
 
@@ -615,7 +615,7 @@ judging — in batch, idiolect continuity is your strongest human evidence. Rows
 
 - Never claim certainty. Not "this is AI-generated", but "likely_llm, strong band, still not proof".
 - `likely_llm` requires an artifact rule in the CLI's `rules[]` — leaked assistant boilerplate,
-  markdown in a non-markdown channel, our own `⟡V3⟡` marker, or a near-duplicate. Style alone
+  markdown in a non-markdown channel, a configured known-machine marker, or a near-duplicate. Style alone
   stops at `leaning_llm`. `likely_human` requires several messages from one sender; a single
   message stops at `leaning_human`.
 - Never use absence of typos as your sole or lead evidence. Clean writing is clean writing.
@@ -635,7 +635,7 @@ judging — in batch, idiolect continuity is your strongest human evidence. Rows
 - Never call a paid API, never fetch the network. You and the CLI are the whole system.
 - Never say a person is a bot. You judge text origin, not people. Real customers paste LLM-drafted
   messages whose prompt they wrote and whose content they mean, and they forward our own bot's
-  confirmations back to us. Say so in the provenance caveat whenever `⟡V3⟡`, a `TRV-` reference,
+  confirmations back to us. Say so in the provenance caveat whenever a configured marker, a product reference code,
   or a pasted-template shape appears.
 - If the CLI is missing, fails, or returns a field you do not recognize, say so and report your own
   judgement alone, capped at `leaning_*`. Do not silently re-implement the CLI.

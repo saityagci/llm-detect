@@ -2,8 +2,8 @@
 
 Standalone project: a zero-dependency Node tool + a global Claude Code agent that judges whether a text
 (English and Turkish; reviews, chat messages, emails, essays) was written by a human or generated
-by an LLM. **This project is NOT part of Travelio.** Never read from, write to, or run anything inside
-`~/Desktop/travelio-asim-shadow`. The only Travelio-derived asset is the private calibration corpus
+by an LLM. **This project is NOT part of the owner's other (private) project.** Never read from, write to, or run
+anything outside this repo. The only asset derived from that project is the private calibration corpus
 already sitting in `eval/data/` (gitignored); do not re-pull it.
 
 ## Owner rules (Sait) — standing, non-negotiable

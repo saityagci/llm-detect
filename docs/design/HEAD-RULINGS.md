@@ -16,8 +16,8 @@ A human on WhatsApp writes "- 2 yetişkin\n- 1 çocuk" all the time. RULING: the
 A near-duplicate across senders is template/copy/spam evidence. RULING: it stays a Tier-0 rule (high precision for its own claim) but ALONE it drives the final verdict to `leaning_llm` with `warnings:['templated_or_copied']` and a report line "duplicate of <id> at Jaccard J — template or copy; not proof of LLM authorship". `likely_llm` via near_duplicate requires a SECOND Tier-0 rule.
 
 ## R4. Own-bot marker and reference-code formats (verified in the repo, not assumed)
-- Marker regex: `/⟡V3(?:-FALLBACK)?⟡/` (the FALLBACK variant exists: backend/src/routes/whatsapp.ts:95).
-- Reference codes are `TRV-` + 6 ASCII digits (e.g. TRV-500592). A customer may retype with Arabic-Indic digits and may drop the hyphen. Regex: `/\bTRV-?[0-9٠-٩]{5,7}\b/u`. Never `\d`.
+- Marker regex: `<the product's bot-marker pattern — kept out of this public repo; configure it locally via markers.json>` (lesson kept: a FALLBACK variant of the marker exists in that product and the pattern must cover it).
+- Reference codes are a three-letter prefix + hyphen + 6 ASCII digits. A customer may retype with Arabic-Indic digits and may drop the hyphen; the pattern (kept out of this public repo) uses `[0-9٠-٩]{5,7}` with an optional hyphen. Never `\d`.
 
 ## R5. `detect()` stays pure — the expiry clock comes from the caller
 SPEC §D.4 calls `Date.now()` inside scoring while §C.6 says `detect` is pure. RULING: `detect(text, opts)` takes `opts.now` (ms epoch, optional). The CLI passes `Date.now()`; the library default is `now = undefined` ⇒ expiry check skipped and `warnings` gets `expiry_not_checked`. Determinism test runs with a fixed `now`.
@@ -64,12 +64,12 @@ Only Node v24.5.0 is installed. `selftest.mjs` asserts byte-identical output acr
 6. selftest.mjs.
 Ship a smaller CORRECT tool over a larger broken one; say exactly what was cut.
 
-# PART 2 — OWNER CLARIFICATION 2026-09-09: THIS IS NOT A TRAVELIO FEATURE
+# PART 2 — OWNER CLARIFICATION 2026-09-09: THIS IS NOT A FEATURE OF THE OWNER'S OTHER PRODUCT
 
-The owner: "this is not related with travelio project". Everything below OVERRIDES SPEC.md and Part 1 wherever they assume the Travelio repo or Travelio traffic.
+The owner: "this is not related with the other project". Everything below OVERRIDES SPEC.md and Part 1 wherever they assume that product's repo or traffic.
 
 ## R16. Location: standalone project `~/Desktop/llm-detect` (its own git repo) + a GLOBAL agent
-Nothing is written inside `~/Desktop/travelio-asim-shadow` — not a file, not a .gitignore line, not a scratch probe. Layout of the standalone repo:
+Nothing is written inside the other project's directory — not a file, not a .gitignore line, not a scratch probe. Layout of the standalone repo:
 ```
 llm-detect/
   package.json                 { "name":"llm-detect", "type":"module", "private":true, "engines":{"node":">=20"},
@@ -89,9 +89,9 @@ llm-detect/
 `tools/llm-detect/...` paths in SPEC map to the repo root of this project. `.claude/agents/llm-text-detector.md` in SPEC maps to `agent/llm-text-detector.md` here, installed globally by install.sh.
 
 ## R17. `own_bot_marker` becomes the generic `known_machine_marker` rule
-The `⟡V3⟡` / `TRV-` patterns are one product's markers and do NOT ship as defaults. The rule reads `markers.json`: an array of `{ "name": string, "pattern": string (regex source, u-flag applied), "note": string }`, default `[]` ⇒ the rule never fires. `--markers <path>` overrides. Behaviour when a marker matches is unchanged from SPEC §B.1 (`warnings:['pasted_machine_text']`, the report says the string is machine-written and the sender may be forwarding it). README documents the format with a GENERIC example (e.g. a booking reference like `\bREF-[0-9]{6}\b` and a bot signature line); R4's regexes appear nowhere in committed files.
+That product's marker and reference-code patterns are one product's markers and do NOT ship as defaults. The rule reads `markers.json`: an array of `{ "name": string, "pattern": string (regex source, u-flag applied), "note": string }`, default `[]` ⇒ the rule never fires. `--markers <path>` overrides. Behaviour when a marker matches is unchanged from SPEC §B.1 (`warnings:['pasted_machine_text']`, the report says the string is machine-written and the sender may be forwarding it). README documents the format with a GENERIC example (e.g. a booking reference like `\bREF-[0-9]{6}\b` and a bot signature line); R4's regexes appear nowhere in committed files.
 
-## R18. The corpus pull becomes an optional adapter, with no Travelio paths in committed files
+## R18. The corpus pull becomes an optional adapter, with no product-specific paths in committed files
 `eval/adapters/supabase-messages.cjs`: flags `--env <path to a .env holding SUPABASE_URL + SUPABASE_SERVICE_KEY>` (required), `--table <name>` (default `messages`), `--human-ids <comma list of user_phone values that are known humans>` (required; mapped to R0..Rn in input order), `--synthetic-prefix <string>` (default `999`), `--out <dir>` (must be gitignored — `git check-ignore -q` guard, exit 2 otherwise), `--dry-run`, `--i-have-approval`. Loads `dotenv` and `@supabase/supabase-js` via `NODE_PATH` (documented: `NODE_PATH=/path/to/some/node_modules node eval/adapters/supabase-messages.cjs …`); if they are not resolvable it prints a one-line instruction and exits 2. Everything else from SPEC §I B2 item 1 (writer_id/persona_id hashing, never a phone number) stands. The CAL lane receives the actual env path and ids on the command line; committed docs and REPORT.md show them as `<env>` and `<ids>`.
 
 ## R19. The agent is GLOBAL, so it locates the tool via `LLM_DETECT_HOME`
@@ -268,3 +268,6 @@ Seven runs, all through `~/.claude/agents/`: essay + history (human → `no_reli
 
 ## R47. A fifth platform label: `not_independently_authored`
 Adding a duplicate essay to a class batch moved the original's label from `no_reliable_indicators` to `ai_style_indicators`: `near_duplicate` alone drives the verdict to `leaning_llm` (R3), and R42(a) maps `leaning_llm` to the AI-style label. A copy is a different finding from AI style and a platform must not conflate them. RULING: `summary.label = "not_independently_authored"` when `near_duplicate` is the only Tier-0 rule and the verdict rests on it (`templated_or_copied` present); `summary.matched` quotes `near_duplicate: duplicate of <id> at Jaccard J`; `summary.caveat` carries R3's sentence ("template, copy or a shared source; not proof of LLM authorship"). When another Tier-0 rule also fires, `fingerprint_found` wins. RUBRIC's "no fifth value" becomes five values; README, RUBRIC §9/platform paragraph, examples and the agent's `LABEL:` line follow. Second sentence for the platform section: a label is true relative to the corpus it was computed against — re-running a class after a late submission can move earlier labels, so store the corpus id with the label or recompute.
+
+## R48. First public push: product-specific literals scrubbed from HEAD, not from history
+The owner created a PUBLIC GitHub repository (`saityagci/llm-detect`). Before the first push the head replaced, in tracked files, the other product's name, its local directory and its bot-marker / reference-code regexes with generic wording (CLAUDE.md, HANDOFF.md, workflow-build.js, judge-tests.jsonl T06's note, HEAD-RULINGS R4/Part 2/R17/R18, SPEC §B.1/§E.5) — applying R17/R20 to the design docs, which the local repo had tolerated. Earlier commits still contain those literals and are pushed with the history; they are not secrets or personal data (a signature glyph, a reference-code prefix, a repo name), but if the owner wants them gone from the public history the repo must be rewritten (or made private) before it gets traffic — the owner's call, offered explicitly. Private data (`eval/data/`, `docs/design/private/`) never entered git.

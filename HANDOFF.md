@@ -71,6 +71,6 @@ Fitted weights NOT promoted (R23).
    stratum. Turkish: no further work until the owner asks; its gates keep running.
 
 ## Do not
-- Touch `~/Desktop/travelio-asim-shadow`. Re-pull the corpus. Call any paid API. Use fable/sonnet/haiku.
+- Touch the owner's other project directory. Re-pull the corpus. Call any paid API. Use fable/sonnet/haiku.
 - Ship product-specific marker patterns as defaults (`markers.json` ships empty; R17).
 - Quote any number above without its base rate, language, length bucket and the three-humans caveat.
