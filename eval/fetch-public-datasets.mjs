@@ -61,7 +61,7 @@ const REGISTRY = [
   {
     name: 'maide-up-tr', dataset: 'MichiganNLP/MAiDE-up', licence: 'MIT',
     role: 'The Turkish anchor: hotel reviews, the exact genre. source 0 = real human, 1 = GPT-4.',
-    lang: 'tr', genre: 'hotel_review', enabled: true, needsFullScan: true,
+    lang: 'tr', genre: 'hotel_review', enabled: true, needsFullScan: true, pairs: true,   // R49: pair key recovered and verified
     // Turkish only. Both labels come from the same file, so one pass fills both.
     // The languages sit in contiguous blocks, so this source is scanned in full rather
     // than sampled: 19,985 rows at 100 per page. That is also how F.4's demand to VERIFY
@@ -70,7 +70,17 @@ const REGISTRY = [
     label: (r) => (Number(r.source) === 1 ? 'llm' : (Number(r.source) === 0 ? 'human' : null)),
     text: (r) => [r.Upside_Review, r.Downside_Review].filter((s) => s && String(s).trim()).join('\n\n'),
     generator: (r) => (Number(r.source) === 1 ? 'gpt-4' : null),
-    note: 'F.4: the source=0 counterpart returned HTTP 500 on the design-round re-check. The count is verified at pull time and recorded below, not assumed.',
+    // HEAD-RULINGS R36(e) follow-up (R49): the matched-pair key, recovered from the schema rather
+    // than invented. `Unnamed: 0` is the within-language row index (0-999) and each language block
+    // holds 1,000 real reviews and 1,000 GPT-4 ones, so (Review_Language, Unnamed: 0) names a real
+    // review and the generated review written FOR it. That is a claim about the data, so the pull
+    // checks it against the data: both rows of a pair must name the same hotel, and if they do not
+    // the key is dropped rather than trusted (`pairAudit` in pullSource).
+    pairFromRow: (r) => (r['Unnamed: 0'] === undefined || r['Unnamed: 0'] === null
+      ? null
+      : `maide-${String(r.Review_Language || 'xx').toLowerCase()}#${r['Unnamed: 0']}`),
+    pairAudit: (r) => ({ key: String(r['Hotel Name'] || '').trim().toLowerCase(), side: Number(r.source) }),
+    note: 'F.4: the source=0 counterpart returned HTTP 500 on the design-round re-check. The count is verified at pull time and recorded below, not assumed. R49: the pair key is (Review_Language, `Unnamed: 0`), verified at pull time by hotel name.',
   },
   {
     name: 'kfupm-ar-posts', dataset: 'KFUPM-JRCAI/arabic-generated-social-media-posts', licence: 'none declared',
@@ -90,7 +100,14 @@ const REGISTRY = [
     label: (r) => (r.label === 'CG' ? 'llm' : (r.label === 'OR' ? 'human' : null)),
     text: (r) => r.text_,           // trailing underscore, verified
     generator: (r) => (r.label === 'CG' ? 'modern-unspecified' : null),
-    note: 'field is `text_` with a trailing underscore; label OR = human, CG = machine.',
+    // R49: NO PAIR KEY EXISTS. The card says each fake is grounded on a paired real review, but the
+    // released columns are `category`, `rating`, `label`, `text_` — nothing links the two rows
+    // (verified by --probe /statistics, recorded in the manifest). Handing every row a synthetic
+    // per-row key would be worse than nothing: shardOf() would stop falling back to normKey(text)
+    // and near-duplicates would become free to straddle the split. So this source declares no key
+    // and is sharded by its text, which is the protection it can actually have.
+    noPairKey: true,
+    note: 'field is `text_` with a trailing underscore; label OR = human, CG = machine. R49: no pair key exists in the released schema; sharded by normalised text.',
   },
   {
     name: 'fake-reviews-gpt2era', dataset: 'theArijitDas/Fake-Reviews-Dataset', licence: 'apache-2.0',
@@ -100,7 +117,12 @@ const REGISTRY = [
     label: (r) => (Number(r.label) === 1 ? 'llm' : (Number(r.label) === 0 ? 'human' : null)),
     text: (r) => r.text,
     generator: (r) => (Number(r.label) === 1 ? 'gpt-2-era' : null),
-    note: '0 = human, 1 = machine. The human half also serves as negative control (a): it predates 2022.',
+    // R49: NO PAIR KEY EXISTS — released columns are `category`, `rating`, `text`, `label`, one
+    // document per row and nothing linking two of them. Same reasoning as modern-fake-reviews:
+    // declaring no key keeps the normKey(text) shard, which is a real protection; a per-row key
+    // would silently remove it.
+    noPairKey: true,
+    note: '0 = human, 1 = machine. The human half also serves as negative control (a): it predates 2022. R49: no pair key exists in the released schema; sharded by normalised text.',
   },
   {
     name: 'hc3-en', dataset: 'Hello-SimpleAI/HC3', licence: 'cc-by-sa-4.0', config: 'all',
@@ -629,6 +651,7 @@ async function pullSource(src, opts) {
     : (src.stride && total ? Math.max(PAGE, Math.floor(total / maxPages)) : PAGE);
 
   const dupKeys = new Set();
+  const pairAudit = new Map();
   let intraSourceDuplicates = 0, crossCheckFailures = [];
 
   for (let p = 0; p < maxPages; p++) {
@@ -658,7 +681,18 @@ async function pullSource(src, opts) {
       // A source with no matched-pair or prompt key gets NO `pair` key, so make-splits shards it by
       // normalised text and two identical documents cannot land on two sides. Handing every row a
       // unique synthetic pair key would silently disable that fallback.
-      const pair = src.noPairKey ? null : `${src.name}#${examined}`;   // every item from ONE source row shares this key
+      const pair = src.noPairKey
+        ? null
+        : (src.pairFromRow ? src.pairFromRow(r) : `${src.name}#${examined}`);   // every item from ONE source row shares this key
+      // R49: a pair key recovered from a schema column is a CLAIM about the data (that these two
+      // rows are the same review, one real and one generated). The claim is checked here: every
+      // audit key seen under one pair key must agree, or the key is dropped for the whole source.
+      if (pair && src.pairAudit) {
+        const a = src.pairAudit(r);
+        if (!pairAudit.has(pair)) pairAudit.set(pair, { keys: new Set(), sides: new Set() });
+        pairAudit.get(pair).keys.add(a.key);
+        pairAudit.get(pair).sides.add(a.side);
+      }
       const prompt = src.promptKey ? src.promptKey(r) : null;          // the essay-prompt holdout unit, when the dataset has one
       for (const it of items) {
         if (!it.label || !it.text) continue;
@@ -702,6 +736,25 @@ async function pullSource(src, opts) {
     rec.label_cross_check = { failures: 0, rule: 'every kept row satisfies (model === "human") === (label === 0)', rows_checked: matchedFilter };
   }
   if (src.noPairKey) rec.intra_source_duplicates_dropped = intraSourceDuplicates;
+  if (src.pairAudit && pairAudit.size) {
+    const conflicting = [...pairAudit.values()].filter((e) => e.keys.size > 1).length;
+    const bothSides = [...pairAudit.values()].filter((e) => e.sides.size > 1).length;
+    rec.pair_key_audit = {
+      rule: 'a pair key names one review; every row under it must agree on the audit key (the hotel name), and a complete pair carries both label sides',
+      distinct_pairs: pairAudit.size,
+      pairs_with_both_sides: bothSides,
+      pairs_with_conflicting_audit_key: conflicting,
+      verdict: conflicting === 0 && bothSides > 0
+        ? 'ACCEPTED — the recovered key groups a real review with the generated review written for it'
+        : 'REJECTED — the key does not group what it claims to; it was stripped from the rows and the source is sharded by text instead',
+    };
+    if (!(conflicting === 0 && bothSides > 0)) {
+      for (const lab of ['human', 'llm']) for (const row of kept[lab]) row.pair = null;
+      process.stderr.write(`  pair key REJECTED: ${conflicting} of ${pairAudit.size} pairs disagree about the audit key, ${bothSides} carry both sides\n`);
+    } else {
+      process.stderr.write(`  pair key accepted: ${pairAudit.size} pairs, ${bothSides} with both sides, 0 conflicting\n`);
+    }
+  }
   rec.status = rec.partial_error ? 'partial' : 'ok';
   rec.pages_fetched = pages;
   rec.rows_examined = examined;

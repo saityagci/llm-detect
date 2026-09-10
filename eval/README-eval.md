@@ -362,20 +362,25 @@ shard is exactly what it was before this ruling.
 
 | cell | bucket | n_human | n_llm | AUC | AUC hard | ECE | FPR@t | TPR@t | TPR@t hard | precision@t |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| en:prose essay | 150–499 tok | 224 | 248 | 0.935 | **0.964** | 0.095 | 0.4% | 28.2% | 44.0% | 0.986 |
+| en:prose essay | 150–499 tok | 224 | 248 | 0.936 | **0.967** | 0.121 | 0.4% | 26.2% | 43.5% | 0.985 |
 | en:prose essay | 50–149 tok | 6 | 77 | INSUFFICIENT (n<100 per side) | | | | | | |
 | en:prose essay | 500+ tok | 95 | 0 | INSUFFICIENT (n<100 per side) | | | | | | |
 
-`t_essay` = 0.853, re-picked on the essay rows' own validation side under the same fairness limit
-(≤2% FPR on every binding stratum); the cell-wide t is 0.853 as well this round, so the two tables
-agree — that is a coincidence of this corpus, not a property. Coverage: **28.4% of essay rows are
-gated** (`insufficient_text`) and count as documents that never fire. Base rates for that row:
-**P@50% 0.984 · P@20% 0.940 · P@10% 0.875 · P@5% 0.769 · P@2% 0.563 · P@1% 0.390.**
-Negative control, essay flavour: **2 of 325 human essays flagged at t on TEST (0.6%)**; in the
+`t_essay` = 0.911, re-picked on the essay rows' own validation side under the same fairness limit
+(≤2% FPR on every binding stratum); the cell-wide t is 0.909, close enough that the two tables
+barely differ this round — a property of this corpus, not a guarantee. Coverage: **28.4% of essay
+rows are gated** (`insufficient_text`) and count as documents that never fire. Base rates for that
+row: **P@50% 0.983 · P@20% 0.936 · P@10% 0.867 · P@5% 0.756 · P@2% 0.545 · P@1% 0.372.**
+Negative control, essay flavour: **1 of 325 human essays flagged at t on TEST (0.3%)**; in the
 measurable bucket, 1 of 224 (0.4%), with 19 of those 224 gated.
 
+**And none of that is what the platform sees** — the shipped CLI's label-level rates on these same
+rows are in CAL-G of `eval/out/REPORT.md` and in finding E15 below: **2 of 325 human essays flagged
+(0.6%) and 21 of 325 machine essays caught (6.5%; 14.1% of the ones that got a judgement)**. The
+fitted row above is what a fitted model can rank; CAL-G is what the product says.
+
 Read alongside:
-- **Hard mode is HIGHER than standard here (0.964 vs 0.935)** — the only cell in this project where
+- **Hard mode is HIGHER than standard here (0.967 vs 0.936)** — the only cell in this project where
   deleting every orthography and format feature *helps*. Both halves of this corpus are clean,
   capitalised, terminated prose, so the format features carry no signal and cost the fit; what
   separates the classes is rhythm and connectives. It also means the essay signal is **not** the
@@ -391,7 +396,7 @@ Read alongside:
 - **Not exam answers.** These are take-home-shaped school essays. No exam-answer corpus was
   fetchable at all, so the other half of the owner's product (R42) is unmeasured.
 - **One generator family, unnamed.** No per-generator recall, and no claim about any 2025-2026 model.
-- **A precision of 0.986 is measured at this corpus's own prior** (≈53% machine in that bucket).
+- **A precision of 0.985 is measured at this corpus's own prior** (≈53% machine in that bucket).
   The base-rate row above is the one to quote at a school's real prior, which nobody has measured.
 
 ### The non-native / ELL stratum: searched for, not found
@@ -423,17 +428,22 @@ also match the platform's own population.
 The essay rows join the **fitting** side like any other public source (R42(e)), so the `en:prose`
 cell is now fitted and thresholded over a row set that is ~20% essays, and section 3 moved:
 
-| cell / bucket | before this round | after |
-|---|---|---|
-| en:prose 150–499 AUC / hard | 0.884 / 0.857 | 0.878 / 0.859 |
-| en:prose 150–499 FPR@t / TPR@t | 7.6% / 65.0% | **2.5% / 32.5%** |
-| en:prose 50–149 AUC / hard | 0.739 / 0.623 | 0.752 / 0.672 |
-| en:prose 50–149 FPR@t / TPR@t | 1.1% / 3.7% | 0.8% / 2.8% |
+| cell / bucket | before the essay rows | after them | after R49's split fixes |
+|---|---|---|---|
+| en:prose 150–499 AUC / hard | 0.884 / 0.857 | 0.878 / 0.859 | 0.891 / 0.874 |
+| en:prose 150–499 FPR@t / TPR@t | 7.6% / 65.0% | 2.5% / 32.5% | **1.2% / 29.7%** |
+| en:prose 50–149 AUC / hard | 0.739 / 0.623 | 0.752 / 0.672 | 0.726 / 0.661 |
+| en:prose 50–149 FPR@t / TPR@t | 1.1% / 3.7% | 0.8% / 2.8% | 0.3% / 2.1% |
+| en:prose essay 150–499 AUC / hard | — | 0.935 / 0.964 | 0.936 / 0.967 |
+| en:prose essay 150–499 FPR@t / TPR@t | — | 0.4% / 28.2% | 0.4% / 26.2% |
 
 Ranking barely moved; the **operating point** moved a lot, because t is picked on a validation side
-that now contains 522 essay rows. Recall halved and the false-flag rate fell by two thirds. Neither
-number is better or worse than the other — they are two points on a curve whose shape the essay
-rows changed. Nothing about how the cells are fitted or reported was altered to produce this.
+that now contains 522 essay rows. Recall more than halved and the false-flag rate fell by six
+sevenths. Neither number is better or worse than the other — they are two points on a curve whose
+shape the essay rows changed. Nothing about how the cells are fitted or reported was altered to
+produce this. The third column adds R49's split fixes (the recovered MAiDE-up pair key and the
+dropped row-id keys), which moved the test set again: read the third column, and read nothing from
+the first two except that a threshold is not a property of a detector.
 
 
 ---
@@ -517,7 +527,7 @@ over segmented sentences would have measured the corpus builder's `.lower()`. **
 this lane: inspect a small pull locally before registering any source; the probe cannot do it,
 because a probe is forbidden to print text.**
 
-**E12 — hard mode is HIGHER than standard on essays (0.964 vs 0.935).** The only cell in this
+**E12 — hard mode is HIGHER than standard on essays (0.967 vs 0.936).** The only cell in this
 project where deleting every orthography and format feature improves the fit. Both halves of the
 essay corpus are clean capitalised prose, so the format features carry no class signal and cost the
 model degrees of freedom; the separation is rhythm and connectives, which survive a prompt change.
@@ -542,6 +552,56 @@ no L1 column. **Nothing was registered and negative control (f) was NOT implemen
 `control` split side and an (f) table for a corpus that does not exist would be a switch nobody can
 turn on. The finding is the absence, and `REPORT.md` §3b now states it with the probe evidence
 rather than as a bare caveat. Repro: the `probes` array in `eval/data/public/manifest.json`.
+
+**E15 — CAL-G: what the platform sees is not what the eval measures.** run-eval §3b reports the
+FITTED model at its fitted threshold on the essay TEST rows (AUC 0.935, FPR@t 0.4%, TPR@t 28.2%).
+A platform gets the shipped CLI's `summary.label`, computed from the PRIOR weights through the
+verdict table. Same 650 rows (325 human / 325 machine), one `--jsonl` batch, `--preset essay`, no
+history and no corpus index:
+
+| instrument | human essays flagged | machine essays flagged |
+|---|---|---|
+| shipped CLI, prior weights (the product) | 2 of 325 = **0.6%** (0.7% of the 298 scored) | 22 of 325 = **6.8%** (14.9% of the 148 scored) |
+| shipped CLI, `--weights eval/out/weights.fitted.json` | 22 of 325 = **6.8%** (10.1% of the 218 scored) | 17 of 325 = **5.2%** (6.2% of the 273 scored) |
+| run-eval §3b, fitted model at t_essay = 0.911 | 0.4% | 26.2% |
+
+*(Numbers as of this release run. The core lane was editing `lib/features.mjs` while this section
+was measured, and two consecutive runs a few minutes apart moved the prior-weights catch count by
+one row and the fitted-weights false-flag count by seven. `eval/out/REPORT.md` is internally
+consistent — one sequence, one core — and it, not this summary, is the record.)*
+
+Flagged = `fingerprint_found` + `ai_style_indicators`. Three findings, none of them cosmetic:
+**(a)** the product catches about **6.5% of machine essays**, not 26% — the verdict table's
+conservatism (a Tier-0 fingerprint for `likely_llm`, R24's refusal of register-proxy evidence) sits
+on top of the score and removes most of the recall the fitted model can rank; **(b)** loading the
+fitted weights into the CLI makes the label-level false-flag rate **an order of magnitude worse**
+(0.6% → 6.8%) and catches no more (6.8% → 5.2%), because the CLI's verdict table has FIXED cutoffs and the fitted file's
+own tau is not one of them — evidence for R23, not against it; **(c)** the gate is not symmetric — 8.3% of human essays but 54.2% of machine ones are
+refused a judgement under the prior weights (and the asymmetry INVERTS under the fitted file: 32.9%
+human, 16.0% machine), because this corpus's machine half is its shorter half and the fitted weights
+change which rows clear G5; any "over all rows" rate is therefore part abstention and part judgement,
+and only the "over scored rows" pair compares like with like. `likely_llm` and `not_independently_authored` are 0 in every cell: no Tier-0 rule fired
+and no corpus index was supplied. Repro: section CAL-G of `eval/out/REPORT.md`.
+
+**E16 — a `pair` key that names one document is a row id, and it was removing protection.**
+`shardOf()` prefers the `pair` key over `normKey(text)`, so a source that hands every row its own
+key does not gain pair protection — it LOSES the near-duplicate protection that R36(e) is about.
+Three of the six public sources were shipping exactly that. Measured and fixed this round:
+
+| source | before | after |
+|---|---|---|
+| `maide-up-tr` | no key at all | **1,000 pairs recovered and verified** — `(Review_Language, Unnamed: 0)` names a real review and the GPT-4 review written for it; the pull checks the claim against the data (both rows must name the same hotel): 1,000 pairs, 1,000 with both label sides, **0 conflicting**. 9 rows lost their counterpart to the length floor and are sharded by text. Registry now declares `pairs: true`. |
+| `mage-en` | 3,000 keys, 3,000 distinct — a row id | **3,000 dropped**; sharded by normalised text again |
+| `hc3-en` | 3,000 keys, 1,500 distinct | 1,000 singleton keys dropped, **500 real pairs kept**; the report now says "ACTIVE on the 2,000 paired rows" instead of the false "INACTIVE — the file has no key" |
+| `fake-reviews-gpt2era`, `modern-fake-reviews` | no key | **no key is recoverable**: `--probe /statistics` shows the released columns are `category`, `rating`, `text`/`text_`, `label` — one document per row and nothing linking two of them. Both now declare `noPairKey: true` so the fetcher cannot invent one. |
+
+The fix is generic (`degeneratePairKeys()` in `make-splits.mjs`), not per-source: a key covering
+fewer than two rows is dropped and counted. Straddles stayed 0 throughout, before and after. The
+re-pull of `maide-up-tr` returned **all 1,991 rows byte-identical** (id, text, label) to the pull of
+record — no drift, only the key added. The two review corpora were NOT re-pulled: a read-only probe
+answered the question at lower risk than a fetch (E3's wedge), and the answer is that the key does
+not exist. Cost of the fix: the test set changed again, so section 3 moved (see the essay section's
+last table).
 
 ## Verify round 1
 
@@ -852,3 +912,4 @@ measurement of the judge.
 | English first; Turkish supported but unscheduled | R41 |
 | the school-platform round: essay calibration, `--probe`, the by-prompt split, the essay-genre report row | R42, R42(e) |
 | the non-native/ELL essay stratum: 41 datasets probed, none fetchable with an L1 or proficiency column; control (f) absent, not passed | R42(e) follow-up (head to number) |
+| CAL-G, the shipped CLI on the essay test rows: the product's label-level rates are a different instrument from the fitted model's; the fitted weights make the CLI's false-flag rate worse; the review corpora's pair keys | R49 |

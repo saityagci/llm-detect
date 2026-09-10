@@ -369,11 +369,14 @@ async function main() {
         emit('**Matched-pair protection, per public source.** `shardOf()` shards on the `pair` key when a');
         emit('row has one and falls back to `normKey(text)` when it does not, so a source that claims');
         emit('matched pairs but ships no key is sharded per text and its pair protection is a silent no-op.');
+        emit('HEAD-RULINGS R49 adds the opposite failure: a `pair` key that names exactly ONE document is a');
+        emit('row id, and preferring it over the text key REMOVES the near-duplicate protection instead of');
+        emit('adding pair protection. Those keys are dropped in `make-splits.mjs` and counted here.');
         emit('');
-        emit('| source | rows | rows with a `pair` key | claims matched pairs | pair protection | pairs straddling |');
-        emit('|---|---:|---:|---|---|---:|');
+        emit('| source | rows | rows with a `pair` key | row-id keys dropped (R49) | claims matched pairs | pair protection | pairs straddling |');
+        emit('|---|---:|---:|---:|---|---|---:|');
         for (const [src, e] of Object.entries(sr.pair_key_coverage)) {
-          emit(`| \`${src}\` | ${e.rows} | ${e.with_pair_key} (${fmt(e.coverage_pct, 1)}%) | ${e.claims_matched_pairs ? 'yes' : 'no'} | ${String(e.pair_protection).split(' — ')[0]} | ${e.straddling_pairs === null ? 'not measurable — no key' : e.straddling_pairs} |`);
+          emit(`| \`${src}\` | ${e.rows} | ${e.with_pair_key} (${fmt(e.coverage_pct, 1)}%) | ${e.row_id_keys_dropped ?? 0} | ${e.claims_matched_pairs ? 'yes' : 'no'} | ${String(e.pair_protection).split(' — ')[0].split(';')[0]} | ${e.straddling_pairs === null ? 'not measurable — no key' : e.straddling_pairs} |`);
         }
         emit('');
         const inactive = Object.entries(sr.pair_key_coverage).filter(([, e]) => String(e.pair_protection).startsWith('INACTIVE'));

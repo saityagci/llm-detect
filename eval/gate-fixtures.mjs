@@ -134,12 +134,27 @@ function runBatch(detector, rows, opts) {
   const tmp = path.join(process.env.TMPDIR || '/tmp', `gate-batch-${process.pid}-${Date.now()}.jsonl`);
   writeFileSync(tmp, rows.map((r) => JSON.stringify(r)).join('\n') + '\n');
   const args = [detector, '--jsonl', tmp, '--allow-uncalibrated'];
+  if (opts.preset) args.push('--preset', opts.preset);
   if (opts.channel) args.push('--channel', opts.channel);
   if (opts.context) args.push('--context', opts.context);
+  if (opts.genre) args.push('--genre', opts.genre);
+  if (opts.lang) args.push('--lang', opts.lang);
   if (opts.domain) args.push('--domain', opts.domain);
-  const out = execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
-  return out.trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  if (opts.weights) args.push('--weights', opts.weights);
+  try {
+    const out = execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+    return out.trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  } finally {
+    // The batch file holds public corpus text and lives in TMPDIR, never in the repo. It is
+    // removed whether the CLI succeeded or threw.
+    if (existsSync(tmp)) rmSync(tmp, { force: true });
+  }
 }
+
+// HEAD-RULINGS R42(a)/R47: the five platform-facing labels, in the order a reader wants them.
+const SUMMARY_LABELS_ORDER = ['fingerprint_found', 'ai_style_indicators', 'not_independently_authored',
+  'no_reliable_indicators', 'too_short_or_no_signal'];
+const FLAG_LABELS = new Set(['fingerprint_found', 'ai_style_indicators']);
 
 // The fitting word, assembled so this source cannot itself trip the acceptance grep the honesty
 // guard implements. One definition, used by the append guard and by its one narrow exemption.
@@ -853,6 +868,206 @@ function main() {
     emit('');
     emit(`**NOT RUN**: no fixture at \`<repo>/${path.relative(ROOT, vr2File)}\`.`);
     emit('');
+  }
+
+  // ---------------- G. the shipped CLI on the essay TEST rows (HEAD-RULINGS R49) ----------
+  //
+  // WHY THIS SECTION EXISTS. run-eval §3b reports the FITTED model at its FITTED threshold:
+  // AUC, FPR@t, TPR@t. A school platform never sees any of that. It sees `summary.label`,
+  // computed by the shipped CLI from the PRIOR weights and the verdict table. Those are two
+  // different instruments over the same rows, and the difference between them is the difference
+  // between what the eval can measure and what the product actually says. Both are printed here,
+  // side by side, so nobody quotes the fitted number as a product number.
+  //
+  // One `--jsonl` batch, `--preset essay`, no history and no corpus index (so `near_duplicate`
+  // cannot fire and `not_independently_authored` is structurally 0 — that is a property of this
+  // run, not a finding about the label). Rows come from the split file; NO ROW TEXT IS PRINTED.
+  {
+    const splitFile = path.join(opts.data, 'splits.jsonl');
+    emit('## CAL-G. What the platform actually sees — the shipped CLI on the essay TEST rows (R49)');
+    emit('');
+    if (!existsSync(splitFile)) {
+      R.essayCli = { error: `no split at ${splitFile}` };
+      emit(`**NOT RUN**: no split at \`<repo>/${path.relative(ROOT, splitFile)}\`. Run \`node eval/make-splits.mjs\` first.`);
+      emit('');
+    } else {
+      const essay = readFileSync(splitFile, 'utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l))
+        .filter((r) => r.genre === 'essay' && r.side === 'test');
+      const nH = essay.filter((r) => r.label === 'human').length;
+      const nL = essay.filter((r) => r.label === 'llm').length;
+      if (!essay.length) {
+        R.essayCli = { error: 'no essay rows on the test side' };
+        emit('**NOT RUN**: the split carries no `genre: "essay"` row on the test side.');
+        emit('');
+      } else {
+        const batch = essay.map((r) => ({ id: r.id, text: r.text }));
+        const truthOf = new Map(essay.map((r) => [r.id, r.label]));
+        const bucketOf = new Map(essay.map((r) => [r.id, r.bucket]));
+
+        // Two passes over the same rows: the shipped default (prior weights) and the fitted file.
+        const fittedPath = path.join(outDir, 'weights.fitted.json');
+        const passes = [{ name: 'prior', weights: null }];
+        if (existsSync(fittedPath)) passes.push({ name: 'fitted', weights: fittedPath });
+
+        const results = {};
+        for (const pass of passes) {
+          let reports;
+          try {
+            reports = runBatch(opts.detector, batch, { preset: 'essay', weights: pass.weights });
+          } catch (e) {
+            results[pass.name] = { error: `CLI batch failed: ${String(e.stderr || e.message).slice(0, 200)}` };
+            continue;
+          }
+          const rows = reports.map((rep) => ({
+            id: rep.id,
+            truth: truthOf.get(rep.id) || 'unknown',
+            bucket: bucketOf.get(rep.id) || 'unknown',
+            label: rep.summary?.label || 'MISSING',
+            verdict: rep.verdict,
+            gateReason: rep.gates?.reason || null,
+            warnings: rep.warnings || [],
+            humanReviewRequired: rep.summary?.humanReviewRequired === true,
+            hasCaveat: Boolean(rep.summary?.caveat),
+          }));
+          const human = rows.filter((r) => r.truth === 'human');
+          const llm = rows.filter((r) => r.truth === 'llm');
+          const flagged = (list) => list.filter((r) => FLAG_LABELS.has(r.label)).length;
+          const scoredOf = (list) => list.filter((r) => r.label !== 'too_short_or_no_signal');
+          results[pass.name] = {
+            rows: rows.length, n_human: human.length, n_llm: llm.length,
+            labelByTruth: {
+              human: tally(human, (r) => r.label),
+              llm: tally(llm, (r) => r.label),
+            },
+            verdictByTruth: { human: tally(human), llm: tally(llm) },
+            gatedHuman: human.length - scoredOf(human).length,
+            gatedLlm: llm.length - scoredOf(llm).length,
+            gateReasons: tally(rows.filter((r) => r.label === 'too_short_or_no_signal'), (r) => r.gateReason || 'none'),
+            falseFlagAll: human.length ? flagged(human) / human.length : null,
+            falseFlagScored: scoredOf(human).length ? flagged(human) / scoredOf(human).length : null,
+            catchAll: llm.length ? flagged(llm) / llm.length : null,
+            catchScored: scoredOf(llm).length ? flagged(llm) / scoredOf(llm).length : null,
+            flaggedHuman: flagged(human), flaggedLlm: flagged(llm),
+            humanReviewRequiredOnEveryRow: rows.every((r) => r.humanReviewRequired),
+            caveatOnEveryRow: rows.every((r) => r.hasCaveat),
+            cellNotFittedPriorUsed: rows.filter((r) => (r.warnings || []).includes('cell_not_fitted_prior_used')).length,
+            uncalibratedWeights: rows.filter((r) => (r.warnings || []).includes('uncalibrated_weights')).length,
+            byBucket: {},
+          };
+          for (const b of ['<20', '20-49', '50-149', '150-499', '500+']) {
+            const hb = human.filter((r) => r.bucket === b), lb = llm.filter((r) => r.bucket === b);
+            if (!hb.length && !lb.length) continue;
+            results[pass.name].byBucket[b] = {
+              n_human: hb.length, n_llm: lb.length,
+              flaggedHuman: flagged(hb), flaggedLlm: flagged(lb),
+              falseFlag: hb.length ? flagged(hb) / hb.length : null,
+              catch: lb.length ? flagged(lb) / lb.length : null,
+              insufficient: hb.length < 100 || lb.length < 100,
+            };
+          }
+        }
+        R.essayCli = { n_human: nH, n_llm: nL, preset: 'essay', passes: results,
+          note: 'One --jsonl batch per pass, --preset essay, no --history and no corpus index. Row text is never printed.' };
+
+        emit(`The ${essay.length} essay rows of the TEST side (${nH} human, ${nL} machine) through the **shipped CLI**`);
+        emit('in one `--jsonl` batch with `--preset essay`, no `--history` and no corpus index. This is the');
+        emit('product path: the prior weights (`weights.v1.json`, which R11/R23 keep as the default) and the');
+        emit('verdict table, reduced to the five platform labels of R42(a)/R47. **run-eval §3b measures a');
+        emit('different instrument** — a model fitted on the fitting side, at a threshold picked on the');
+        emit('validation side — and its row is printed at the bottom of this section so the two are never');
+        emit('confused. No row text is printed here (R40); only counts.');
+        emit('');
+
+        for (const pass of passes) {
+          const P = results[pass.name];
+          emit(`### CAL-G.${pass.name === 'prior' ? '1' : '2'} ${pass.name === 'prior' ? 'The shipped default: prior weights' : 'The same rows with `--weights eval/out/weights.fitted.json` (R23 opt-in)'}`);
+          emit('');
+          if (P.error) { emit(`**NOT RUN**: ${P.error}`); emit(''); continue; }
+          emit(`| truth | n | ${SUMMARY_LABELS_ORDER.join(' | ')} |`);
+          emit(`|---|---:|${SUMMARY_LABELS_ORDER.map(() => '---:').join('|')}|`);
+          for (const t of ['human', 'llm']) {
+            const row = P.labelByTruth[t] || {};
+            emit(`| ${t} | ${t === 'human' ? P.n_human : P.n_llm} | ${SUMMARY_LABELS_ORDER.map((l) => row[l] || 0).join(' | ')} |`);
+          }
+          emit('');
+          emit(`| truth | n | ${VERDICTS.join(' | ')} |`);
+          emit(`|---|---:|${VERDICTS.map(() => '---:').join('|')}|`);
+          emit(`| human | ${P.n_human} | ${tallyRow(P.verdictByTruth.human)} |`);
+          emit(`| llm | ${P.n_llm} | ${tallyRow(P.verdictByTruth.llm)} |`);
+          emit('');
+          const ffAll = P.n_human < 100 ? `INSUFFICIENT (n=${P.n_human})` : `**${pct(P.falseFlagAll)}**`;
+          const ffScored = P.n_human - P.gatedHuman < 100 ? `INSUFFICIENT (n=${P.n_human - P.gatedHuman})` : `**${pct(P.falseFlagScored)}**`;
+          const caAll = P.n_llm < 100 ? `INSUFFICIENT (n=${P.n_llm})` : `**${pct(P.catchAll)}**`;
+          const caScored = P.n_llm - P.gatedLlm < 100 ? `INSUFFICIENT (n=${P.n_llm - P.gatedLlm})` : `**${pct(P.catchScored)}**`;
+          emit(`- **Label-level false-flag rate on human essays** (\`fingerprint_found\` + \`ai_style_indicators\`): ` +
+            `${P.flaggedHuman} of ${P.n_human} = ${ffAll} over all human essays; ${P.flaggedHuman} of ${P.n_human - P.gatedHuman} = ${ffScored} over the ones that got past the length floor.`);
+          emit(`- **Label-level catch rate on machine essays** (same two labels): ` +
+            `${P.flaggedLlm} of ${P.n_llm} = ${caAll} over all machine essays; ${P.flaggedLlm} of ${P.n_llm - P.gatedLlm} = ${caScored} over the scored ones.`);
+          emit(`- \`too_short_or_no_signal\`: ${P.gatedHuman} human, ${P.gatedLlm} machine. Gate reasons: ` +
+            `${Object.entries(P.gateReasons).map(([k, v]) => `\`${k}\` ${v}`).join(', ') || 'none'}.`);
+          // The gate does not fall evenly on the two halves, and the "over all rows" rates above are
+          // not comparable until that is said out loud: this corpus's machine essays are shorter than
+          // its human ones (median ~197 words against ~424), so the length/evidence floor removes more
+          // of the machine half, and a catch rate over ALL machine rows is depressed by rows the tool
+          // deliberately never judged.
+          {
+            const gh = P.n_human ? P.gatedHuman / P.n_human : null;
+            const gl = P.n_llm ? P.gatedLlm / P.n_llm : null;
+            const heavier = gl > gh ? 'machine' : (gh > gl ? 'human' : null);
+            emit(`- The gate is **not symmetric**: ${pct(gh)} of the human essays and ${pct(gl)} of the machine ones `
+              + 'are refused a judgement'
+              + (heavier === 'machine'
+                ? ', and the machine half is the one this corpus makes shorter (median ~197 words against ~424), so a catch rate over ALL machine rows is held down by documents the tool abstained on rather than got wrong.'
+                : (heavier === 'human'
+                  ? ' — here it is the HUMAN half that is silenced more, which lowers the false-flag rate over all rows for the same mechanical reason. A rate whose denominator includes abstentions is not a judgement rate.'
+                  : '.'))
+              + ' The "over scored rows" figures are the ones that compare like with like.');
+          }
+          emit(`- \`humanReviewRequired: true\` on every row: **${P.humanReviewRequiredOnEveryRow ? 'yes' : 'NO — R42(a) violated'}**. Base-rate caveat on every row: **${P.caveatOnEveryRow ? 'yes' : 'NO — R42(a) violated'}**.`);
+          if (pass.name === 'fitted') {
+            emit(`- \`cell_not_fitted_prior_used\`: **${P.cellNotFittedPriorUsed}** row(s) fell back to the prior cell; \`uncalibrated_weights\`: ${P.uncalibratedWeights}.`);
+          }
+          emit('');
+          emit('| bucket | n_human | n_llm | flagged human | false-flag | flagged machine | catch |');
+          emit('|---|---:|---:|---:|---:|---:|---:|');
+          for (const [b, v] of Object.entries(P.byBucket)) {
+            emit(`| ${b} | ${v.n_human} | ${v.n_llm} | ${v.flaggedHuman} | ${v.insufficient ? `${pct(v.falseFlag)} — INSUFFICIENT (under 100 a side)` : `**${pct(v.falseFlag)}**`} | ${v.flaggedLlm} | ${v.insufficient ? `${pct(v.catch)} — INSUFFICIENT` : `**${pct(v.catch)}**`} |`);
+          }
+          emit('');
+        }
+
+        // The fitted-model row from run-eval, quoted verbatim from the report this section appends
+        // to, so the two instruments sit on one page.
+        const reportPath = opts.append ? path.resolve(opts.append) : path.join(outDir, 'REPORT.md');
+        emit('### The two instruments, side by side');
+        emit('');
+        let quoted = null;
+        if (existsSync(reportPath)) {
+          const lines = readFileSync(reportPath, 'utf8').split('\n')
+            .filter((l) => /^\| en:prose essay \| [^|]+ \|/.test(l) && !/INSUFFICIENT|NO COVERAGE/.test(l) && /\|\s*0\.\d/.test(l));
+          quoted = lines[0] || null;
+        }
+        if (quoted) {
+          emit('run-eval §3b, the FITTED model at its fitted threshold, on these same rows:');
+          emit('');
+          emit('| cell | length bucket | n_human | n_llm | AUC | AUC hard | ECE | FPR@t_essay | TPR@t_essay | TPR@t_essay hard | precision@t_essay |');
+          emit('|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|');
+          emit(quoted);
+          emit('');
+        } else {
+          emit('- the fitted row could not be read from `REPORT.md` (run `node eval/run-eval.mjs` first); the two instruments cannot be shown side by side in this run.');
+          emit('');
+        }
+        emit('**They are not the same number and neither is wrong.** The fitted row is what a model fitted');
+        emit('on this corpus can rank, at a threshold chosen on held-out validation rows. The tables above');
+        emit('are what the shipped tool SAYS, with the prior weights it ships with and the verdict table\'s');
+        emit('deliberate conservatism on top: `likely_llm` needs a Tier-0 fingerprint, style alone stops at');
+        emit('`leaning_llm`, and R24 refuses even that on register-proxy evidence. A platform integrating');
+        emit('this tool gets the second set. Quoting the first set at a parent, a student or a school is a');
+        emit('misrepresentation of the product.');
+        emit('');
+      }
+    }
   }
 
   R.wallClockSec = Number(((Date.now() - started) / 1000).toFixed(1));

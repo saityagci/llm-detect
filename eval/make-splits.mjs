@@ -184,15 +184,37 @@ function loadRecordedSplit(dataDir) {
   return { side, meta: j.meta || null };
 }
 
-function loadPublic(dataDir) {
+/**
+ * HEAD-RULINGS R49: a `pair` key that names exactly ONE document is a row id, not a pair, and it is
+ * actively harmful. `shardOf()` prefers the pair key over `normKey(text)`, so a per-row key silently
+ * REMOVES the near-duplicate protection R36(e) is about: two identical reviews stop sharing a shard
+ * and become free to straddle the split. Sources whose row yields one document (the two review
+ * corpora, MAGE) were shipping exactly that. The fix is not per-source and not a re-pull: a pair key
+ * that groups fewer than two rows is dropped here, per source, and the count is reported.
+ */
+function degeneratePairKeys(raws) {
+  const count = new Map();
+  for (const r of raws) if (r.pair) count.set(r.pair, (count.get(r.pair) || 0) + 1);
+  let dropped = 0;
+  for (const r of raws) {
+    if (r.pair && count.get(r.pair) < 2) { r.pair = null; dropped++; }
+  }
+  return { dropped, distinct: count.size };
+}
+
+function loadPublic(dataDir, report) {
   const dir = path.join(dataDir, 'public');
   if (!existsSync(dir)) return [];
   const rows = [];
+  const degenerate = {};
   for (const f of readdirSync(dir)) {
     if (!f.endsWith('.jsonl')) continue;
-    for (const line of readFileSync(path.join(dir, f), 'utf8').split('\n')) {
-      if (!line.trim()) continue;
-      const r = JSON.parse(line);
+    const raws = readFileSync(path.join(dir, f), 'utf8').split('\n')
+      .filter((l) => l.trim()).map((l) => JSON.parse(l));
+    const src = 'public:' + path.basename(f, '.jsonl');
+    const deg = degeneratePairKeys(raws);          // R49: mutates `pair` in place
+    degenerate[src] = deg;
+    for (const r of raws) {
       rows.push({
         id: r.id, text: r.text, label: r.label, lang: r.lang, genre: r.genre,
         source: 'public:' + path.basename(f, '.jsonl'),
@@ -210,6 +232,7 @@ function loadPublic(dataDir) {
       });
     }
   }
+  if (report) report._degenerate_pair_keys = degenerate;
   return rows;
 }
 
@@ -405,7 +428,7 @@ function main() {
   }
 
   // ---- public + fixtures
-  const pub = loadPublic(dataDir);
+  const pub = loadPublic(dataDir, report);
   for (const r of pub) r.side = sideOfShard(r.shard);
   const fix = loadFixtures(path.resolve(opts.fixtures));
   for (const r of fix) r.side = r.forceSide;
@@ -449,13 +472,26 @@ function main() {
     for (const [src, e] of Object.entries(cov)) {
       const pct2 = e.rows ? Number((100 * e.with_pair_key / e.rows).toFixed(2)) : 0;
       const straddle = straddlingPairs[src] ? [...straddlingPairs[src].values()].filter((x) => x.size > 1).length : 0;
+      const deg = (report._degenerate_pair_keys || {})[src] || { dropped: 0 };
       report.pair_key_coverage[src] = {
         rows: e.rows, with_pair_key: e.with_pair_key, coverage_pct: pct2,
         distinct_pairs: e.distinct_pairs.size,
+        row_id_keys_dropped: deg.dropped,
+        row_id_keys_note: deg.dropped
+          ? 'HEAD-RULINGS R49: this source shipped a `pair` key that named exactly one document each. A key that groups one row is a row id, and preferring it over normKey(text) would have removed the near-duplicate protection. Those keys were dropped and the rows are sharded by their normalised text.'
+          : null,
         claims_matched_pairs: e.claims_matched_pairs,
-        pair_protection: e.claims_matched_pairs
-          ? (pct2 === 100 ? 'ACTIVE' : 'INACTIVE — the registry says this source has matched pairs, the file has no `pair` key, so shardOf() fell back to normKey(text) and a matched pair can straddle')
-          : (pct2 === 100 ? 'ACTIVE (source does not claim matched pairs)' : 'n/a — source does not claim matched pairs'),
+        // R49: three states, not two. A source can have a key on every row, a key on SOME rows
+        // (the rest being genuine singletons — a question with only one answer, a real review whose
+        // generated twin fell below the length floor), or no key at all. The middle state used to
+        // print as INACTIVE with a reason that was simply false ("the file has no `pair` key").
+        pair_protection: e.with_pair_key === 0
+          ? (e.claims_matched_pairs
+            ? 'INACTIVE — the registry says this source has matched pairs, the file carries no usable `pair` key, so shardOf() fell back to normKey(text) and a matched pair can straddle'
+            : 'n/a — source ships no pair key; sharded by normalised text, which stops near-duplicates and nothing else')
+          : (pct2 === 100
+            ? 'ACTIVE'
+            : `ACTIVE on the ${e.with_pair_key} paired rows; the other ${e.rows - e.with_pair_key} carry no counterpart in this pull and are sharded by normalised text`),
         straddling_pairs: e.with_pair_key ? straddle : null,
       };
     }

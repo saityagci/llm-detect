@@ -48,10 +48,10 @@ Every row scoring below tau = 0.500 is a miss; every gated row is a document the
 
 | set | n | insufficient_text | uncertain | leaning_human | leaning_llm | likely_human | likely_llm |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| lang **en** | 25 | 11 | 6 | 1 | 7 | 0 | 0 |
+| lang **en** | 25 | 11 | 9 | 1 | 4 | 0 | 0 |
 | lang **tr** | 25 | 10 | 9 | 1 | 5 | 0 | 0 |
-| transform `none` | 30 | 14 | 7 | 0 | 9 | 0 | 0 |
-| transform `b` | 6 | 2 | 2 | 0 | 2 | 0 | 0 |
+| transform `none` | 30 | 14 | 9 | 0 | 7 | 0 | 0 |
+| transform `b` | 6 | 2 | 3 | 0 | 1 | 0 | 0 |
 | transform `c` | 6 | 0 | 4 | 1 | 1 | 0 | 0 |
 | transform `a` | 6 | 4 | 2 | 0 | 0 | 0 | 0 |
 | transform `d` | 2 | 1 | 0 | 1 | 0 | 0 | 0 |
@@ -66,25 +66,25 @@ is itself the finding.
 
 - pairs with a humanized variant: **12**
 - pairs where both sides were scored (evaluable): **9**
-- of those, score dropped: **2**; mean delta: **-0.0176**
+- of those, score dropped: **2**; mean delta: **-0.0233**
 
-**R25 check** — the prose humanization pairs were rewritten at 160-260 tokens on both sides so the §F.3 collapse assertion would stop landing in the 50-~120-token dead band. Measured: **7 of 10** prose pairs are evaluable, **2** of those dropped, mean delta **-0.0227**. A pair that is evaluable and does NOT drop is a real result about transform (b)/(c), not a fixture bug.
+**R25 check** — the prose humanization pairs were rewritten at 160-260 tokens on both sides so the §F.3 collapse assertion would stop landing in the 50-~120-token dead band. Measured: **7 of 10** prose pairs are evaluable, **2** of those dropped, mean delta **-0.03**. A pair that is evaluable and does NOT drop is a real result about transform (b)/(c), not a fixture bug.
 
 | pair | lang | transform | clean | humanized | delta |
 |---|---|---|---|---|---:|
-| en-hr-1 | en | b | 0.870 (leaning_llm) | 0.802 (uncertain) | -0.068 |
-| en-hr-2 | en | c | 0.850 (leaning_llm) | 0.753 (uncertain) | -0.098 |
-| en-pr-1 | en | b | 0.762 (leaning_llm) | 0.762 (leaning_llm) | 0.000 |
+| en-hr-1 | en | b | 0.832 (leaning_llm) | 0.751 (uncertain) | -0.081 |
+| en-hr-2 | en | c | 0.745 (uncertain) | 0.610 (uncertain) | -0.135 |
+| en-pr-1 | en | b | 0.653 (uncertain) | 0.653 (uncertain) | 0.000 |
 | en-wa-3 | en | c | 0.754 (uncertain) | 0.754 (uncertain) | 0.000 |
 | tr-hr-1 | tr | b | 0.700 (leaning_llm) | 0.700 (leaning_llm) | 0.000 |
 | tr-hr-2 | tr | c | 0.306 (uncertain) | 0.306 (uncertain) | 0.000 |
-| tr-pr-1 | tr | b | 0.537 (uncertain) | 0.537 (uncertain) | 0.000 |
+| tr-pr-1 | tr | b | 0.511 (uncertain) | 0.511 (uncertain) | 0.000 |
 | tr-wa-3 | tr | c | 0.650 (uncertain) | 0.650 (uncertain) | 0.000 |
-| tr-em-2 | tr | c | 0.270 (leaning_llm) | 0.276 (leaning_llm) | +0.006 |
+| tr-em-2 | tr | c | 0.255 (leaning_llm) | 0.261 (leaning_llm) | +0.006 |
 
 3 pair(s) are NOT measurable because at least one side was gated:
 - en-em-3 vs en-em-1 (en, `b`): clean insufficient_text null / humanized insufficient_text null
-- en-em-4 vs en-em-2 (en, `c`): clean insufficient_text null / humanized leaning_human 0.102
+- en-em-4 vs en-em-2 (en, `c`): clean insufficient_text null / humanized leaning_human 0.068
 - tr-em-3 vs tr-em-1 (tr, `b`): clean insufficient_text null / humanized insufficient_text null
 
 8 humanized row(s) have NO clean twin by construction (transforms `a` and `d`:
@@ -172,15 +172,15 @@ from their `requiresMarkers` field, because `markers.json` ships as `[]` (R17) a
 
 | set | n | insufficient_text | uncertain | leaning_human | leaning_llm | likely_human | likely_llm |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| human (H01-H35) | 35 | 11 | 18 | 2 | 2 | 0 | 2 |
+| human (H01-H35) | 35 | 11 | 19 | 2 | 1 | 0 | 2 |
 | llm (L01-L08) | 8 | 1 | 0 | 2 | 5 | 0 | 0 |
 
 | id | truth | class | lang/ctx | mk | verdict | score | rules | warnings | in `allowed` |
 |---|---|---|---|---|---|---|---|---|---|
-| H01 | human | non_native_en_formal | en/prose | — | uncertain | 0.444 | — | register_only_evidence, uncalibrated_weights | yes |
+| H01 | human | non_native_en_formal | en/prose | — | uncertain | 0.420 | — | register_only_evidence, uncalibrated_weights | yes |
 | H02 | human | non_native_en_formal | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
-| H03 | human | non_native_en_formal | en/prose | — | leaning_llm | 0.194 | — | uncalibrated_weights, score_table_disagreement | yes |
-| H04 | human | non_native_en_formal | en/prose | — | leaning_llm | 0.840 | — | uncalibrated_weights | yes |
+| H03 | human | non_native_en_formal | en/prose | — | uncertain | 0.130 | — | uncalibrated_weights | yes |
+| H04 | human | non_native_en_formal | en/prose | — | leaning_llm | 0.825 | — | uncalibrated_weights | yes |
 | H05 | human | non_native_en_formal | en/chat | — | uncertain | 0.650 | — | uncalibrated_weights | yes |
 | H06 | human | non_native_en_formal | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H07 | human | careful_tr_orthography | tr/chat | — | uncertain | 0.650 | — | register_only_evidence, uncalibrated_weights | yes |
@@ -199,25 +199,25 @@ from their `requiresMarkers` field, because `markers.json` ships as `[]` (R17) a
 | H20 | human | pasted_machine_template | en/prose | yes | likely_llm | 0.200 | known_machine_marker | pasted_machine_text, uncalibrated_weights, score_table_disagreement | yes |
 | H21 | human | human_discussing_an_assistant | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H22 | human | human_discussing_an_assistant | tr/chat | — | uncertain | 0.650 | — | uncalibrated_weights | yes |
-| H23 | human | human_discussing_an_assistant | en/prose | — | uncertain | 0.320 | — | uncalibrated_weights | yes |
-| H24 | human | human_discussing_an_assistant | en/prose | — | uncertain | 0.482 | — | register_only_evidence, uncalibrated_weights | yes |
+| H23 | human | human_discussing_an_assistant | en/prose | — | uncertain | 0.294 | — | uncalibrated_weights | yes |
+| H24 | human | human_discussing_an_assistant | en/prose | — | uncertain | 0.389 | — | uncalibrated_weights | yes |
 | H25 | human | marketing_register_human | tr/prose | — | uncertain | 0.437 | — | register_only_evidence, uncalibrated_weights | yes |
 | H26 | human | marketing_register_human | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H27 | human | machine_translated_looking_human | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H28 | human | machine_translated_looking_human | tr/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H29 | human | native_speaker_control | en/chat | — | uncertain | 0.350 | — | uncalibrated_weights | yes |
-| H30 | human | native_speaker_control | en/prose | — | uncertain | 0.236 | — | uncalibrated_weights | yes |
+| H30 | human | native_speaker_control | en/prose | — | uncertain | 0.192 | — | uncalibrated_weights | yes |
 | H31 | human | native_speaker_control | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
-| H32 | human | native_speaker_control | en/prose | — | uncertain | 0.358 | — | uncalibrated_weights | yes |
+| H32 | human | native_speaker_control | en/prose | — | uncertain | 0.321 | — | uncalibrated_weights | yes |
 | H33 | human | careful_tr_orthography | tr/chat | — | uncertain | 0.800 | — | uncalibrated_weights | yes |
 | H34 | human | non_native_en_formal | en/chat | — | uncertain | 0.800 | — | register_only_evidence, uncalibrated_weights | yes |
 | H35 | human | careful_tr_orthography | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
-| L01 | llm | llm_base | en/prose | — | leaning_llm | 0.889 | — | uncalibrated_weights | yes |
+| L01 | llm | llm_base | en/prose | — | leaning_llm | 0.851 | — | uncalibrated_weights | yes |
 | L02 | llm | llm_base | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes |
 | L03 | llm | llm_base | tr/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes |
 | L04 | llm | llm_transform_a | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
-| L05 | llm | llm_transform_b | en/prose | — | leaning_llm | 0.889 | — | uncalibrated_weights | yes |
-| L06 | llm | llm_transform_c | en/prose | — | leaning_llm | 0.684 | — | uncalibrated_weights | yes |
+| L05 | llm | llm_transform_b | en/prose | — | leaning_llm | 0.851 | — | uncalibrated_weights | yes |
+| L06 | llm | llm_transform_c | en/prose | — | leaning_llm | 0.634 | — | uncalibrated_weights | yes |
 | L07 | llm | llm_transform_d_mimicry | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
 | L08 | llm | llm_transform_d_mimicry | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
 
@@ -305,15 +305,15 @@ that an aggregate report's notes are de-duplicated.
 |---|---|---|---|---|---|---|---|---|---|---|
 | A01 | human | human-guest-list | en/chat | — | uncertain | 0.587 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A02 | human | human-guest-list | tr/chat | — | uncertain | 0.587 | — | register_only_evidence, uncalibrated_weights | yes | ok |
-| A03 | human | human-esl-essay | en/prose | — | leaning_llm | 0.935 | — | uncalibrated_weights | yes | ok |
+| A03 | human | human-esl-essay | en/prose | — | leaning_llm | 0.921 | — | uncalibrated_weights | yes | ok |
 | A04 | human | human-tr-petition | tr/prose | — | leaning_llm | 0.761 | — | uncalibrated_weights | yes | ok |
 | A05 | human | human-hotel-staff-email | en/prose | — | uncertain | 0.200 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A06 | human | human-friend-list | en/chat | — | uncertain | 0.273 | — | uncalibrated_weights | yes | ok |
 | A07 | human | human-wedding-list | tr/chat | — | uncertain | 0.481 | — | register_only_evidence, uncalibrated_weights | yes | ok |
-| A08 | human | human-native-review | en/prose | — | leaning_llm | 0.826 | — | uncalibrated_weights | yes | ok |
+| A08 | human | human-native-review | en/prose | — | leaning_llm | 0.709 | — | uncalibrated_weights | yes | ok |
 | A09 | human | human-tr-marketing | tr/prose | — | insufficient_text | null | — | marketing_register, uncalibrated_weights | yes | ok |
-| A10 | human | human-travel-writer | en/prose | — | leaning_llm | 0.743 | — | uncalibrated_weights | yes | ok |
-| A11 | human | human-esl-essay | en/prose | — | leaning_llm | 0.901 | — | uncalibrated_weights | yes | ok |
+| A10 | human | human-travel-writer | en/prose | — | leaning_llm | 0.683 | — | uncalibrated_weights | yes | ok |
+| A11 | human | human-esl-essay | en/prose | — | leaning_llm | 0.881 | — | uncalibrated_weights | yes | ok |
 | A12 | human | human-agent-list | tr/chat | — | uncertain | 0.533 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A13 | human | human-hotel-staff-chat | en/chat | — | uncertain | 0.722 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A14 | human | human-guest-list | tr/chat | — | uncertain | 0.722 | — | register_only_evidence, uncalibrated_weights | yes | ok |
@@ -434,4 +434,79 @@ Probe text is not printed (HEAD-RULINGS R40); look a row up by its id in
 | N26 | en | no fire | no fire | ok | — |
 | N27 | en | no fire | no fire | ok | — |
 
-_CAL fixture gate wall-clock: 34.5s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._
+## CAL-G. What the platform actually sees — the shipped CLI on the essay TEST rows (R49)
+
+The 650 essay rows of the TEST side (325 human, 325 machine) through the **shipped CLI**
+in one `--jsonl` batch with `--preset essay`, no `--history` and no corpus index. This is the
+product path: the prior weights (`weights.v1.json`, which R11/R23 keep as the default) and the
+verdict table, reduced to the five platform labels of R42(a)/R47. **run-eval §3b measures a
+different instrument** — a model fitted on the fitting side, at a threshold picked on the
+validation side — and its row is printed at the bottom of this section so the two are never
+confused. No row text is printed here (R40); only counts.
+
+### CAL-G.1 The shipped default: prior weights
+
+| truth | n | fingerprint_found | ai_style_indicators | not_independently_authored | no_reliable_indicators | too_short_or_no_signal |
+|---|---:|---:|---:|---:|---:|---:|
+| human | 325 | 0 | 2 | 0 | 296 | 27 |
+| llm | 325 | 0 | 22 | 0 | 126 | 177 |
+
+| truth | n | insufficient_text | uncertain | leaning_human | leaning_llm | likely_human | likely_llm |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| human | 325 | 27 | 103 | 193 | 2 | 0 | 0 |
+| llm | 325 | 177 | 91 | 35 | 22 | 0 | 0 |
+
+- **Label-level false-flag rate on human essays** (`fingerprint_found` + `ai_style_indicators`): 2 of 325 = **0.6%** over all human essays; 2 of 298 = **0.7%** over the ones that got past the length floor.
+- **Label-level catch rate on machine essays** (same two labels): 22 of 325 = **6.8%** over all machine essays; 22 of 148 = **14.9%** over the scored ones.
+- `too_short_or_no_signal`: 27 human, 177 machine. Gate reasons: `no_evidence_either_way` 184, `too_few_active_features` 20.
+- The gate is **not symmetric**: 8.3% of the human essays and 54.5% of the machine ones are refused a judgement, and the machine half is the one this corpus makes shorter (median ~197 words against ~424), so a catch rate over ALL machine rows is held down by documents the tool abstained on rather than got wrong. The "over scored rows" figures are the ones that compare like with like.
+- `humanReviewRequired: true` on every row: **yes**. Base-rate caveat on every row: **yes**.
+
+| bucket | n_human | n_llm | flagged human | false-flag | flagged machine | catch |
+|---|---:|---:|---:|---:|---:|---:|
+| 50-149 | 6 | 77 | 0 | 0.0% — INSUFFICIENT (under 100 a side) | 2 | 2.6% — INSUFFICIENT |
+| 150-499 | 224 | 248 | 1 | **0.4%** | 20 | **8.1%** |
+| 500+ | 95 | 0 | 1 | 1.1% — INSUFFICIENT (under 100 a side) | 0 | n/a — INSUFFICIENT |
+
+### CAL-G.2 The same rows with `--weights eval/out/weights.fitted.json` (R23 opt-in)
+
+| truth | n | fingerprint_found | ai_style_indicators | not_independently_authored | no_reliable_indicators | too_short_or_no_signal |
+|---|---:|---:|---:|---:|---:|---:|
+| human | 325 | 0 | 22 | 0 | 196 | 107 |
+| llm | 325 | 0 | 17 | 0 | 256 | 52 |
+
+| truth | n | insufficient_text | uncertain | leaning_human | leaning_llm | likely_human | likely_llm |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| human | 325 | 107 | 98 | 98 | 22 | 0 | 0 |
+| llm | 325 | 52 | 143 | 113 | 17 | 0 | 0 |
+
+- **Label-level false-flag rate on human essays** (`fingerprint_found` + `ai_style_indicators`): 22 of 325 = **6.8%** over all human essays; 22 of 218 = **10.1%** over the ones that got past the length floor.
+- **Label-level catch rate on machine essays** (same two labels): 17 of 325 = **5.2%** over all machine essays; 17 of 273 = **6.2%** over the scored ones.
+- `too_short_or_no_signal`: 107 human, 52 machine. Gate reasons: `no_evidence_either_way` 139, `too_few_active_features` 20.
+- The gate is **not symmetric**: 32.9% of the human essays and 16.0% of the machine ones are refused a judgement — here it is the HUMAN half that is silenced more, which lowers the false-flag rate over all rows for the same mechanical reason. A rate whose denominator includes abstentions is not a judgement rate. The "over scored rows" figures are the ones that compare like with like.
+- `humanReviewRequired: true` on every row: **yes**. Base-rate caveat on every row: **yes**.
+- `cell_not_fitted_prior_used`: **0** row(s) fell back to the prior cell; `uncalibrated_weights`: 0.
+
+| bucket | n_human | n_llm | flagged human | false-flag | flagged machine | catch |
+|---|---:|---:|---:|---:|---:|---:|
+| 50-149 | 6 | 77 | 0 | 0.0% — INSUFFICIENT (under 100 a side) | 8 | 10.4% — INSUFFICIENT |
+| 150-499 | 224 | 248 | 19 | **8.5%** | 9 | **3.6%** |
+| 500+ | 95 | 0 | 3 | 3.2% — INSUFFICIENT (under 100 a side) | 0 | n/a — INSUFFICIENT |
+
+### The two instruments, side by side
+
+run-eval §3b, the FITTED model at its fitted threshold, on these same rows:
+
+| cell | length bucket | n_human | n_llm | AUC | AUC hard | ECE | FPR@t_essay | TPR@t_essay | TPR@t_essay hard | precision@t_essay |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| en:prose essay | 150-499 | 224 | 248 | 0.936 | 0.967 | 0.121 | 0.4% | 26.2% | 43.5% | 0.985 |
+
+**They are not the same number and neither is wrong.** The fitted row is what a model fitted
+on this corpus can rank, at a threshold chosen on held-out validation rows. The tables above
+are what the shipped tool SAYS, with the prior weights it ships with and the verdict table's
+deliberate conservatism on top: `likely_llm` needs a Tier-0 fingerprint, style alone stops at
+`leaning_llm`, and R24 refuses even that on register-proxy evidence. A platform integrating
+this tool gets the second set. Quoting the first set at a parent, a student or a school is a
+misrepresentation of the product.
+
+_CAL fixture gate wall-clock: 37.5s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._
