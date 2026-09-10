@@ -15,6 +15,7 @@ import {
   buildHistoryProfile as coreBuildHistoryProfile,
 } from './lib/detect.mjs';
 import { validateWeightsShape } from './lib/score.mjs';
+import { authorOf } from './lib/rules.mjs';
 
 // One-time resource load (SPEC §I B1 item 3: the Aho-Corasick trie is built once at module load).
 const RES = loadResources();
@@ -59,6 +60,7 @@ OPTIONS
   --build-history-profile <path>   print the history profile JSON for those priors and exit 0
   --domain general|customer_service                                    (default general)
   --corpus <path>          NDJSON {id,sender,text} index enabling near_duplicate
+                           (rows may use "student" instead of "sender"; sender wins)
   --markers <path>         known-machine markers (default ./markers.json, ships as [])
   --weights <path>         override weights.v1.json
   --allow-uncalibrated     REQUIRED to emit any verdict from prior weights
@@ -328,7 +330,8 @@ function main() {
       }
       try {
         const r = coreDetect(p.row.text ?? '', {
-          ...o, id: p.row.id, sender: p.row.sender,
+          // R51(b): rows may name the author as `sender` or `student`; `sender` wins.
+          ...o, id: p.row.id, sender: authorOf(p.row),
           lang: p.row.lang ?? o.lang, shape: p.row.context ?? o.shape,
           // R45: a row may carry the SAME author's priors, or a pre-built profile.
           history: p.row.history ?? o.history,
@@ -353,7 +356,7 @@ function main() {
     let bad = 0;
     for (const p of parsed) {
       if (!p.ok) { bad++; continue; }
-      const s = p.row.sender ?? '(unknown)';
+      const s = authorOf(p.row) ?? '(unknown)';
       if (!bySender.has(s)) bySender.set(s, []);
       bySender.get(s).push(p.row);
     }

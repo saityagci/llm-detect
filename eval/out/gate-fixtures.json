@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T23:23:24.445Z",
+  "generatedAt": "2026-09-10T23:32:56.695Z",
   "detector": "stylometry.mjs",
   "tau": 0.5,
   "tauSource": "the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.",
@@ -715,19 +715,19 @@
       }
     ],
     "dropped": 2,
-    "meanDelta": -0.0233,
+    "meanDelta": -0.0195,
     "deltas": [
       {
         "pairId": "en-hr-1",
         "lang": "en",
         "transform": "b",
         "cleanId": "en-hr-1",
-        "cleanScore": 0.832375,
+        "cleanScore": 0.873899,
         "cleanVerdict": "leaning_llm",
         "humId": "en-hr-5",
-        "humScore": 0.750925,
+        "humScore": 0.807972,
         "humVerdict": "uncertain",
-        "delta": -0.0814,
+        "delta": -0.0659,
         "evaluable": true,
         "dropped": true
       },
@@ -736,12 +736,12 @@
         "lang": "en",
         "transform": "c",
         "cleanId": "en-hr-2",
-        "cleanScore": 0.744692,
+        "cleanScore": 0.802792,
         "cleanVerdict": "uncertain",
         "humId": "en-hr-6",
-        "humScore": 0.609847,
+        "humScore": 0.68568,
         "humVerdict": "uncertain",
-        "delta": -0.1348,
+        "delta": -0.1171,
         "evaluable": true,
         "dropped": true
       },
@@ -750,10 +750,10 @@
         "lang": "en",
         "transform": "b",
         "cleanId": "en-pr-1",
-        "cleanScore": 0.652929,
+        "cleanScore": 0.724176,
         "cleanVerdict": "uncertain",
         "humId": "en-pr-3",
-        "humScore": 0.652929,
+        "humScore": 0.724176,
         "humVerdict": "uncertain",
         "delta": 0,
         "evaluable": true,
@@ -795,7 +795,7 @@
         "cleanScore": null,
         "cleanVerdict": "insufficient_text",
         "humId": "en-em-4",
-        "humScore": 0.068116,
+        "humScore": 0.092569,
         "humVerdict": "leaning_human",
         "delta": null,
         "evaluable": false,
@@ -806,10 +806,10 @@
         "lang": "tr",
         "transform": "b",
         "cleanId": "tr-hr-1",
-        "cleanScore": 0.700206,
+        "cleanScore": 0.765237,
         "cleanVerdict": "leaning_llm",
         "humId": "tr-hr-5",
-        "humScore": 0.700206,
+        "humScore": 0.765237,
         "humVerdict": "leaning_llm",
         "delta": 0,
         "evaluable": true,
@@ -820,10 +820,10 @@
         "lang": "tr",
         "transform": "c",
         "cleanId": "tr-hr-2",
-        "cleanScore": 0.306463,
+        "cleanScore": 0.381456,
         "cleanVerdict": "uncertain",
         "humId": "tr-hr-6",
-        "humScore": 0.306463,
+        "humScore": 0.381456,
         "humVerdict": "uncertain",
         "delta": 0,
         "evaluable": true,
@@ -834,10 +834,10 @@
         "lang": "tr",
         "transform": "b",
         "cleanId": "tr-pr-1",
-        "cleanScore": 0.511057,
+        "cleanScore": 0.593287,
         "cleanVerdict": "uncertain",
         "humId": "tr-pr-3",
-        "humScore": 0.511057,
+        "humScore": 0.593287,
         "humVerdict": "uncertain",
         "delta": 0,
         "evaluable": true,
@@ -876,12 +876,12 @@
         "lang": "tr",
         "transform": "c",
         "cleanId": "tr-em-2",
-        "cleanScore": 0.254706,
+        "cleanScore": 0.322931,
         "cleanVerdict": "leaning_llm",
         "humId": "tr-em-4",
-        "humScore": 0.260922,
+        "humScore": 0.330074,
         "humVerdict": "leaning_llm",
-        "delta": 0.0062,
+        "delta": 0.0071,
         "evaluable": true,
         "dropped": false
       }
@@ -898,7 +898,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 208,
         "verdict": "leaning_llm",
-        "score": 0.832375,
+        "score": 0.873899,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -914,7 +914,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 205,
         "verdict": "uncertain",
-        "score": 0.744692,
+        "score": 0.802792,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -962,7 +962,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 208,
         "verdict": "uncertain",
-        "score": 0.750925,
+        "score": 0.807972,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -978,7 +978,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 205,
         "verdict": "uncertain",
-        "score": 0.609847,
+        "score": 0.68568,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1010,7 +1010,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 205,
         "verdict": "uncertain",
-        "score": 0.652929,
+        "score": 0.724176,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1042,7 +1042,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 205,
         "verdict": "uncertain",
-        "score": 0.652929,
+        "score": 0.724176,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1234,7 +1234,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 188,
         "verdict": "leaning_human",
-        "score": 0.068116,
+        "score": 0.092569,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1250,7 +1250,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call",
         "tokens": 122,
         "verdict": "leaning_llm",
-        "score": 0.629399,
+        "score": 0.703281,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1298,7 +1298,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 179,
         "verdict": "leaning_llm",
-        "score": 0.700206,
+        "score": 0.765237,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1314,7 +1314,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 165,
         "verdict": "uncertain",
-        "score": 0.306463,
+        "score": 0.381456,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1362,7 +1362,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 179,
         "verdict": "leaning_llm",
-        "score": 0.700206,
+        "score": 0.765237,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1378,7 +1378,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 165,
         "verdict": "uncertain",
-        "score": 0.306463,
+        "score": 0.381456,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1410,7 +1410,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 169,
         "verdict": "uncertain",
-        "score": 0.511057,
+        "score": 0.593287,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1442,7 +1442,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 169,
         "verdict": "uncertain",
-        "score": 0.511057,
+        "score": 0.593287,
         "gateReason": null,
         "flagged": true,
         "cliError": null
@@ -1602,7 +1602,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 184,
         "verdict": "leaning_llm",
-        "score": 0.254706,
+        "score": 0.322931,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1634,7 +1634,7 @@
         "gen": "claude-opus-5 (1M context), in-session, no API call; rewritten 2026-09-09 under HEAD-RULINGS R25",
         "tokens": 183,
         "verdict": "leaning_llm",
-        "score": 0.260922,
+        "score": 0.330074,
         "gateReason": null,
         "flagged": false,
         "cliError": null
@@ -1692,7 +1692,7 @@
       "prosePairs": 10,
       "proseEvaluable": 7,
       "proseDropped": 2,
-      "proseMeanDelta": -0.03,
+      "proseMeanDelta": -0.0251,
       "chatPairs": 2
     }
   },
@@ -2471,7 +2471,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.420349,
+        "score": 0.502998,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -2528,7 +2528,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.130137,
+        "score": 0.172728,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -2557,7 +2557,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.824787,
+        "score": 0.867893,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3103,7 +3103,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.294146,
+        "score": 0.367723,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3131,7 +3131,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.388829,
+        "score": 0.470309,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3300,7 +3300,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.191726,
+        "score": 0.248711,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3356,7 +3356,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.320556,
+        "score": 0.397023,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3469,7 +3469,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.851442,
+        "score": 0.888874,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3593,7 +3593,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.851442,
+        "score": 0.888874,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -3623,7 +3623,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.633865,
+        "score": 0.707271,
         "gateReason": null,
         "rules": [],
         "warnings": [
@@ -4384,7 +4384,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.920993,
+        "score": 0.942092,
         "gateReason": null,
         "detectedLang": "en",
         "rules": [],
@@ -4417,7 +4417,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.761278,
+        "score": 0.8,
         "gateReason": null,
         "detectedLang": "tr",
         "rules": [],
@@ -4548,7 +4548,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.708849,
+        "score": 0.772615,
         "gateReason": null,
         "detectedLang": "en",
         "rules": [],
@@ -4614,7 +4614,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.682754,
+        "score": 0.750221,
         "gateReason": null,
         "detectedLang": "en",
         "rules": [],
@@ -4647,7 +4647,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "leaning_llm",
-        "score": 0.881,
+        "score": 0.911756,
         "gateReason": null,
         "detectedLang": "en",
         "rules": [],
@@ -4845,7 +4845,7 @@
         "markers": false,
         "expectedEvasion": false,
         "verdict": "uncertain",
-        "score": 0.571673,
+        "score": 0.650677,
         "gateReason": null,
         "detectedLang": "en",
         "rules": [],
@@ -7574,41 +7574,41 @@
         "labelByTruth": {
           "human": {
             "no_reliable_indicators": 296,
-            "too_short_or_no_signal": 27,
-            "ai_style_indicators": 2
+            "too_short_or_no_signal": 25,
+            "ai_style_indicators": 4
           },
           "llm": {
-            "no_reliable_indicators": 126,
-            "too_short_or_no_signal": 177,
-            "ai_style_indicators": 22
+            "no_reliable_indicators": 110,
+            "too_short_or_no_signal": 164,
+            "ai_style_indicators": 51
           }
         },
         "verdictByTruth": {
           "human": {
-            "leaning_human": 193,
-            "uncertain": 103,
-            "insufficient_text": 27,
-            "leaning_llm": 2
+            "leaning_human": 145,
+            "uncertain": 151,
+            "insufficient_text": 25,
+            "leaning_llm": 4
           },
           "llm": {
-            "uncertain": 91,
-            "insufficient_text": 177,
-            "leaning_llm": 22,
-            "leaning_human": 35
+            "uncertain": 89,
+            "insufficient_text": 164,
+            "leaning_llm": 51,
+            "leaning_human": 21
           }
         },
-        "gatedHuman": 27,
-        "gatedLlm": 177,
+        "gatedHuman": 25,
+        "gatedLlm": 164,
         "gateReasons": {
-          "no_evidence_either_way": 184,
+          "no_evidence_either_way": 169,
           "too_few_active_features": 20
         },
-        "falseFlagAll": 0.006154,
-        "falseFlagScored": 0.006711,
-        "catchAll": 0.067692,
-        "catchScored": 0.148649,
-        "flaggedHuman": 2,
-        "flaggedLlm": 22,
+        "falseFlagAll": 0.012308,
+        "falseFlagScored": 0.013333,
+        "catchAll": 0.156923,
+        "catchScored": 0.31677,
+        "flaggedHuman": 4,
+        "flaggedLlm": 51,
         "humanReviewRequiredOnEveryRow": true,
         "caveatOnEveryRow": true,
         "cellNotFittedPriorUsed": 0,
@@ -7618,18 +7618,18 @@
             "n_human": 6,
             "n_llm": 77,
             "flaggedHuman": 0,
-            "flaggedLlm": 2,
+            "flaggedLlm": 4,
             "falseFlag": 0,
-            "catch": 0.025974,
+            "catch": 0.051948,
             "insufficient": true
           },
           "150-499": {
             "n_human": 224,
             "n_llm": 248,
-            "flaggedHuman": 1,
-            "flaggedLlm": 20,
-            "falseFlag": 0.004464,
-            "catch": 0.080645,
+            "flaggedHuman": 3,
+            "flaggedLlm": 47,
+            "falseFlag": 0.013393,
+            "catch": 0.189516,
             "insufficient": false
           },
           "500+": {
@@ -7649,42 +7649,40 @@
         "n_llm": 325,
         "labelByTruth": {
           "human": {
-            "too_short_or_no_signal": 107,
-            "no_reliable_indicators": 196,
-            "ai_style_indicators": 22
+            "too_short_or_no_signal": 128,
+            "no_reliable_indicators": 197
           },
           "llm": {
-            "no_reliable_indicators": 256,
+            "no_reliable_indicators": 271,
             "too_short_or_no_signal": 52,
-            "ai_style_indicators": 17
+            "ai_style_indicators": 2
           }
         },
         "verdictByTruth": {
           "human": {
-            "insufficient_text": 107,
-            "uncertain": 98,
-            "leaning_llm": 22,
-            "leaning_human": 98
+            "insufficient_text": 128,
+            "uncertain": 85,
+            "leaning_human": 112
           },
           "llm": {
-            "uncertain": 143,
-            "leaning_human": 113,
+            "uncertain": 115,
+            "leaning_human": 156,
             "insufficient_text": 52,
-            "leaning_llm": 17
+            "leaning_llm": 2
           }
         },
-        "gatedHuman": 107,
+        "gatedHuman": 128,
         "gatedLlm": 52,
         "gateReasons": {
-          "no_evidence_either_way": 139,
+          "no_evidence_either_way": 160,
           "too_few_active_features": 20
         },
-        "falseFlagAll": 0.067692,
-        "falseFlagScored": 0.100917,
-        "catchAll": 0.052308,
-        "catchScored": 0.062271,
-        "flaggedHuman": 22,
-        "flaggedLlm": 17,
+        "falseFlagAll": 0,
+        "falseFlagScored": 0,
+        "catchAll": 0.006154,
+        "catchScored": 0.007326,
+        "flaggedHuman": 0,
+        "flaggedLlm": 2,
         "humanReviewRequiredOnEveryRow": true,
         "caveatOnEveryRow": true,
         "cellNotFittedPriorUsed": 0,
@@ -7694,26 +7692,26 @@
             "n_human": 6,
             "n_llm": 77,
             "flaggedHuman": 0,
-            "flaggedLlm": 8,
+            "flaggedLlm": 2,
             "falseFlag": 0,
-            "catch": 0.103896,
+            "catch": 0.025974,
             "insufficient": true
           },
           "150-499": {
             "n_human": 224,
             "n_llm": 248,
-            "flaggedHuman": 19,
-            "flaggedLlm": 9,
-            "falseFlag": 0.084821,
-            "catch": 0.03629,
+            "flaggedHuman": 0,
+            "flaggedLlm": 0,
+            "falseFlag": 0,
+            "catch": 0,
             "insufficient": false
           },
           "500+": {
             "n_human": 95,
             "n_llm": 0,
-            "flaggedHuman": 3,
+            "flaggedHuman": 0,
             "flaggedLlm": 0,
-            "falseFlag": 0.031579,
+            "falseFlag": 0,
             "catch": null,
             "insufficient": true
           }
@@ -7722,5 +7720,5 @@
     },
     "note": "One --jsonl batch per pass, --preset essay, no --history and no corpus index. Row text is never printed."
   },
-  "wallClockSec": 37.5
+  "wallClockSec": 37.7
 }

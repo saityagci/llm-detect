@@ -279,10 +279,13 @@ const GOLDENS = [
       + 'The bed was soft. The shower was hot. The price was fair.',
     opts: { shape: 'prose' }, want: 1 },
   { id: 'parallel_openers',
+    // R50(c): FUNCTION-WORD openers ("The …") are excluded, so the four "The" sentences do not
+    // count at all. Four CONTENT openers remain, of which "Alpha" repeats twice: 3 distinct of
+    // 4 counted openers.
     text: sentencesOf([15, 15, 15, 15], 'The') + ' ' + sentencesOf([15], 'Alpha')
-      + ' ' + sentencesOf([15], 'Beta') + ' ' + sentencesOf([15], 'Gamma')
+      + ' ' + sentencesOf([15], 'Alpha') + ' ' + sentencesOf([15], 'Gamma')
       + ' ' + sentencesOf([15], 'Delta'),
-    opts: { shape: 'prose' }, want: 1 - 5 / 8 },     // 5 distinct openers over 8 sentences
+    opts: { shape: 'prose', lang: 'en' }, want: 1 - 3 / 4 },
   { id: 'closing_summary_move',
     text: sentencesOf([60, 60], 'The') + '\n\nIn conclusion, the stay was pleasant and good.',
     // lang pinned: the filler is one repeated word, so language ID has nothing to vote on and
@@ -1962,14 +1965,198 @@ function verifyRoundOne() {
     eq('R43 golden: ... labelled no_reliable_indicators', tidy.summary.label, 'no_reliable_indicators');
     ok('R43 golden: ... warning register_only_evidence',
       tidy.warnings.includes('register_only_evidence'));
-    ok('R43 golden: ... note names parallel_openers as immaterial',
+    // After R50(c) the tidy draft's parallel_openers no longer fires at all, so the note takes
+    // R50(d)'s SECOND form: material non-proxy evidence from one group only.
+    ok('R43 golden: ... note explains which of R24\'s two cases applies',
       tidy.notes.some((n) => n.startsWith('register_only_evidence')
-        && n.includes('parallel_openers') && n.includes('materiality floor')),
+        && (n.includes('materiality floor')
+          || n.includes('material non-proxy evidence from one group only'))),
       JSON.stringify(tidy.notes.filter((n) => n.startsWith('register_only_evidence'))));
   } else {
     info.push('R43 golden: examples/samples/student-essay-v1-tidy.txt is not present; the '
       + 'materiality floor is still asserted directly against decideVerdict above.');
   }
+
+  // ===========================================================================================
+  // R50 — the essay-genre round. (a) history may not cross the evidence floor, (b) the
+  // consistency note names what shifted, (c) parallel_openers ignores function-word starters,
+  // (d) register_only_evidence distinguishes its two cases.
+  // ===========================================================================================
+
+  // --- R50(c): function-word sentence starters are not "parallel openers" ---------------------
+  const narrative = 'When I was fifteen my school ran a trip to the coast. The bus was too hot and '
+    + 'the hostel smelled of bleach. I spent the first two days convinced that I hated it. '
+    + 'It rained without stopping until Wednesday. The weather turned on the third morning. '
+    + 'We walked out along the cliff path before breakfast. I remember that nobody said very much. '
+    + 'The sea was flat and grey that day. There were birds on the rocks below us. '
+    + 'They were birds I could not name then and cannot name now. '
+    + 'That walk has stayed with me longer than anything else we did that year. '
+    + 'I still do not entirely know why it did. '
+    + 'The rest of the week was ordinary and I have forgotten almost all of it. '
+    + 'We came home on the Friday and school started again on the Monday morning. '
+    + 'I told nobody about the walk because there was nothing much to tell them. '
+    + 'It was cold and early and quiet and none of that makes a story worth hearing. '
+    + 'That is probably the reason it has lasted as long as it has in my head.';
+  const narR = detect(narrative, { ...BASE, preset: 'essay' });
+  const narPo = narR.signals.find((x) => x.name === 'parallel_openers');
+  ok('R50(c): an ordinary narrative ("The… I… It… We…") is not parallel openers',
+    !narPo || narPo.value === null || narPo.value === 0,
+    `value ${narPo && narPo.value} — ${narPo && narPo.matched}`);
+  const contentRepeat = 'Photosynthesis converts light into chemical energy in the leaf. '
+    + 'Photosynthesis requires water drawn up through the stem. '
+    + 'Photosynthesis releases oxygen as a by-product of the reaction. '
+    + 'Respiration reverses part of that process at night in every cell. '
+    + 'Respiration consumes the sugars the plant has stored during daylight hours. '
+    + 'Chlorophyll gives the leaf its colour and does the absorbing of light. '
+    + 'Stomata open and close to control how much water the plant loses. '
+    + 'Xylem carries that water upward from the roots to the leaves above. '
+    + 'Photosynthesis stops entirely once the light level falls below a threshold value. '
+    + 'Respiration continues through the night at a slow and fairly steady rate. '
+    + 'Chlorophyll breaks down in autumn and the other pigments become visible at last. '
+    + 'Stomata close in dry weather to slow the loss of water from the leaf surface. '
+    + 'Xylem vessels are dead cells arranged end to end into continuous narrow tubes.';
+  const cr = detect(contentRepeat, { ...BASE, preset: 'essay' });
+  const crPo = cr.signals.find((x) => x.name === 'parallel_openers');
+  ok('R50(c): REPEATED CONTENT openers still register',
+    crPo && crPo.value !== null && crPo.value > 0, `value ${crPo && crPo.value}`);
+  ok('R50(c): the matched string says what was measured',
+    crPo && /^\d+ of \d+ sentences open with the same content word; \d+ connector openers$/
+      .test(crPo.matched), crPo && crPo.matched);
+  const connectorEssay = 'Furthermore the committee met on Tuesday to review the whole proposal. '
+    + 'Moreover the budget had already been agreed by the finance team in advance. '
+    + 'Additionally the timetable was published before anybody raised a single objection. '
+    + 'Nobody objected to the timetable at the meeting itself on the day. '
+    + 'Everybody agreed that the process had been fair enough under the circumstances. '
+    + 'Several members asked for a written summary to be circulated afterwards. '
+    + 'The chair promised one by the end of the following working week. '
+    + 'That promise was kept and the summary arrived on the Thursday morning. '
+    + 'Nobody read the summary carefully enough to notice the missing appendix at first. '
+    + 'Several weeks passed before anyone asked about it in a meeting again. '
+    + 'Everybody had assumed that somebody else was checking the figures in it. '
+    + 'That assumption turned out to be wrong in a way that cost the project time. '
+    + 'The lesson was learned and the next summary carried its appendix from the start.';
+  const ce = detect(connectorEssay, { ...BASE, preset: 'essay' });
+  const cePo = ce.signals.find((x) => x.name === 'parallel_openers');
+  ok('R50(c): the connector bonus is unchanged — taught connectives still register',
+    cePo && cePo.value !== null && cePo.value >= 0.15
+      && / [3-9]\d* connector openers$/.test(cePo.matched), cePo && cePo.matched);
+
+  // --- R52: the prior is re-based to the feature's NEW scale ----------------------------------
+  // A feature whose DEFINITION changed keeps no prior from its old definition. "No repeated
+  // content opener" is the typical human and must contribute nothing.
+  const priorW = JSON.parse(readFileSync(join(HERE, 'weights.v1.json'), 'utf8'));
+  for (const cellKey of ['en:prose', 'tr:prose']) {
+    eq(`R52: ${cellKey} parallel_openers mu is 0`, priorW.cells[cellKey].mu.parallel_openers, 0);
+    eq(`R52: ${cellKey} parallel_openers sigma is 0.15`, priorW.cells[cellKey].sigma.parallel_openers, 0.15);
+  }
+  const zeroPo = narR.signals.find((x) => x.name === 'parallel_openers');
+  ok('R52: a narrative with no repeated content opener contributes nothing either way',
+    !zeroPo || zeroPo.value === null || Math.abs(zeroPo.contribution) < 1e-9,
+    `value ${zeroPo && zeroPo.value} contribution ${zeroPo && zeroPo.contribution}`);
+  const crPo2 = cr.signals.find((x) => x.name === 'parallel_openers');
+  ok('R52: a >=20% repeat share is still a MATERIAL positive contribution (R43 floor 0.10)',
+    crPo2 && crPo2.value >= 0.2 && crPo2.contribution >= MATERIALITY_FLOOR,
+    `value ${crPo2 && crPo2.value} contribution ${crPo2 && crPo2.contribution}`);
+  near('R52: ... and the raw arithmetic is exactly w * (value - 0) / 0.15',
+    crPo2.contributionRaw, crPo2.weight * Math.min(3, crPo2.value / 0.15), 1e-9);
+
+  // --- R51(b): `student` is an alias of `sender` -----------------------------------------------
+  const twin = 'When I was fifteen my school ran a trip to the coast and I spent the whole week '
+    + 'convinced that I hated it. The bus was too hot and the hostel smelled of bleach. On the '
+    + 'third morning the weather turned and one of the teachers took a small group of us out '
+    + 'along the cliff path before breakfast. Nobody said very much at all that morning. The sea '
+    + 'was flat and grey and there were birds on the rocks below us that I could not name then '
+    + 'and still cannot name now. I have thought about that walk more often than about anything '
+    + 'else we did that year, and I still do not entirely know why. It was not beautiful in the '
+    + 'way a photograph is beautiful. It was early, and cold, and I was tired, and none of us '
+    + 'wanted to be awake at all. What I remember is the quiet, and the fact that for about an '
+    + 'hour nobody asked me anything whatsoever. That is the whole of it, and every time I try '
+    + 'to write it down as though something happened, the something turns out to be the nothing.';
+  const sameStudent = buildCorpusIndex([{ id: 'essay-1', student: 's-77', text: twin }]);
+  const otherStudent = buildCorpusIndex([{ id: 'essay-1', student: 's-99', text: twin }]);
+  const sameR = detect(twin, { ...BASE, preset: 'essay', corpusIndex: sameStudent,
+    sender: 's-77', id: 'essay-2' });
+  ok('R51(b): the SAME student\'s two essays under `student` keys do NOT fire near_duplicate',
+    !sameR.rules.some((r) => r.name === 'near_duplicate'),
+    sameR.rules.map((r) => r.name).join(','));
+  const otherR = detect(twin, { ...BASE, preset: 'essay', corpusIndex: otherStudent,
+    sender: 's-77', id: 'essay-2' });
+  ok('R51(b): two DIFFERENT students at Jaccard 1.0 do fire it',
+    otherR.rules.some((r) => r.name === 'near_duplicate'));
+  eq('R51(b): ... and it is labelled not_independently_authored',
+    otherR.summary.label, 'not_independently_authored');
+  const bothKeys = buildCorpusIndex([{ id: 'essay-1', sender: 's-77', student: 's-99', text: twin }]);
+  ok('R51(b): when a row carries BOTH, `sender` wins',
+    !detect(twin, { ...BASE, preset: 'essay', corpusIndex: bothKeys, sender: 's-77', id: 'essay-2' })
+      .rules.some((r) => r.name === 'near_duplicate'));
+  const batchStudent = detectBatch(
+    [{ id: 'essay-2', student: 's-77', text: twin }], { ...BASE, preset: 'essay', corpusIndex: sameStudent });
+  ok('R51(b): a --jsonl row resolves `student` for the different-sender guard',
+    !batchStudent[0].rules.some((r) => r.name === 'near_duplicate'));
+  const aggStudent = aggregate(
+    Array.from({ length: 3 }, (_, i) => ({ id: 'm' + i, student: 's-77', text: twin })),
+    { ...BASE, preset: 'essay' });
+  eq('R51(b): an --aggregate row resolves `student` as the sender', aggStudent.sender, 's-77');
+
+  // --- R50(a): history never manufactures a verdict --------------------------------------------
+  const shortOwn = 'The ice rink opened in November and I went twice a week until it closed. '
+    + 'I fell over more times than I can count and my wrists ached for days afterwards. '
+    + 'By February I could go round the outside without holding on to anything at all. '
+    + 'That is the only thing I have ever practised until it stopped being hard.';
+  const belowFloor = detect(shortOwn, { ...BASE, preset: 'essay', history: priorEssays });
+  ok('R50(a): a document below the evidence floor keeps its abstention',
+    belowFloor.verdict !== 'leaning_human' && belowFloor.verdict !== 'likely_human',
+    `${belowFloor.verdict}`);
+  if (belowFloor.verdict === 'insufficient_text') {
+    eq('R50(a): ... and its label', belowFloor.summary.label, 'too_short_or_no_signal');
+    ok('R50(a): ... while the history result is still REPORTED',
+      Boolean(belowFloor.history) && belowFloor.notes.some((n) => n.startsWith('consistent_with_history')
+        || n.startsWith('style_shift_vs_history')));
+    ok('R50(a): ... and a note says the signal was not scored',
+      belowFloor.notes.some((n) => n.startsWith('history_not_applied_below_floor')));
+    ok('R50(a): ... and no history signal entered the sum',
+      !belowFloor.signals.some((x) => x.name === 'history_consistency'));
+  }
+  ok('R50(a): a document that DOES clear the floor still gets the signal',
+    consistent.signals.some((x) => x.name === 'history_consistency'));
+
+  // --- R50(b): the consistency note names what shifted ------------------------------------------
+  const shiftedTwo = compareHistory(
+    [{ tokens: 200, signals: [{ name: 'a', z: 0 }, { name: 'b', z: 0 }, { name: 'c', z: 0 }] },
+      { tokens: 200, signals: [{ name: 'a', z: 0 }, { name: 'b', z: 0 }, { name: 'c', z: 0 }] }],
+    [{ name: 'a', z: 3 }, { name: 'b', z: -2.5 }, { name: 'c', z: 0 }]);
+  ok('R50(b): two shifted features are below the three-feature threshold',
+    shiftedTwo.shifted.length === 2 && shiftedTwo.shift === false);
+  const twoShiftReport = detect(newEssay, { ...BASE, preset: 'essay', historyProfile: {
+    ...profile,
+    features: Object.fromEntries(Object.entries(profile.features).map(([k, v], i) =>
+      [k, i < 2 ? { mean: v.mean + 9, sd: v.sd } : v])),
+  } });
+  ok('R50(b): with 0 < shifted < 3 the note NAMES them with their z, and agrees with shifted[]',
+    twoShiftReport.history.shifted.length > 0 && twoShiftReport.history.shifted.length < 3
+      ? twoShiftReport.notes.some((n) => n.startsWith('consistent_with_history')
+        && n.includes('beyond 2 SD')
+        && twoShiftReport.history.shifted.every((x) => n.includes(x.feature))
+        && n.includes('no shift is declared'))
+      : true,
+    JSON.stringify(twoShiftReport.notes.filter((n) => n.startsWith('consistent_with_history'))));
+  ok('R50(b): with nothing shifted the note still says "within 2 SD"',
+    consistent.notes.some((n) => n.startsWith('consistent_with_history') && n.includes('within 2 SD')));
+
+  // --- R50(d): the two cases of register_only_evidence -------------------------------------------
+  const proxyOnly = decide([proxySig, mkSig('sentence_len_mode_mass', 'rhythm', 0.03)]);
+  ok('R50(d): with no material non-proxy signal the note says "register proxies only"',
+    proxyOnly.notes.some((n) => n.startsWith('register_only_evidence')
+      && n.includes('register proxies only')), JSON.stringify(proxyOnly.notes));
+  const oneGroup = decide([proxySig, mkSig('sentence_len_mode_mass', 'rhythm', 0.4),
+    mkSig('paragraph_uniformity', 'rhythm', 0.3)]);
+  ok('R50(d): with material non-proxy evidence from ONE group the note says so, and names it',
+    oneGroup.notes.some((n) => n.startsWith('register_only_evidence')
+      && n.includes('material non-proxy evidence from one group only (rhythm)')
+      && n.includes('sentence_len_mode_mass')), JSON.stringify(oneGroup.notes));
+  ok('R50(d): ... and does not claim the proxies were the issue',
+    oneGroup.notes.every((n) => !n.startsWith('register_only_evidence')
+      || !n.includes('register proxies only')));
 
   // --- S-01: near_duplicate with an unknown sender ------------------------------------------
   const dupText = 'The hotel was excellent and the staff were extremely helpful during our stay in '

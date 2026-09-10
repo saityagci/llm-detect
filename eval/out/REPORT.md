@@ -1,6 +1,6 @@
 # LLM-detect evaluation report
 
-generated 2026-09-10T23:23:06.056Z · node v24.5.0 · detector `stylometry.mjs`
+generated 2026-09-10T23:32:38.675Z · node v24.5.0 · detector `stylometry.mjs`
 
 Language scope is **English and Turkish only** (HEAD-RULINGS R22). Arabic-script rows were
 excluded upstream by make-splits.mjs and are never scored.
@@ -60,7 +60,7 @@ scored remainder, and the coverage that produced it is printed beside it.
 | cell | rows | scored | gated (`insufficient_text`) | gate rate |
 |---|---:|---:|---:|---:|
 | en:chat | 613 | 9 | 604 | 98.5% |
-| en:prose | 15029 | 5498 | 9531 | 63.4% |
+| en:prose | 15029 | 5575 | 9454 | 62.9% |
 | tr:chat | 2522 | 223 | 2299 | 91.2% |
 | tr:prose | 1996 | 47 | 1949 | 97.6% |
 
@@ -76,8 +76,8 @@ number. A precision computed from three positives is a rounding artefact wearing
 | en:chat | 50-149 | 0 | 5 | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |
 | en:prose | <20 | 188 | 193 | NO COVERAGE — 381 of 381 rows are below the floor and were never scored | — | — | 0.0% | 0.0% | — | — |
 | en:prose | 20-49 | 377 | 352 | NO COVERAGE — 729 of 729 rows are below the floor and were never scored | — | — | 0.0% | 0.0% | — | — |
-| en:prose | 50-149 | 372 | 427 | 0.726 | 0.661 | 0.175 | 0.3% | 2.1% | 2.6% | 0.900 |
-| en:prose | 150-499 | 430 | 549 | 0.891 | 0.874 | 0.062 | 1.2% | 29.7% | 41.7% | 0.970 |
+| en:prose | 50-149 | 372 | 427 | 0.717 | 0.641 | 0.162 | 0.3% | 1.4% | 2.6% | 0.857 |
+| en:prose | 150-499 | 430 | 549 | 0.887 | 0.870 | 0.061 | 1.4% | 29.7% | 40.3% | 0.964 |
 | en:prose | 500+ | 132 | 39 | INSUFFICIENT — placeholder, not a measurement | | | | | | |
 | tr:chat | <20 | 146 | 631 | NO COVERAGE — 776 of 777 rows are below the floor and were never scored | — | — | 0.0% | 0.0% | — | — |
 | tr:chat | 20-49 | 25 | 84 | INSUFFICIENT — placeholder, not a measurement | | | | | | |
@@ -105,20 +105,20 @@ own validation side. **The model, mu/sigma and the coefficients are section 3's*
 rows joined the fitting side like any other public source, and the fit is not re-run per genre.
 
 - essay rows in the split: **3000** from `public:essays-en-pairs` · fit 1828 / val 522 / test 650
-- gated by the length/feature floor (`insufficient_text`): **852** of 3000 (28.4%) — the essay coverage that produced every number below
+- gated by the length/feature floor (`insufficient_text`): **783** of 3000 (26.1%) — the essay coverage that produced every number below
 - machine half by recorded generator: `unspecified-essay-generator` 1500
 
 | cell | length bucket | n_human | n_llm | AUC | AUC hard | ECE | FPR@t_essay | TPR@t_essay | TPR@t_essay hard | precision@t_essay |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | en:prose essay | 50-149 | 6 | 77 | INSUFFICIENT — placeholder, not a measurement | | | | | | |
-| en:prose essay | 150-499 | 224 | 248 | 0.936 | 0.967 | 0.121 | 0.4% | 26.2% | 43.5% | 0.985 |
+| en:prose essay | 150-499 | 224 | 248 | 0.941 | 0.965 | 0.116 | 0.4% | 25.0% | 44.8% | 0.984 |
 | en:prose essay | 500+ | 95 | 0 | INSUFFICIENT — placeholder, not a measurement | | | | | | |
 
 `t_essay` is the fairness-limited threshold re-picked on the ESSAY rows of the validation side
 (same rule as section 5: the smallest threshold holding every binding stratum at or under 2%
 FPR). It is not section 5's cell-wide t, and the two are printed side by side below.
 
-- `en:prose`: t_essay = **0.911** (candidate from the validation-side score set, picked over 522 essay validation rows) · the cell-wide t of section 5 is 0.909 · hard-mode t_essay = 0.819
+- `en:prose`: t_essay = **0.858** (candidate from the validation-side score set, picked over 522 essay validation rows) · the cell-wide t of section 5 is 0.854 · hard-mode t_essay = 0.874
   - fairness strata on the essay validation side: `formal_register` n=26 FPR 0.0% · `lang:en` n=261 FPR 0.4%
 
 The same essay rows at section 5's cell-wide t, which is what a caller gets today if the
@@ -126,7 +126,7 @@ threshold is not re-picked per genre:
 
 | cell | bucket | t_essay | FPR@t_essay | TPR@t_essay | cell-wide t | FPR@cell t | TPR@cell t |
 |---|---|---:|---:|---:|---:|---:|---:|
-| en:prose essay | 150-499 | 0.911 | 0.4% | 26.2% | 0.909 | 0.4% | 26.6% |
+| en:prose essay | 150-499 | 0.858 | 0.4% | 25.0% | 0.854 | 0.4% | 25.0% |
 
 **Base rates for the essay rows.** Precision recomputed from the essay rows' own measured
 FPR and recall. A school platform's prior is the share of submissions that are actually
@@ -135,7 +135,7 @@ the head's own estimate of that share, not the friendliest one.
 
 | cell | bucket | FPR | recall | P@50% | P@20% | P@10% | P@5% | P@2% | P@1% |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| en:prose essay | 150-499 | 0.4% | 26.2% | 0.983 | 0.936 | 0.867 | 0.756 | 0.545 | 0.372 |
+| en:prose essay | 150-499 | 0.4% | 25.0% | 0.982 | 0.933 | 0.862 | 0.747 | 0.533 | 0.361 |
 
 
 **Negative control, essay flavour: human essays flagged at t (TEST side only).** This is the
@@ -145,9 +145,9 @@ column is printed beside it so a silent instrument cannot look like a safe one.
 | cell | bucket | human essays (test) | gated | scored | flagged at t_essay | FPR | flagged at cell-wide t | FPR |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | en:prose essay | 50-149 | 6 | 6 | 0 | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote |
-| en:prose essay | 150-499 | 224 | 19 | 205 | 1 | 0.4% | 1 | 0.4% |
-| en:prose essay | 500+ | 95 | 2 | 93 | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote |
-| en:prose essay | ALL | 325 | 27 | 298 | 1 | 0.3% | 1 | 0.3% |
+| en:prose essay | 150-499 | 224 | 17 | 207 | 1 | 0.4% | 1 | 0.4% |
+| en:prose essay | 500+ | 95 | 2 | 93 | 1 | 1.1% — INSUFFICIENT (n<100), an anecdote | 1 | 1.1% — INSUFFICIENT (n<100), an anecdote |
+| en:prose essay | ALL | 325 | 25 | 300 | 2 | 0.6% | 2 | 0.6% |
 
 **The non-native stratum is UNMEASURED on essays, after a deliberate search for it.** 0 essay
 row(s) carry the `non_native_en` stratum, because that stratum is defined as "an English
@@ -188,7 +188,7 @@ Deleted in hard mode: `terminal_punct_ratio`, `sentence_initial_caps`, `all_lowe
 | cell | AUC standard | AUC hard mode | TPR@t standard | TPR@t hard mode |
 |---|---:|---:|---:|---:|
 | en:chat | — | — | — | — |
-| en:prose | 0.862 | 0.822 | 11.1% | 15.4% |
+| en:prose | 0.859 | 0.823 | 10.9% | 14.9% |
 | tr:chat | 0.975 | 0.450 | 11.2% | 2.1% |
 | tr:prose | — | — | — | — |
 
@@ -200,10 +200,10 @@ falls out is reported without editorializing.
 
 | cell | t | stratum | n (human, val) | FPR@t | binding? |
 |---|---:|---|---:|---:|---|
-| en:prose | 0.909 | non_native_en | 0 | — | no — fewer than 20 rows, it cannot limit anything |
-| en:prose | 0.909 | formal_register | 33 | 0.0% | yes |
-| en:prose | 0.909 | lang:en | 1454 | 0.6% | yes |
-| en:prose | 0.909 | lang:tr | 0 | — | no — fewer than 20 rows, it cannot limit anything |
+| en:prose | 0.854 | non_native_en | 0 | — | no — fewer than 20 rows, it cannot limit anything |
+| en:prose | 0.854 | formal_register | 33 | 0.0% | yes |
+| en:prose | 0.854 | lang:en | 1454 | 0.8% | yes |
+| en:prose | 0.854 | lang:tr | 0 | — | no — fewer than 20 rows, it cannot limit anything |
 | tr:chat | 1.000 | non_native_en | 22 | 0.0% | yes |
 | tr:chat | 1.000 | formal_register | 0 | — | no — fewer than 20 rows, it cannot limit anything |
 | tr:chat | 1.000 | lang:en | 0 | — | no — fewer than 20 rows, it cannot limit anything |
@@ -226,8 +226,8 @@ a gated row counted as a document that never fires. Under 100 rows it is an anec
 |---|---|---:|---:|---:|---:|---:|
 | en:prose | formal_register | 46 | 16 | 30 | 1 | 2.2% — INSUFFICIENT (n<100), an anecdote |
 | en:prose | mobile_typed | 50 | 31 | 19 | 1 | 2.0% — INSUFFICIENT (n<100), an anecdote |
-| en:prose | lang:en | 1486 | 931 | 555 | 6 | **0.4%** |
-| en:prose | ALL | 1499 | 944 | 555 | 6 | **0.4%** |
+| en:prose | lang:en | 1486 | 928 | 558 | 8 | **0.5%** |
+| en:prose | ALL | 1499 | 941 | 558 | 8 | **0.5%** |
 | tr:chat | non_native_en | 13 | 13 | 0 | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote |
 | tr:chat | mobile_typed | 136 | 131 | 5 | 0 | **0.0%** |
 | tr:chat | lang:tr | 172 | 156 | 16 | 0 | **0.0%** |
@@ -245,13 +245,11 @@ A fitted coefficient whose sign is opposite to §B is **not flipped**. It is fla
 investigated, and either explained or the feature is dropped. A sign flip usually means a
 corpus artefact.
 
-- `en:prose` · `balanced_contrast_frame` expected llm-direction, fitted coefficient -0.438
-- `en:prose` · `contraction_apostrophe_drop` expected human-direction, fitted coefficient 0.096
-- `en:prose` · `ellipsis_hand_typed` expected human-direction, fitted coefficient 0.383
-- `en:prose` · `letter_elongation` expected human-direction, fitted coefficient 0.207
-- `en:prose` · `paragraph_uniformity` expected llm-direction, fitted coefficient -0.068
-- `en:prose` · `parallel_openers` expected llm-direction, fitted coefficient -0.246
-- `en:prose` · `repeated_punct_emoticon` expected human-direction, fitted coefficient 0.579
+- `en:prose` · `balanced_contrast_frame` expected llm-direction, fitted coefficient -0.443
+- `en:prose` · `contraction_apostrophe_drop` expected human-direction, fitted coefficient 0.088
+- `en:prose` · `ellipsis_hand_typed` expected human-direction, fitted coefficient 0.321
+- `en:prose` · `letter_elongation` expected human-direction, fitted coefficient 0.237
+- `en:prose` · `repeated_punct_emoticon` expected human-direction, fitted coefficient 0.594
 - `tr:chat` · `tr_chat_morphology` expected human-direction, fitted coefficient 0.257
 
 ## 7. Leave-one-writer-out — the binding limit on every threshold
@@ -305,8 +303,8 @@ R0 with the bulk of the rows and R1/R2 with very few, and the table above says e
 - 298 documents re-scored with their sentences shuffled by the shipped segmenter, original inter-sentence separators preserved.
 - **1** document(s) became `insufficient_text` AFTER the shuffle and are excluded from the deltas below — a shuffle that gates a document is itself a finding, and it used to leave the denominator without a line.
 - 0 document(s) could not be re-assembled from their segmented sentences (NFC normalisation moved the bytes) and 1 had no model for their cell; both are skipped and counted rather than dropped.
-- calibrated p: mean |delta| **0.079** · median **0.011** · max **0.642**
-- pre-isotonic score: mean |delta| **0.070** · max **0.540** (isotonic calibration is a step function and flattens small moves, so this is the sensitive one)
+- calibrated p: mean |delta| **0.069** · median **0.009** · max **0.595**
+- pre-isotonic score: mean |delta| **0.062** · max **0.488** (isotonic calibration is a step function and flattens small moves, so this is the sensitive one)
 - The score should barely move. A large move means the features are reading document order rather than style.
 
 Top 5 documents by |delta| on the pre-isotonic score, and the features that actually moved.
@@ -316,13 +314,13 @@ different boundaries in the shuffled text — that is the control measuring itse
 
 | row | cell | \|delta p\| | \|delta raw\| | features that moved (delta contribution) |
 |---|---|---:|---:|---|
-| essays-en-pairs-human-679 | en:prose | 0.642 | 0.540 | `terminal_punct_ratio` +2.432, `sentence_len_mode_mass` +0.023, `sentence_len_cv` -0.017, `parallel_openers` -0.014 |
-| essays-en-pairs-human-700 | en:prose | 0.598 | 0.485 | `terminal_punct_ratio` +2.432, `sentence_len_cv` -0.290, `sentence_len_mode_mass` +0.023, `parallel_openers` -0.014 |
-| essays-en-pairs-human-1111 | en:prose | 0.525 | 0.474 | `terminal_punct_ratio` +1.621, `sentence_len_cv` +0.181, `parallel_openers` +0.143, `sentence_len_mode_mass` +0.118 |
-| essays-en-pairs-human-190 | en:prose | 0.498 | 0.474 | `llm_lexicon_weak` -1.006, `terminal_punct_ratio` -0.973, `sentence_len_cv` -0.283, `sentence_len_mode_mass` -0.132, `parallel_openers` +0.084, `paragraph_uniformity` +0.021 |
-| essays-en-pairs-human-450 | en:prose | 0.470 | 0.432 | `terminal_punct_ratio` +2.432, `sentence_len_cv` -0.585, `parallel_openers` +0.089, `sentence_len_mode_mass` -0.044 |
+| essays-en-pairs-human-190 | en:prose | 0.595 | 0.488 | `llm_lexicon_weak` -1.057, `terminal_punct_ratio` -0.852, `sentence_len_cv` -0.281, `sentence_len_mode_mass` -0.120, `paragraph_uniformity` +0.010 |
+| essays-en-pairs-human-679 | en:prose | 0.453 | 0.488 | `terminal_punct_ratio` +2.130, `sentence_len_mode_mass` +0.021, `sentence_len_cv` -0.017, `parallel_openers` -0.001 |
+| essays-en-pairs-human-700 | en:prose | 0.439 | 0.432 | `terminal_punct_ratio` +2.130, `sentence_len_cv` -0.288, `sentence_len_mode_mass` +0.021, `parallel_openers` -0.001 |
+| essays-en-pairs-human-1103 | en:prose | 0.436 | 0.426 | `terminal_punct_ratio` +0.852, `llm_lexicon_weak` +0.796, `sentence_len_cv` +0.174, `sentence_len_mode_mass` +0.017, `paragraph_uniformity` +0.013 |
+| essays-en-pairs-human-609 | en:prose | 0.470 | 0.374 | `terminal_punct_ratio` +1.278, `sentence_len_cv` +0.619, `sentence_len_mode_mass` +0.036, `paragraph_uniformity` -0.002, `parallel_openers` -0.000 |
 
-- across all 298 shuffled documents the features that moved most often were `paragraph_uniformity` (160), `parallel_openers` (146), `sentence_len_mode_mass` (145), `terminal_punct_ratio` (143), `sentence_len_cv` (143), `llm_lexicon_weak` (9), `space_hygiene` (8), `hedge_density` (4).
+- across all 298 shuffled documents the features that moved most often were `paragraph_uniformity` (161), `sentence_len_mode_mass` (145), `terminal_punct_ratio` (144), `sentence_len_cv` (143), `parallel_openers` (80), `llm_lexicon_weak` (9), `space_hygiene` (8), `hedge_density` (4).
 
 
 ### (e) the support-desk snippet library, scored as human text
@@ -340,8 +338,8 @@ flags in five.
 
 | cell | bucket | FPR | recall | P@50% | P@20% | P@10% | P@5% | P@2% | P@1% |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| en:prose | 50-149 | 0.3% | 2.1% | 0.887 | 0.662 | 0.466 | 0.292 | 0.138 | 0.073 |
-| en:prose | 150-499 | 1.2% | 29.7% | 0.962 | 0.865 | 0.739 | 0.573 | 0.343 | 0.205 |
+| en:prose | 50-149 | 0.3% | 1.4% | 0.839 | 0.566 | 0.367 | 0.216 | 0.096 | 0.050 |
+| en:prose | 150-499 | 1.4% | 29.7% | 0.955 | 0.842 | 0.703 | 0.528 | 0.303 | 0.177 |
 
 For reference, the design round measured precision **0.183 at a 1% prior** on this corpus at the
 strictest threshold it tested: four of five flags wrong. Nothing below should be read without it.
@@ -351,15 +349,15 @@ strictest threshold it tested: four of five flags wrong. Nothing below should be
 | fixture | variant | transform | verdict | p | delta vs its clean sibling |
 |---|---|---|---|---:|---:|
 | en-hr-1 | clean | — | leaning_llm | 1.000 |  |
-| en-hr-2 | clean | — | leaning_llm | 1.000 |  |
+| en-hr-2 | clean | — | uncertain | 1.000 |  |
 | en-hr-3 | clean | — | insufficient_text | — |  |
-| en-hr-4 | clean | — | leaning_llm | 0.399 |  |
+| en-hr-4 | clean | — | leaning_llm | 0.415 |  |
 | en-hr-5 | humanized | b | uncertain | 1.000 | 0.000 |
 | en-hr-6 | humanized | c | uncertain | 1.000 | 0.000 |
 | en-hr-7 | humanized | a | insufficient_text | — |  |
-| en-pr-1 | clean | — | leaning_llm | 0.885 |  |
+| en-pr-1 | clean | — | uncertain | 0.919 |  |
 | en-pr-2 | clean | — | insufficient_text | — |  |
-| en-pr-3 | humanized | b | leaning_llm | 0.885 | 0.000 |
+| en-pr-3 | humanized | b | uncertain | 0.919 | 0.000 |
 | en-wa-1 | clean | — | insufficient_text | — |  |
 | en-wa-2 | clean | — | insufficient_text | — |  |
 | en-wa-3 | clean | — | uncertain | — |  |
@@ -371,8 +369,8 @@ strictest threshold it tested: four of five flags wrong. Nothing below should be
 | en-em-1 | clean | — | insufficient_text | — |  |
 | en-em-2 | clean | — | insufficient_text | — |  |
 | en-em-3 | humanized | b | insufficient_text | — |  |
-| en-em-4 | humanized | c | leaning_human | 0.095 |  |
-| en-es-1 | clean | — | leaning_llm | 0.667 |  |
+| en-em-4 | humanized | c | leaning_human | 0.146 |  |
+| en-es-1 | clean | — | leaning_llm | 0.607 |  |
 | en-es-2 | clean | — | insufficient_text | — |  |
 | en-es-3 | humanized | a | insufficient_text | — |  |
 | tr-hr-1 | clean | — | leaning_llm | — |  |
@@ -509,25 +507,25 @@ is itself the finding.
 
 - pairs with a humanized variant: **12**
 - pairs where both sides were scored (evaluable): **9**
-- of those, score dropped: **2**; mean delta: **-0.0233**
+- of those, score dropped: **2**; mean delta: **-0.0195**
 
-**R25 check** — the prose humanization pairs were rewritten at 160-260 tokens on both sides so the §F.3 collapse assertion would stop landing in the 50-~120-token dead band. Measured: **7 of 10** prose pairs are evaluable, **2** of those dropped, mean delta **-0.03**. A pair that is evaluable and does NOT drop is a real result about transform (b)/(c), not a fixture bug.
+**R25 check** — the prose humanization pairs were rewritten at 160-260 tokens on both sides so the §F.3 collapse assertion would stop landing in the 50-~120-token dead band. Measured: **7 of 10** prose pairs are evaluable, **2** of those dropped, mean delta **-0.0251**. A pair that is evaluable and does NOT drop is a real result about transform (b)/(c), not a fixture bug.
 
 | pair | lang | transform | clean | humanized | delta |
 |---|---|---|---|---|---:|
-| en-hr-1 | en | b | 0.832 (leaning_llm) | 0.751 (uncertain) | -0.081 |
-| en-hr-2 | en | c | 0.745 (uncertain) | 0.610 (uncertain) | -0.135 |
-| en-pr-1 | en | b | 0.653 (uncertain) | 0.653 (uncertain) | 0.000 |
+| en-hr-1 | en | b | 0.874 (leaning_llm) | 0.808 (uncertain) | -0.066 |
+| en-hr-2 | en | c | 0.803 (uncertain) | 0.686 (uncertain) | -0.117 |
+| en-pr-1 | en | b | 0.724 (uncertain) | 0.724 (uncertain) | 0.000 |
 | en-wa-3 | en | c | 0.754 (uncertain) | 0.754 (uncertain) | 0.000 |
-| tr-hr-1 | tr | b | 0.700 (leaning_llm) | 0.700 (leaning_llm) | 0.000 |
-| tr-hr-2 | tr | c | 0.306 (uncertain) | 0.306 (uncertain) | 0.000 |
-| tr-pr-1 | tr | b | 0.511 (uncertain) | 0.511 (uncertain) | 0.000 |
+| tr-hr-1 | tr | b | 0.765 (leaning_llm) | 0.765 (leaning_llm) | 0.000 |
+| tr-hr-2 | tr | c | 0.381 (uncertain) | 0.381 (uncertain) | 0.000 |
+| tr-pr-1 | tr | b | 0.593 (uncertain) | 0.593 (uncertain) | 0.000 |
 | tr-wa-3 | tr | c | 0.650 (uncertain) | 0.650 (uncertain) | 0.000 |
-| tr-em-2 | tr | c | 0.255 (leaning_llm) | 0.261 (leaning_llm) | +0.006 |
+| tr-em-2 | tr | c | 0.323 (leaning_llm) | 0.330 (leaning_llm) | +0.007 |
 
 3 pair(s) are NOT measurable because at least one side was gated:
 - en-em-3 vs en-em-1 (en, `b`): clean insufficient_text null / humanized insufficient_text null
-- en-em-4 vs en-em-2 (en, `c`): clean insufficient_text null / humanized leaning_human 0.068
+- en-em-4 vs en-em-2 (en, `c`): clean insufficient_text null / humanized leaning_human 0.093
 - tr-em-3 vs tr-em-1 (tr, `b`): clean insufficient_text null / humanized insufficient_text null
 
 8 humanized row(s) have NO clean twin by construction (transforms `a` and `d`:
@@ -620,10 +618,10 @@ from their `requiresMarkers` field, because `markers.json` ships as `[]` (R17) a
 
 | id | truth | class | lang/ctx | mk | verdict | score | rules | warnings | in `allowed` |
 |---|---|---|---|---|---|---|---|---|---|
-| H01 | human | non_native_en_formal | en/prose | — | uncertain | 0.420 | — | register_only_evidence, uncalibrated_weights | yes |
+| H01 | human | non_native_en_formal | en/prose | — | uncertain | 0.503 | — | register_only_evidence, uncalibrated_weights | yes |
 | H02 | human | non_native_en_formal | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
-| H03 | human | non_native_en_formal | en/prose | — | uncertain | 0.130 | — | uncalibrated_weights | yes |
-| H04 | human | non_native_en_formal | en/prose | — | leaning_llm | 0.825 | — | uncalibrated_weights | yes |
+| H03 | human | non_native_en_formal | en/prose | — | uncertain | 0.173 | — | uncalibrated_weights | yes |
+| H04 | human | non_native_en_formal | en/prose | — | leaning_llm | 0.868 | — | uncalibrated_weights | yes |
 | H05 | human | non_native_en_formal | en/chat | — | uncertain | 0.650 | — | uncalibrated_weights | yes |
 | H06 | human | non_native_en_formal | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H07 | human | careful_tr_orthography | tr/chat | — | uncertain | 0.650 | — | register_only_evidence, uncalibrated_weights | yes |
@@ -642,25 +640,25 @@ from their `requiresMarkers` field, because `markers.json` ships as `[]` (R17) a
 | H20 | human | pasted_machine_template | en/prose | yes | likely_llm | 0.200 | known_machine_marker | pasted_machine_text, uncalibrated_weights, score_table_disagreement | yes |
 | H21 | human | human_discussing_an_assistant | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H22 | human | human_discussing_an_assistant | tr/chat | — | uncertain | 0.650 | — | uncalibrated_weights | yes |
-| H23 | human | human_discussing_an_assistant | en/prose | — | uncertain | 0.294 | — | uncalibrated_weights | yes |
-| H24 | human | human_discussing_an_assistant | en/prose | — | uncertain | 0.389 | — | uncalibrated_weights | yes |
+| H23 | human | human_discussing_an_assistant | en/prose | — | uncertain | 0.368 | — | uncalibrated_weights | yes |
+| H24 | human | human_discussing_an_assistant | en/prose | — | uncertain | 0.470 | — | uncalibrated_weights | yes |
 | H25 | human | marketing_register_human | tr/prose | — | uncertain | 0.437 | — | register_only_evidence, uncalibrated_weights | yes |
 | H26 | human | marketing_register_human | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H27 | human | machine_translated_looking_human | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H28 | human | machine_translated_looking_human | tr/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | H29 | human | native_speaker_control | en/chat | — | uncertain | 0.350 | — | uncalibrated_weights | yes |
-| H30 | human | native_speaker_control | en/prose | — | uncertain | 0.192 | — | uncalibrated_weights | yes |
+| H30 | human | native_speaker_control | en/prose | — | uncertain | 0.249 | — | uncalibrated_weights | yes |
 | H31 | human | native_speaker_control | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
-| H32 | human | native_speaker_control | en/prose | — | uncertain | 0.321 | — | uncalibrated_weights | yes |
+| H32 | human | native_speaker_control | en/prose | — | uncertain | 0.397 | — | uncalibrated_weights | yes |
 | H33 | human | careful_tr_orthography | tr/chat | — | uncertain | 0.800 | — | uncalibrated_weights | yes |
 | H34 | human | non_native_en_formal | en/chat | — | uncertain | 0.800 | — | register_only_evidence, uncalibrated_weights | yes |
 | H35 | human | careful_tr_orthography | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
-| L01 | llm | llm_base | en/prose | — | leaning_llm | 0.851 | — | uncalibrated_weights | yes |
+| L01 | llm | llm_base | en/prose | — | leaning_llm | 0.889 | — | uncalibrated_weights | yes |
 | L02 | llm | llm_base | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes |
 | L03 | llm | llm_base | tr/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes |
 | L04 | llm | llm_transform_a | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
-| L05 | llm | llm_transform_b | en/prose | — | leaning_llm | 0.851 | — | uncalibrated_weights | yes |
-| L06 | llm | llm_transform_c | en/prose | — | leaning_llm | 0.634 | — | uncalibrated_weights | yes |
+| L05 | llm | llm_transform_b | en/prose | — | leaning_llm | 0.889 | — | uncalibrated_weights | yes |
+| L06 | llm | llm_transform_c | en/prose | — | leaning_llm | 0.707 | — | uncalibrated_weights | yes |
 | L07 | llm | llm_transform_d_mimicry | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
 | L08 | llm | llm_transform_d_mimicry | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
 
@@ -748,21 +746,21 @@ that an aggregate report's notes are de-duplicated.
 |---|---|---|---|---|---|---|---|---|---|---|
 | A01 | human | human-guest-list | en/chat | — | uncertain | 0.587 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A02 | human | human-guest-list | tr/chat | — | uncertain | 0.587 | — | register_only_evidence, uncalibrated_weights | yes | ok |
-| A03 | human | human-esl-essay | en/prose | — | leaning_llm | 0.921 | — | uncalibrated_weights | yes | ok |
-| A04 | human | human-tr-petition | tr/prose | — | leaning_llm | 0.761 | — | uncalibrated_weights | yes | ok |
+| A03 | human | human-esl-essay | en/prose | — | leaning_llm | 0.942 | — | uncalibrated_weights | yes | ok |
+| A04 | human | human-tr-petition | tr/prose | — | leaning_llm | 0.800 | — | uncalibrated_weights | yes | ok |
 | A05 | human | human-hotel-staff-email | en/prose | — | uncertain | 0.200 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A06 | human | human-friend-list | en/chat | — | uncertain | 0.273 | — | uncalibrated_weights | yes | ok |
 | A07 | human | human-wedding-list | tr/chat | — | uncertain | 0.481 | — | register_only_evidence, uncalibrated_weights | yes | ok |
-| A08 | human | human-native-review | en/prose | — | leaning_llm | 0.709 | — | uncalibrated_weights | yes | ok |
+| A08 | human | human-native-review | en/prose | — | leaning_llm | 0.773 | — | uncalibrated_weights | yes | ok |
 | A09 | human | human-tr-marketing | tr/prose | — | insufficient_text | null | — | marketing_register, uncalibrated_weights | yes | ok |
-| A10 | human | human-travel-writer | en/prose | — | leaning_llm | 0.683 | — | uncalibrated_weights | yes | ok |
-| A11 | human | human-esl-essay | en/prose | — | leaning_llm | 0.881 | — | uncalibrated_weights | yes | ok |
+| A10 | human | human-travel-writer | en/prose | — | leaning_llm | 0.750 | — | uncalibrated_weights | yes | ok |
+| A11 | human | human-esl-essay | en/prose | — | leaning_llm | 0.912 | — | uncalibrated_weights | yes | ok |
 | A12 | human | human-agent-list | tr/chat | — | uncertain | 0.533 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A13 | human | human-hotel-staff-chat | en/chat | — | uncertain | 0.722 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A14 | human | human-guest-list | tr/chat | — | uncertain | 0.722 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A15 | human | human-hotel-staff-chat | tr/chat | — | uncertain | 0.722 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A16 | human | human-friend-list | en/chat | — | uncertain | 0.675 | — | register_only_evidence, uncalibrated_weights | yes | ok |
-| A17 | human | human-forum-answer | en/prose | — | uncertain | 0.572 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A17 | human | human-forum-answer | en/prose | — | uncertain | 0.651 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A18 | human | human-corp-rfq | tr/prose | — | uncertain | 0.200 | — | register_only_evidence, uncalibrated_weights | yes | ok |
 | A05cs | human | human-hotel-staff-email | auto/auto | — | insufficient_text | null | — | domain_suppressed, uncalibrated_weights | yes | ok |
 | A13cs | human | human-hotel-staff-chat | auto/auto | — | insufficient_text | null | — | domain_suppressed, uncalibrated_weights | yes | ok |
@@ -891,50 +889,50 @@ confused. No row text is printed here (R40); only counts.
 
 | truth | n | fingerprint_found | ai_style_indicators | not_independently_authored | no_reliable_indicators | too_short_or_no_signal |
 |---|---:|---:|---:|---:|---:|---:|
-| human | 325 | 0 | 2 | 0 | 296 | 27 |
-| llm | 325 | 0 | 22 | 0 | 126 | 177 |
+| human | 325 | 0 | 4 | 0 | 296 | 25 |
+| llm | 325 | 0 | 51 | 0 | 110 | 164 |
 
 | truth | n | insufficient_text | uncertain | leaning_human | leaning_llm | likely_human | likely_llm |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| human | 325 | 27 | 103 | 193 | 2 | 0 | 0 |
-| llm | 325 | 177 | 91 | 35 | 22 | 0 | 0 |
+| human | 325 | 25 | 151 | 145 | 4 | 0 | 0 |
+| llm | 325 | 164 | 89 | 21 | 51 | 0 | 0 |
 
-- **Label-level false-flag rate on human essays** (`fingerprint_found` + `ai_style_indicators`): 2 of 325 = **0.6%** over all human essays; 2 of 298 = **0.7%** over the ones that got past the length floor.
-- **Label-level catch rate on machine essays** (same two labels): 22 of 325 = **6.8%** over all machine essays; 22 of 148 = **14.9%** over the scored ones.
-- `too_short_or_no_signal`: 27 human, 177 machine. Gate reasons: `no_evidence_either_way` 184, `too_few_active_features` 20.
-- The gate is **not symmetric**: 8.3% of the human essays and 54.5% of the machine ones are refused a judgement, and the machine half is the one this corpus makes shorter (median ~197 words against ~424), so a catch rate over ALL machine rows is held down by documents the tool abstained on rather than got wrong. The "over scored rows" figures are the ones that compare like with like.
+- **Label-level false-flag rate on human essays** (`fingerprint_found` + `ai_style_indicators`): 4 of 325 = **1.2%** over all human essays; 4 of 300 = **1.3%** over the ones that got past the length floor.
+- **Label-level catch rate on machine essays** (same two labels): 51 of 325 = **15.7%** over all machine essays; 51 of 161 = **31.7%** over the scored ones.
+- `too_short_or_no_signal`: 25 human, 164 machine. Gate reasons: `no_evidence_either_way` 169, `too_few_active_features` 20.
+- The gate is **not symmetric**: 7.7% of the human essays and 50.5% of the machine ones are refused a judgement, and the machine half is the one this corpus makes shorter (median ~197 words against ~424), so a catch rate over ALL machine rows is held down by documents the tool abstained on rather than got wrong. The "over scored rows" figures are the ones that compare like with like.
 - `humanReviewRequired: true` on every row: **yes**. Base-rate caveat on every row: **yes**.
 
 | bucket | n_human | n_llm | flagged human | false-flag | flagged machine | catch |
 |---|---:|---:|---:|---:|---:|---:|
-| 50-149 | 6 | 77 | 0 | 0.0% — INSUFFICIENT (under 100 a side) | 2 | 2.6% — INSUFFICIENT |
-| 150-499 | 224 | 248 | 1 | **0.4%** | 20 | **8.1%** |
+| 50-149 | 6 | 77 | 0 | 0.0% — INSUFFICIENT (under 100 a side) | 4 | 5.2% — INSUFFICIENT |
+| 150-499 | 224 | 248 | 3 | **1.3%** | 47 | **19.0%** |
 | 500+ | 95 | 0 | 1 | 1.1% — INSUFFICIENT (under 100 a side) | 0 | n/a — INSUFFICIENT |
 
 ### CAL-G.2 The same rows with `--weights eval/out/weights.fitted.json` (R23 opt-in)
 
 | truth | n | fingerprint_found | ai_style_indicators | not_independently_authored | no_reliable_indicators | too_short_or_no_signal |
 |---|---:|---:|---:|---:|---:|---:|
-| human | 325 | 0 | 22 | 0 | 196 | 107 |
-| llm | 325 | 0 | 17 | 0 | 256 | 52 |
+| human | 325 | 0 | 0 | 0 | 197 | 128 |
+| llm | 325 | 0 | 2 | 0 | 271 | 52 |
 
 | truth | n | insufficient_text | uncertain | leaning_human | leaning_llm | likely_human | likely_llm |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| human | 325 | 107 | 98 | 98 | 22 | 0 | 0 |
-| llm | 325 | 52 | 143 | 113 | 17 | 0 | 0 |
+| human | 325 | 128 | 85 | 112 | 0 | 0 | 0 |
+| llm | 325 | 52 | 115 | 156 | 2 | 0 | 0 |
 
-- **Label-level false-flag rate on human essays** (`fingerprint_found` + `ai_style_indicators`): 22 of 325 = **6.8%** over all human essays; 22 of 218 = **10.1%** over the ones that got past the length floor.
-- **Label-level catch rate on machine essays** (same two labels): 17 of 325 = **5.2%** over all machine essays; 17 of 273 = **6.2%** over the scored ones.
-- `too_short_or_no_signal`: 107 human, 52 machine. Gate reasons: `no_evidence_either_way` 139, `too_few_active_features` 20.
-- The gate is **not symmetric**: 32.9% of the human essays and 16.0% of the machine ones are refused a judgement — here it is the HUMAN half that is silenced more, which lowers the false-flag rate over all rows for the same mechanical reason. A rate whose denominator includes abstentions is not a judgement rate. The "over scored rows" figures are the ones that compare like with like.
+- **Label-level false-flag rate on human essays** (`fingerprint_found` + `ai_style_indicators`): 0 of 325 = **0.0%** over all human essays; 0 of 197 = **0.0%** over the ones that got past the length floor.
+- **Label-level catch rate on machine essays** (same two labels): 2 of 325 = **0.6%** over all machine essays; 2 of 273 = **0.7%** over the scored ones.
+- `too_short_or_no_signal`: 128 human, 52 machine. Gate reasons: `no_evidence_either_way` 160, `too_few_active_features` 20.
+- The gate is **not symmetric**: 39.4% of the human essays and 16.0% of the machine ones are refused a judgement — here it is the HUMAN half that is silenced more, which lowers the false-flag rate over all rows for the same mechanical reason. A rate whose denominator includes abstentions is not a judgement rate. The "over scored rows" figures are the ones that compare like with like.
 - `humanReviewRequired: true` on every row: **yes**. Base-rate caveat on every row: **yes**.
 - `cell_not_fitted_prior_used`: **0** row(s) fell back to the prior cell; `uncalibrated_weights`: 0.
 
 | bucket | n_human | n_llm | flagged human | false-flag | flagged machine | catch |
 |---|---:|---:|---:|---:|---:|---:|
-| 50-149 | 6 | 77 | 0 | 0.0% — INSUFFICIENT (under 100 a side) | 8 | 10.4% — INSUFFICIENT |
-| 150-499 | 224 | 248 | 19 | **8.5%** | 9 | **3.6%** |
-| 500+ | 95 | 0 | 3 | 3.2% — INSUFFICIENT (under 100 a side) | 0 | n/a — INSUFFICIENT |
+| 50-149 | 6 | 77 | 0 | 0.0% — INSUFFICIENT (under 100 a side) | 2 | 2.6% — INSUFFICIENT |
+| 150-499 | 224 | 248 | 0 | **0.0%** | 0 | **0.0%** |
+| 500+ | 95 | 0 | 0 | 0.0% — INSUFFICIENT (under 100 a side) | 0 | n/a — INSUFFICIENT |
 
 ### The two instruments, side by side
 
@@ -942,7 +940,7 @@ run-eval §3b, the FITTED model at its fitted threshold, on these same rows:
 
 | cell | length bucket | n_human | n_llm | AUC | AUC hard | ECE | FPR@t_essay | TPR@t_essay | TPR@t_essay hard | precision@t_essay |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| en:prose essay | 150-499 | 224 | 248 | 0.936 | 0.967 | 0.121 | 0.4% | 26.2% | 43.5% | 0.985 |
+| en:prose essay | 150-499 | 224 | 248 | 0.941 | 0.965 | 0.116 | 0.4% | 25.0% | 44.8% | 0.984 |
 
 **They are not the same number and neither is wrong.** The fitted row is what a model fitted
 on this corpus can rank, at a threshold chosen on held-out validation rows. The tables above
@@ -952,4 +950,4 @@ deliberate conservatism on top: `likely_llm` needs a Tier-0 fingerprint, style a
 this tool gets the second set. Quoting the first set at a parent, a student or a school is a
 misrepresentation of the product.
 
-_CAL fixture gate wall-clock: 37.5s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._
+_CAL fixture gate wall-clock: 37.7s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._

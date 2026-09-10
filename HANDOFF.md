@@ -1,4 +1,4 @@
-# HANDOFF — state as of 2026-09-10, end of the school-platform round (R41–R44)
+# HANDOFF — state as of 2026-09-10, end of the school-platform rounds (R41–R53)
 
 ## What exists now (all committed, all verified by running)
 - `stylometry.mjs` + `lib/` — zero-dependency EN/TR detector, importable and CLI; `node selftest.mjs`
@@ -12,18 +12,18 @@
 - `agent/llm-text-detector.md` (898 words, `model: opus`) installed at `~/.claude/agents/` by
   `install.sh`; exercised END TO END through the installed copy on six texts and a six-row batch.
 - `README.md`, `RUBRIC.md`, `eval/README-eval.md` (findings log + ruling index), `LICENSE`.
-- `docs/design/HEAD-RULINGS.md` Part 3 — R23–R47, the build/verify/platform-round rulings. They override SPEC.
+- `docs/design/HEAD-RULINGS.md` Part 3 — R23–R53, the build/verify/platform-round rulings. They override SPEC.
 
 ## The honest numbers (TEST only, `eval/out/REPORT.md`; three human writers, R0 holds 92 % of the
 ## surviving human rows after the Arabic filter — every threshold is valid for them and nobody else)
-| cell | bucket | n_h / n_llm | AUC | AUC hard | FPR@t | TPR@t |
-|---|---|---|---|---|---|---|
-| en:prose ESSAY (R44) | 150–499 tok | 224 / 248 | 0.935 | 0.964 | 0.4 % | 28.2 % |
-| en:prose (all genres) | 150–499 tok | 448 / 545 | 0.878 | 0.859 | 2.5 % | 32.5 % |
-| en:prose | 50–149 tok | 365 / 433 | 0.752 | 0.672 | 0.8 % | 2.8 % |
-| en:prose | <50, 500+ | — | NO COVERAGE / INSUFFICIENT | | | |
-| en:chat, tr:prose | all | — | no model (too few rows survive the gates) | | | |
-| tr:chat | all | — | INSUFFICIENT / NO COVERAGE; cell-level AUC 0.975 → **0.450 in hard mode** | | | |
+| what | measure | value |
+|---|---|---|
+| PRODUCT (shipped CLI, prior weights, `--preset essay`) on 650 essay TEST rows | human essays flagged (`fingerprint_found` + `ai_style_indicators`) | 4 of 325 = 1.2 % |
+| | machine essays flagged | 51 of 325 = 15.7 % (31.7 % of the 161 scored) |
+| | refused a judgement (`too_short_or_no_signal`) | 7.7 % human, 50.5 % machine |
+| Fitted model, reference only (§3b) | essay 150–499: AUC / hard / FPR / TPR | 0.941 / 0.965 / 0.4 % / 25.0 % |
+| Fitted model, reference only (§3) | en:prose 150–499: AUC / hard / FPR / TPR | 0.887 / 0.870 / 1.4 % / 29.7 % |
+| en:chat, tr:prose, tr:chat | | no model / INSUFFICIENT; tr:chat cell AUC 0.975 → 0.450 hard |
 Coverage (`insufficient_text` rate): en:chat 98.5 %, tr:chat 91.2 %, tr:prose 97.6 %, en:prose 63.4 % (essays 28.4 %).
 Real WhatsApp messages (200, R0/R2, Latin script): 196 `insufficient_text`, 2 `uncertain`, 2 `leaning_human`,
 0 false positives — the FPR of silence; 2 % of real chat gets a score at all.
