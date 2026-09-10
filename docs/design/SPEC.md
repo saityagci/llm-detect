@@ -555,7 +555,7 @@ Rubric criteria that have **no CLI counterpart** and must be argued qualitativel
 
 ### E.5 THE AGENT — `.claude/agents/llm-text-detector.md` (final)
 
-Changes from D2's draft, all forced by other lanes: the floor is words **and** characters; `likely_human` is unreachable single-message; rules are reported separately from the score; keyboard-proxy signals may never be cited toward LLM; `⟡V3⟡` gets an explicit line; `--corpus` is mentioned. Measured by the synthesizer with `wc -w`, not estimated: **836** body words, **897** including frontmatter — 3 words under the 900 limit. D2's draft plus these additions came to 942 and had to be trimmed; the trim came out of Procedure, never out of Anti-patterns, which is the rule B3 must also follow.
+Changes from D2's draft, all forced by other lanes: the floor is words **and** characters; `likely_human` is unreachable single-message; rules are reported separately from the score; keyboard-proxy signals may never be cited toward LLM; the configured marker gets an explicit line; `--corpus` is mentioned. Measured by the synthesizer with `wc -w`, not estimated: **836** body words, **897** including frontmatter — 3 words under the 900 limit. D2's draft plus these additions came to 942 and had to be trimmed; the trim came out of Procedure, never out of Anti-patterns, which is the rule B3 must also follow.
 
 ```markdown
 ---
@@ -757,7 +757,7 @@ At FPR 2% and recall 60%: precision is 0.968 at a 50% prevalence, 0.612 at 5%, 0
 
 Ordered by how likely each is to happen in this product, in production, this quarter. All of these go in the README under this exact heading.
 
-1. **A customer forwards our own bot's confirmation back to us and gets flagged.** Measured, not hypothetical: the single highest-scoring "human" message in DATA's held-out set (score 1.000) is a customer pasting our `⟡V3⟡` price list back into the chat. The text is machine-written; the author is a paying customer. `own_bot_marker` catches the marker-bearing ones; nothing catches a customer who retypes a hotel name and room type out of our menu, Arabic comma and all.
+1. **A customer forwards our own bot's confirmation back to us and gets flagged.** Measured, not hypothetical: the single highest-scoring "human" message in DATA's held-out set (score 1.000) is a customer pasting the product's own (marker-bearing) price list back into the chat. The text is machine-written; the author is a paying customer. `own_bot_marker` catches the marker-bearing ones; nothing catches a customer who retypes a hotel name and room type out of our menu, Arabic comma and all.
 2. **A careful Turkish customer with a Turkish keyboard, who ends a sentence with a period.** DATA rows 4–7: real Turkish, correct diacritics, mid-sentence period, flagged at the 5% and 10% thresholds. The ≥2-features-from-≥2-groups invariant is the mitigation, not a cure.
 3. **A fluent non-native English writer being formal.** The whole of §G.2. `leaning_llm` on a "Dear Sir, We are 4 person, two adult and two childs" message is a critical failure, and the rubric's C10 exists solely to stop it.
 4. **A support agent's snippet library.** "Thank you for reaching out. I'd be happy to help." is on the LLM list and in the human template file. Domain suppression handles it only if the caller passes `--domain customer_service`. **A caller who forgets the flag accuses the support team.**
