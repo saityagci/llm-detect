@@ -23,10 +23,11 @@ yes/no.** There are five values; `not_independently_authored` is a **copy** find
 (HEAD-RULINGS R47), and a label is true only relative to the corpus it was computed against — adding
 a late submission to a class can change an earlier one's label, so store the corpus id beside the
 label or recompute. `summary.humanReviewRequired` is `true` on every report this tool produces, and that is not
-a formality: on 150–499-token student essays the tool's own measured false-flag rate is 0.4% and its
-recall is 28.2%, so **roughly seven in ten AI-written essays are not flagged at all**; on general
-English prose the false-flag rate is 2.5% and at a 5% true prevalence a flag is right about **two
-times in five**. Both are eval-side numbers at the fitted threshold, not rates about the four labels.
+a formality. **What the shipped CLI actually does** on 650 held-out student essays: it flags
+**1.2%** of the human ones and catches **15.7%** of the machine ones — five machine essays in six
+come back unflagged, and half of them are refused a judgement entirely. (The eval report also carries
+*fitted-model* figures — 0.4% false-flag at 25.0% recall on essays — but those are a different
+instrument at a threshold the shipped CLI cannot reach, and they are never rates about these labels.)
 Read
 `README.md` § "Using this in a school platform" before wiring any of this to something a student
 sees. If your UI turns four labels into a number, you have built a different product from this one.
@@ -94,7 +95,15 @@ detectBatch([                                              // a class in one pas
 ], { preset: 'essay' });
 ```
 
-A row's own `historyProfile` (or `history`) wins over anything passed for the batch. The two paths
+A row's own `historyProfile` (or `history`) wins over anything passed for the batch. Rows name their
+author in **`sender`** (`student` is accepted as an alias, HEAD-RULINGS R51(b)) — `--jsonl`,
+`--aggregate` and `--corpus` all read that field, and `near_duplicate`'s different-sender guard is
+inoperative without it.
+
+Two things history does **not** do (R50(a)): it detects a **change of hand, not machine authorship**
+— a student who has always used AI reads consistent — and it never manufactures a verdict on a text
+the tool declined to score, where the comparison is reported with `history_not_applied_below_floor`
+and the verdict stands. The two paths
 give **byte-identical reports** — the profile is a cache, not a different measurement.
 
 **A profile is valid only for the cell and weights id it was built in.** On a mismatch the core warns

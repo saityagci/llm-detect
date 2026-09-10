@@ -311,6 +311,14 @@ Asymmetries, all deliberate:
    text the sender is forwarding; text is a structured list, not prose; under 40 words).
    **Never one step toward LLM.**
 
+**Invariant 4's shift is NOT applied on a ⚠ cell (HEAD-RULINGS R51(a)).** In the six conflict cells
+the contradiction *is* the finding, and the cell has already resolved to `uncertain` because the two
+instruments disagree. Shifting one step further toward human on top of that produces a report that
+prints `[CONFLICT]` and then `leaning_human`, which contradicts itself: it announces that the
+instruments disagree and then quietly picks a side. Print the block, print `uncertain`, and say what
+would resolve it. The one-step shift is for cells where the table has *not* already absorbed a
+disagreement.
+
 **Invariant 4's third reason, qualified (HEAD-RULINGS R35(d)).** "Text is a pasted template or
 machine-written text the sender is forwarding" licenses the one-step shift **only when the whole
 text is the paste, or all of it but a greeting line**. A message that merely *contains* a pasted
@@ -379,7 +387,8 @@ Arabic-only routes to `leaning_human` no longer exist. The English and Turkish r
 
 ```
 VERDICT: <one of six>                 confidence band: <strong|moderate|none|n/a>
-LABEL: <one of four>
+LABEL: <one of five>
+ROW: <id> (sender <sender>)           [batch only — omit entirely in single-document mode]
 CLI: <verdict> (score <0.00-1.00 or n/a>, <n> tokens, lang=<..> context=<..>)
 JUDGE: <verdict> — <band>             [CONFLICT] if a ⚠ cell fired
 
@@ -406,6 +415,11 @@ NOTES: <optional, one line, last — working-file paths and nothing that reads a
 add — the path of its judgement file, what it wrote where — goes at the END, after WHAT WOULD CHANGE
 THIS VERDICT, on a single optional line beginning `NOTES:`, or nowhere at all. A reader and a parser
 both start at line 1, and a preamble puts prose where the verdict should be.
+
+**In batch mode a `ROW:` line sits between `LABEL:` and `CLI:`** (HEAD-RULINGS R51(c)): the id the
+caller gave the row, and the sender in parentheses. The skeleton had no row identifier at all, so
+batch runs invented three different forms for it. In single-document mode the line is omitted, not
+left blank.
 
 **`LABEL:` is its own line, directly under `VERDICT:`** (HEAD-RULINGS R42 addendum). It carries the
 CLI's `summary.label` verbatim — one of the five values in the table below — and nothing else: no
@@ -601,6 +615,7 @@ disagreement and a critical failure.
 | a path to a known-machine-marker file | `--markers <path>` | omit it — `markers.json` ships empty and the rule is meant not to fire |
 | a path to a corpus index for near-duplicate matching | `--corpus <path>` | omit it |
 | the language | `--lang en\|tr` | `--lang auto` |
+| **nothing about the language** — restated because a run passed `--lang en` unprompted (R51(d)) | pass nothing | `--lang auto`; the CLI's own detection is not a claim you made |
 
 Three things follow, and each of them was a real defect in the first gate run:
 

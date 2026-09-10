@@ -11,11 +11,11 @@ changes the routing, not the answer.
 
 | file | command | verdict | `summary.label` | score |
 |---|---|---|---|---|
-| `student-essay-v1-tidy.txt` | `node stylometry.mjs --file examples/samples/student-essay-v1-tidy.txt --preset essay --allow-uncalibrated --json` | `uncertain` | `no_reliable_indicators` | 0.5330 |
+| `student-essay-v1-tidy.txt` | `node stylometry.mjs --file examples/samples/student-essay-v1-tidy.txt --preset essay --allow-uncalibrated --json` | `uncertain` | `no_reliable_indicators` | 0.5255 |
 | `student-essay-v2.txt` | `node stylometry.mjs --file examples/samples/student-essay-v2.txt --preset essay --allow-uncalibrated --json` | `insufficient_text` | `too_short_or_no_signal` | — |
-| `student-essay-v3.txt` | `node stylometry.mjs --file examples/samples/student-essay-v3.txt --preset essay --allow-uncalibrated --json` | `leaning_human` | `no_reliable_indicators` | 0.1248 |
-| `human-style-essay.txt` | `node stylometry.mjs --file examples/samples/human-style-essay.txt --preset essay --allow-uncalibrated --json` | `leaning_human` | `no_reliable_indicators` | 0.1248 |
-| `assistant-essay.txt` | `node stylometry.mjs --file examples/samples/assistant-essay.txt --preset essay --allow-uncalibrated --json` | `likely_llm` | `fingerprint_found` | 0.7270 |
+| `student-essay-v3.txt` | `node stylometry.mjs --file examples/samples/student-essay-v3.txt --preset essay --allow-uncalibrated --json` | `leaning_human` | `no_reliable_indicators` | 0.1289 |
+| `human-style-essay.txt` | `node stylometry.mjs --file examples/samples/human-style-essay.txt --preset essay --allow-uncalibrated --json` | `leaning_human` | `no_reliable_indicators` | 0.1289 |
+| `assistant-essay.txt` | `node stylometry.mjs --file examples/samples/assistant-essay.txt --preset essay --allow-uncalibrated --json` | `likely_llm` | `fingerprint_found` | 0.7544 |
 
 `human-style-essay.txt` is byte-identical to `student-essay-v3.txt`; it is the name the README's
 first sample report was produced under, kept so the report and its input can be matched up.
@@ -24,22 +24,25 @@ first sample report was produced under, kept so the report and its input can be 
 
 All three argue the same case about the printing press, in a school-student voice.
 
-- **v1 is the careful-student case, and it is the one HEAD-RULINGS R43 was written for.** It used to
-  come out `leaning_llm` / `ai_style_indicators`. The score has not moved (0.5330) and neither has
-  the human side; what changed is that a non-proxy signal now has to be *material* — contribution
-  ≥ 0.10 — before it can satisfy R24's "two non-proxy signals from two groups". Here the LLM channel
-  is carried by the register proxy `terminal_punct_ratio` (+0.600 of +0.921), `sentence_len_mode_mass`
-  contributes +0.291, and the second non-proxy signal `parallel_openers` contributes **+0.030** — a
-  sliver that was letting a keyboard habit convict. The report now says so in full:
+- **v1 is the careful-student case, and two separate rulings have now moved it.** It originally came
+  out `leaning_llm` / `ai_style_indicators`: the LLM channel was carried by the register proxy
+  `terminal_punct_ratio` (+0.600), with `sentence_len_mode_mass` (+0.291) and `parallel_openers`
+  (+0.030) as the two "non-proxy signals from two groups" R24 asks for. **R43** ruled that a
+  non-proxy signal counts only at contribution ≥ 0.10, which disqualified that +0.030 sliver. **R50(c)**
+  then redefined `parallel_openers` to ignore function-word sentence starters, and on this text it
+  no longer fires at all — so today only `sentence_len_mode_mass` remains, one signal from one group,
+  and the verdict is `uncertain` for the simpler of the two reasons. The report says which form
+  applies (R50(d)):
 
-  > `register_only_evidence` (HEAD-RULINGS R24): the LLM-direction evidence is register proxies —
-  > terminal_punct_ratio — plus 1 non-proxy signal(s) from 1 group(s). parallel_openers (+0.030) is
-  > below the 0.10 materiality floor (HEAD-RULINGS R43) and cannot carry the requirement. A formal,
-  > careful or non-native HUMAN produces these for free, so they may rank a queue but they may not
-  > carry a verdict. leaning_llm needs >=2 non-proxy LLM signals from >=2 groups, or a Tier-0 rule.
+  > `register_only_evidence` (HEAD-RULINGS R24): the LLM-direction evidence is material non-proxy
+  > evidence from one group only (rhythm) — sentence_len_mode_mass, beside the register proxies
+  > terminal_punct_ratio. A formal, careful or non-native HUMAN produces these for free, so they may
+  > rank a queue but they may not carry a verdict. leaning_llm needs >=2 non-proxy LLM signals from
+  > >=2 groups, or a Tier-0 rule.
 
   `uncertain` / **`no_reliable_indicators`** is the honest answer for a text whose only material LLM
-  evidence is that its lines end with full stops.
+  evidence is a sentence-length rhythm and the fact that its lines end with full stops. The score
+  moved with the feature change (0.5330 → 0.5255); the label did not.
 - **v1 → v2 is a register change.** Same argument, same length, rewritten messier: shorter
   fragments, a direct address to the reader, one exclamation, an unfinished last line. The verdict
   moves from **`no_reliable_indicators` to `too_short_or_no_signal`** — from "no indicators" to
@@ -104,17 +107,20 @@ node stylometry.mjs --file examples/samples/student-essay-v3.txt --preset essay 
 node stylometry.mjs --file examples/samples/student-essay-v3.txt --preset essay   --allow-uncalibrated --json --history-profile examples/samples/prior-profile.json
 ```
 
-Both give `leaning_human` / `no_reliable_indicators`, score 0.091305, the note
+Both give `leaning_human` / `no_reliable_indicators`, score 0.094425, the note
 `consistent_with_history: … within 2 SD … on 10 compared feature(s)`, and the **same bytes** — the
 whole report, not just the label. The same equality holds through
 `examples/platform-essay.mjs --history` versus `--history-profile`.
 
 ## The class batch
 
-`class-batch.jsonl` is four submissions from three students, built to exercise every history state
-in one file:
+`class-batch.jsonl` is five submissions from four senders, built to exercise every history state and
+the duplicate rule in one file. **The field is `sender`** (HEAD-RULINGS R51(b)); `student` is still
+accepted as an alias, but the documented path uses `sender` — with the wrong field name every row
+looks like a different author and `near_duplicate`'s different-sender guard never runs, which is
+exactly how a same-student pair slipped past it once:
 
-| row | student | input | what it exercises |
+| row | sender | input | what it exercises |
 |---|---|---|---|
 | `sub-1041` | `s-77` | `student-essay-v3.txt` | a valid stored profile → `consistent_with_history`; **and** the near-duplicate pair below |
 | `sub-1042` | `s-81` | `assistant-essay.txt` | the same profile → `style_shift_vs_history` on 5 features |

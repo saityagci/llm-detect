@@ -13,9 +13,13 @@
  *
  * The class file is JSONL, one submission per line:
  *
- *   {"id":"sub-1041","student":"s-77","text":"…","historyProfile":{…}}
- *   {"id":"sub-1042","student":"s-81","text":"…","history":["…prior essay…"]}
- *   {"id":"sub-1043","student":"s-90","text":"…"}
+ *   {"id":"sub-1041","sender":"s-77","text":"…","historyProfile":{…}}
+ *   {"id":"sub-1042","sender":"s-81","text":"…","history":["…prior essay…"]}
+ *   {"id":"sub-1043","sender":"s-90","text":"…"}
+ *
+ * The field is `sender` (HEAD-RULINGS R51(b)); `student` is accepted as an alias. Get it wrong and
+ * `near_duplicate`'s different-sender guard is inoperative — every row looks like a different
+ * author, so a student's own resubmission reads as a copy.
  *
  * A row's `historyProfile` (or `history`) wins over anything on the command line. A row with
  * neither is scored without history and says so — a student's first submission is not a problem to
@@ -54,6 +58,7 @@ const usage = (code) => {
       score every submission in one pass; one label line per row.
       The class file is ALWAYS its own near-duplicate index; --corpus adds an archive of
       earlier submissions ({"id","sender","text"} per line) to compare against as well.
+      Rows use "sender"; "student" is accepted as an alias (HEAD-RULINGS R51(b)).
 
   node examples/platform-class-batch.mjs --build-profile <prior.jsonl> [--out <profile.json>]
       build one student's history profile from their prior submissions and print it
@@ -107,9 +112,10 @@ const rows = readFileSync(file, 'utf8').split('\n').filter((l) => l.trim()).map(
 const archive = archiveFile
   ? readFileSync(archiveFile, 'utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l))
   : [];
+const senderOf = (r) => r.sender ?? r.student ?? r.id;   // `student` is an alias (R51(b))
 const corpusIndex = buildCorpusIndex([
-  ...rows.map((r) => ({ id: r.id, sender: r.student ?? r.sender ?? r.id, text: r.text })),
-  ...archive.map((r) => ({ id: r.id, sender: r.student ?? r.sender ?? r.id, text: r.text })),
+  ...rows.map((r) => ({ id: r.id, sender: senderOf(r), text: r.text })),
+  ...archive.map((r) => ({ id: r.id, sender: senderOf(r), text: r.text })),
 ]);
 BASE.corpusIndex = corpusIndex;
 
@@ -142,7 +148,7 @@ const historyOf = (rep) => {
   return 'no history supplied';
 };
 
-process.stdout.write(`${'submission'.padEnd(14)}${'student'.padEnd(10)}${'label'.padEnd(LABEL_W)}${'verdict'.padEnd(18)}history\n`);
+process.stdout.write(`${'submission'.padEnd(14)}${'sender'.padEnd(10)}${'label'.padEnd(LABEL_W)}${'verdict'.padEnd(18)}history\n`);
 process.stdout.write('-'.repeat(110) + '\n');
 
 const tally = {};
@@ -155,7 +161,7 @@ for (let i = 0; i < reports.length; i++) {
   tally[label] = (tally[label] || 0) + 1;
   if ((rep.warnings || []).includes('history_profile_mismatch')) mismatches++;
   process.stdout.write(
-    `${String(row.id ?? i).padEnd(14)}${String(row.student ?? '—').padEnd(10)}${label.padEnd(LABEL_W)}`
+    `${String(row.id ?? i).padEnd(14)}${String(row.sender ?? row.student ?? '—').padEnd(10)}${label.padEnd(LABEL_W)}`
     + `${String(rep.verdict).padEnd(18)}${historyOf(rep)}\n`,
   );
   for (const m of ((rep.summary && rep.summary.matched) || [])) {

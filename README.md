@@ -263,7 +263,7 @@ for what you are allowed to say. The judge agent's obligations for the first fou
 | `cell_not_fitted_prior_used` | You passed `--weights eval/out/weights.fitted.json` and the `{language}:{shape}` cell this text routes to was not fitted (R36(c)). The prior cell scored it instead. `version.provenance` still says `fitted`, and for **this** document that is misleading — read it as uncalibrated. Only two of the four cells were fitted this round. |
 | `weights_expired` | The weights file is past its 180-day expiry. The lexicon is a snapshot of a moving register; treat the score as stale, not as wrong-by-a-known-amount. |
 | `expiry_not_checked` | The library was called without `opts.now`, so `detect()` stayed pure and skipped the expiry clock. Nobody checked whether the weights are stale. |
-| `register_only_evidence` | **R24, with R43's materiality floor.** The LLM lean rests only on register proxies — correct terminal punctuation, capitalised sentence openers, a greeting/signoff frame, a politeness formula, a formal copula, an out-of-channel register, a weak lexicon hit, and (since R38(f)) `colon_led_list`, because humans write labelled lists all day: `- Check-in: 14:00` on WhatsApp is a guest, not a model. **A non-proxy signal counts toward the two-from-two-groups requirement only if its contribution is ≥ 0.10** (R43): a signal worth +0.030 beside a proxy worth +0.600 was letting a keyboard habit carry a verdict. Immaterial signals are named in the note as "below the 0.10 materiality floor" rather than dropped silently, so a reader can see what was discounted and why. Those are what a careful, formal or non-native human produces for free, so the verdict is capped at `uncertain`. In chat-length text a style-only `leaning_llm` now needs a strong-lexicon hit **plus** a structure signal (`bold_lead_in_list`, `colon_led_list`, `balanced_contrast_frame`) or a Tier-0 rule. The recall given up here was keyboard detection. |
+| `register_only_evidence` | **R24, with R43's materiality floor. The note has two distinct forms and says which one applies (R50(d))**: *"register proxies only"* — everything pointing LLM is a keyboard or politeness habit; or *"material non-proxy evidence from one group only"* — the evidence is real but all of it comes from one group, typically rhythm, so it cannot meet the two-groups requirement. The distinction matters to a reader: an evaded assistant essay whose LLM channel sits at 0.54 on rhythm alone must not be told its proxies were the problem, because they were not. In the first form the LLM lean rests only on register proxies — correct terminal punctuation, capitalised sentence openers, a greeting/signoff frame, a politeness formula, a formal copula, an out-of-channel register, a weak lexicon hit, and (since R38(f)) `colon_led_list`, because humans write labelled lists all day: `- Check-in: 14:00` on WhatsApp is a guest, not a model. **A non-proxy signal counts toward the two-from-two-groups requirement only if its contribution is ≥ 0.10** (R43): a signal worth +0.030 beside a proxy worth +0.600 was letting a keyboard habit carry a verdict. Immaterial signals are named in the note as "below the 0.10 materiality floor" rather than dropped silently, so a reader can see what was discounted and why. Those are what a careful, formal or non-native human produces for free, so the verdict is capped at `uncertain`. In chat-length text a style-only `leaning_llm` now needs a strong-lexicon hit **plus** a structure signal (`bold_lead_in_list`, `colon_led_list`, `balanced_contrast_frame`) or a Tier-0 rule. The recall given up here was keyboard detection. |
 | `hybrid_suspect` | Two instruments inside the tool disagree about the same text (G6), or a known-machine marker fired inside a message that also carries human evidence (**R28**). In the marker case the verdict drops to `uncertain`: a machine-written *segment* is present, the message is not machine-written, and the sender may be forwarding it. |
 | `pasted_machine_text` | A configured `markers.json` pattern matched. The string is machine-written. **Origin is not attribution** — the sender may be a person forwarding it. |
 | `templated_or_copied` | `near_duplicate` fired against a different sender. The text was not independently authored: template, copy or spam. **Not** proof of LLM authorship (R3); `likely_llm` through this rule needs a second Tier-0 rule. |
@@ -275,7 +275,10 @@ for what you are allowed to say. The judge agent's obligations for the first fou
 | `segmentation_suspect` | The shipped segmenter and the length/rhythm features disagree about where the sentences are. The rhythm signals are the ones that break first; discount them. |
 | `score_table_disagreement` | The 2-D decision table and the raw score point different ways. Read the verdict, not the score, and say both out loud. |
 | `contradictory_evidence` | Human-direction and LLM-direction signals both fired with real weight. The correct output is `uncertain` with both sides printed, never a silent resolution toward LLM. |
+| `parallel_openers` (signal) | **Redefined by R50(c), prior re-based by R52.** It counts repeated **content** openers and the connector set only: function-word starters (`the, a, an, i, it, this, that, he, she, they, we, you, there, in, on, at, when, but, and, so, if, as, then`, plus the Turkish equivalents) are excluded from the uniqueness computation, because ordinary narrative prose opens sentences with them — "The… I… The…" — and was being read as scaffolding. Two personal narratives and two ESL essays had been carried to `ai_style_indicators` by this feature plus `sentence_len_mode_mass`; with it corrected a rhythm-only lean is one group and stays `uncertain`. Its prior was re-based with it: **a feature whose definition changes keeps no prior from the old definition**, so μ = 0 (no repeated content opener is the typical human and contributes nothing) and σ = 0.15. Under the old prior ordinary English prose scored z = −1.67 and took a systematic human-direction push it had not earned. The matched string now states what was measured. |
 | `bold_lead_in_list` / `colon_led_list` (signals, not warnings) | **R38(f).** `bold_lead_in_list` requires actual `**bold**`: markdown arriving in a non-markdown channel is the artifact this design trusts, and it stays a real signal. The plain capitalised-lead shape (`- Check-in: 14:00`) moved into `colon_led_list`, which is now a register proxy under R24 and can no longer carry a verdict on its own. Measured on eighteen authored human-register texts, `llm_lexicon_strong` (13), `bold_lead_in_list` (11) and `colon_led_list` (10) were the road that took ordinary people — guest lists, wedding plans, agency room lists — toward `leaning_llm`. |
+| `history_not_applied_below_floor` (note) | **R50(a).** The document did not clear the evidence floor on its own, so the history comparison was **computed and reported but not applied**: it appears in `history` and in the notes, and it did not touch the verdict or the label. History may move a lean; it may not create one out of an abstention. Read it as context, never as a result. |
+| `style_shift_vs_history` / `consistent_with_history` (note) | The submission sits beyond, or within, 2 SD of this author's own prior work — see `RUBRIC.md` §8 for what the judge may do with each. Both answer "is this like their other writing", never "did a person write it": **history detects a change of hand, not machine authorship**, and a student who has always used AI reads consistent. |
 | `single_feature_guard` (note) | One feature carried most of the LLM channel on its own. The `≥2 features from ≥2 groups` invariant is what stops that from becoming a verdict; the note says which feature it was. |
 | `possible_quotation_or_discussion: <cue>` (note) | **R27.** An assistant-frame phrase was found, but a cue word (`chatgpt`, `claude`, `bot`, `assistant`, `AI`, `LLM`, `yapay zeka`, `dil modeli`, …) appears elsewhere in the document. The phrase is quoted or discussed, not the speaker's own frame, so the rule did **not** fire. A human describing what a chatbot said is a human. |
 | `arabic_indic_digits_observed` (note) | Arabic-Indic digits appear in otherwise Latin-script text. Recorded because the tokenizer must never use `\d`; it is evidence in neither direction. |
@@ -314,44 +317,114 @@ the corpus id (or a hash of the index) alongside every label you keep, or recomp
 changes. A stored label with no record of what it was compared against is not reproducible, and a
 platform that shows a stale one is showing a finding that no longer exists.
 
-### What the numbers actually are
+### What the product does
 
-Held-out, measured. **The essay row is the one a school platform reads** — it is your genre — and the
-general-prose row sits beside it because that is what the tool is scored on everywhere else. Both are
-at the fitted threshold on the eval side (`eval/out/REPORT.md` §3b and §3); neither is a rate about
-the four labels.
+**This is the number to read.** `gate-fixtures.mjs` section CAL-G runs the 325 human and 325 machine
+essays of the held-out set through the **shipped CLI** — prior weights, the verdict table, `--preset
+essay`, one batch, no history, no corpus — and counts the labels a platform would actually receive.
+Nothing here is a fitted model at a fitted threshold; it is the product.
+
+| `summary.label` | human essays (325) | machine essays (325) |
+|---|---:|---:|
+| `fingerprint_found` | 0 | 0 |
+| `not_independently_authored` | 0 | 0 |
+| `ai_style_indicators` | **4** | **51** |
+| `no_reliable_indicators` | 296 | 110 |
+| `too_short_or_no_signal` | 25 | 164 |
+| **flagged** (`ai_style_indicators` or a rule) | **4 = 1.2%** | **51 = 15.7%** |
+| **refused a judgement** (`too_short_or_no_signal`) | 25 = 7.7% | 164 = 50.5% |
+
+So: **the platform flags about 1 human essay in 80 and catches about 1 machine essay in 6.** Over the
+essays that got past the length floor — the like-for-like comparison — that is 1.3% of human and
+31.7% of machine. In the 150–499-token bucket alone, 1.3% and 19.0%.
+
+Four things that table says, and they are the honest description of this product:
+
+- **Most machine essays are not flagged.** 110 come back `no_reliable_indicators` — the same label a
+  human essay gets — and 164 are refused a judgement. A platform that treats "no label" as "not AI"
+  will be wrong about **five machine essays in six**.
+- **Silence is the modal output on the machine side.** Half the machine essays return
+  `too_short_or_no_signal`: gates passed, nothing worth saying. The gate is not symmetric — 7.7% of
+  human against 50.5% of machine essays — largely because this corpus's machine half is shorter
+  (median ~197 words against ~424). A UI must not round that label to "clean".
+- **The false-flag rate is low because the catch rate is low.** Both follow from the same
+  conservatism, and you cannot move one without moving the other. R50's `parallel_openers` fix and
+  R52's re-base moved both together: catch **6.8% → 15.7%**, false-flag **0.6% → 1.2%** (the
+  before-figures are recorded in HEAD-RULINGS R53; the after-figures are the table above).
+- **No rule fired at all.** `fingerprint_found` and `not_independently_authored` are zero, which is
+  expected: no assistant frame survived in this corpus and no corpus index was supplied. Those two
+  labels are the precise ones — they need an artifact or a duplicate — and on a real platform, with
+  the class passed as a corpus, they are the labels most worth acting on.
+
+**Loading the fitted weights makes the product worse, measured.** With
+`--weights eval/out/weights.fitted.json` the same 650 rows give **0 human essays flagged and 2
+machine essays (0.6%)** — the false-flag rate falls to zero by silencing 39.4% of the human half, and
+the catch rate collapses. See the next section for why.
+
+### What the ranking could do with a calibrated threshold
+
+The evaluation report measures something different: a model **fitted** on held-out data, at a
+threshold **fitted** on a validation side. That is the ranking's ceiling, not the product's behaviour.
+It is quoted here because it says what a calibrated build could reach, and for no other reason.
 
 | 150–499 tokens | **essays** (the platform's genre) | general English prose (all genres) |
 |---|---|---|
-| held-out rows | 224 human / 248 llm | 448 human / 545 llm |
-| gated before scoring | 28.4% of essay rows | 63.4% of prose rows |
-| AUC | **0.935** | 0.878 |
-| AUC, hard mode | **0.964** | 0.859 |
-| false-flag rate | **0.4%** | 2.5% |
-| recall | **28.2%** (44.0% hard) | 32.5% |
-| precision at a 20% prior | **0.940** | 0.768 |
-| at 5% | **0.769** | 0.410 |
-| at 1% | **0.390** | 0.118 |
+| held-out rows | 224 human / 248 llm | 430 human / 549 llm |
+| AUC | **0.941** | 0.887 |
+| AUC, hard mode | **0.965** | 0.870 |
+| false-flag rate at the fitted t | **0.4%** | 1.4% |
+| recall at the fitted t | **25.0%** (44.8% hard) | 29.7% |
+| precision at a 20% prior | **0.933** | 0.842 |
+| at 5% | **0.747** | 0.528 |
+| at 1% | **0.361** | 0.177 |
 
 Shorter and longer essays have no numbers at all: the 50–149 and 500+ essay buckets are
 **INSUFFICIENT** — too few held-out rows on one side to measure. On general prose the 50–149 bucket
-is measurable and barely useful (AUC 0.752, hard mode 0.672, recall 2.8% at a 0.8% false-flag rate).
+is measurable and barely useful (AUC 0.717, hard mode 0.641, recall 1.4% at a 0.3% false-flag rate).
 Under 50 words the tool gives no answer at all.
 
-**The essay cell is the only one where hard mode scores *higher* than standard** (0.964 against
-0.935). Hard mode deletes every spelling and formatting feature. That the essay signal survives —
+**The essay cell is the only one where hard mode scores *higher* than standard** (0.965 against
+0.941). Hard mode deletes every spelling and formatting feature. That the essay signal survives —
 improves, even — says the thing separating these two halves is rhythm and connectives, not
-punctuation or capitalisation. It is the one place in this project where the instrument is not
-mostly reading a keyboard.
+punctuation or capitalisation. It is the one place in this project where the instrument is not mostly
+reading a keyboard.
 
-Read the columns together rather than picking one. At a 5% true prevalence a flag on an essay is
-right about **three times in four**; the same flag on general prose is right about **two times in
-five**. At 1% the essay flag is right **two times in five** and the prose flag **one time in eight**.
-And 28.2% recall means that **at best seven in ten AI-written essays are not flagged at all** — the
-low false-flag rate is bought with silence, which is the trade this design chose on purpose. Measured
-directly on the held-out set: **2 of 325 human essays were flagged (0.6%)**.
+**Two reasons that ceiling is not the product, and neither is a formality.**
 
-### The caveats that apply hardest here
+1. **`--weights eval/out/weights.fitted.json` is a research path, not a better product**
+   (HEAD-RULINGS R49(b)). The verdict table's cutoffs are fixed constants; the fitted threshold is
+   not one of them, so handing the CLI a fitted file does not move the operating point to where the
+   fitted number was measured. Measured on the same 650 rows: **0 human essays flagged, 2 machine
+   essays (0.6%)** against the shipped default's 1.2% and 15.7% — the catch rate collapses and the
+   apparent gain on the human side comes from silencing 39.4% of it. Promoting fitted weights means
+   re-deriving the verdict table's cutoffs with them, which nobody has done. Until then the flag is
+   for research.
+2. **A calibrated essay mode is not built** (R49(c)). Scoring `>= t_essay` straight to
+   `ai_style_indicators` would recover 25.0% catch at 0.4% false-flag — better than the
+   product on both axes — but that 0.4% is measured on a population with **zero known non-native
+   rows**. Shipping a threshold whose fairness has never been checked, into a school, is the failure
+   this project exists to avoid. It becomes a decision when the platform supplies ELL-flagged essays.
+
+### What a determined student does about it
+
+Measured on 58 authored essays and 122 CLI reports, not argued:
+
+- **Adding typos changes nothing.** Six misspellings inserted into a machine essay produced a
+  **byte-identical report**. Typo distribution is a judge criterion; the CLI has no typo feature at
+  all. Advice to "add mistakes" is advice about a feature that does not exist.
+- **The working evasion is deleting scaffolding**, not adding noise: removing the ordinal scaffold
+  ("First… Second… Finally"), the closing offer and two register phrases — **67 tokens, no sentence
+  rewritten** — takes a flagged essay to unflagged.
+- **Prompting evades outright.** "Write like a 15-year-old" and a paraphrase pass both evade fully.
+  Neither requires knowing anything about this tool.
+- **Two apostrophes decide the ESL flag.** The human evidence that clears a text is the cheapest
+  thing in the world to fake, and the student who does not know that is the one who gets flagged.
+
+The shape of that list is the point: **the tool is hardest on the honest, and transparent to anyone
+who reads its documentation.** That is a property of every stylometric detector, and it is why the
+output is a review flag rather than a finding.
+
+### The caveats that apply hardest here### The caveats that apply hardest here
 
 - **Non-native writers — still unmeasured, and now unmeasured on essays specifically.** The
   essay corpus carries no L1 or `ell_status` column, and every corpus that does is auth-gated, so
@@ -395,6 +468,18 @@ node stylometry.mjs --aggregate all-submissions-by-this-student.jsonl --allow-un
 lean toward `uncertain` and never away from it.** A style shift is a reason to look, never a reason
 to accuse: a student who improves across a term, or switches genre, or has a bad week, trips it
 honestly.
+
+**Two limits, and the first one matters more than everything else on this page.** History detects a
+**change of hand, not machine authorship**. A student who has used AI all term reads *consistent*,
+and an LLM essay prompted to imitate three of that student's prior submissions came back with an
+empty `shifted[]` — history said "same hand" about a machine. It answers "is this like their other
+work", never "did a person write it".
+
+Second: **history never manufactures a verdict on a text the tool declined to score** (HEAD-RULINGS
+R50(a)). The consistency signal used to enter the human channel before the evidence floor, so a
+document the tool had refused to judge could come out `leaning_human` on the strength of its author's
+past work. It cannot now: on `insufficient_text` the comparison is still reported in `history` and
+`notes`, with `history_not_applied_below_floor`, and the verdict and label stay where they were.
 
 #### Do it with a stored profile, not by re-reading the priors
 
@@ -469,6 +554,19 @@ node stylometry.mjs --file <submission.txt> \
 know it (`web` for a browser form). Omit `--history` for a student's first submission; the tool says
 `history_insufficient` rather than pretending.
 
+#### Relay the agent's bytes, and get the sender field right
+
+**Show the agent's report as the bytes it produced.** A wrapper that parses the report and re-renders
+it as markdown reintroduces exactly the failures that took three rounds to close: `- length:` instead
+of `• length:`, a bolded label, a preamble above `VERDICT:`, a code fence around a report whose
+CAVEATS labels then stop being parseable. The report's format is a contract; a renderer that "tidies"
+it breaks the contract silently.
+
+**The sender field is `sender`.** `--jsonl`, `--aggregate` and `--corpus` rows all read it, and
+`student` is accepted as an alias (HEAD-RULINGS R51(b)). Get it wrong and every row looks like a
+different author, which makes `near_duplicate`'s different-sender guard inoperative: a student's own
+resubmission reads as a copy, and the guard that exists to prevent that never runs.
+
 #### Class-wide duplicates need a corpus index
 
 Two students handing in the same essay is a **corpus** question, not a stylometry one. The
@@ -535,6 +633,14 @@ by running the second through anything.
 The reports are shown inside fences here so this file renders them as blocks. The agent itself
 prints them plain (RUBRIC §5); a fence around a real report would break the CAVEATS labels.
 
+**These two runs are dated.** They were produced before HEAD-RULINGS R50/R52 changed what
+`parallel_openers` counts, so the scores they quote have since moved — 0.73 → 0.7544 for the
+assistant essay, 0.12 → 0.1289 for the student one. **Both labels and both verdicts are unchanged**,
+and the current figures for every committed sample are in
+[`examples/samples/README.md`](examples/samples/README.md), which is regenerated against the shipped
+build. They are reproduced verbatim rather than re-run because they are evidence of what the agent
+printed, and editing an artefact to keep its numbers current would make it stop being one.
+
 One inconsistency in the pair below is left visible on purpose: the first report carries the platform
 label on its own line and the second does not. Both runs used the same installed agent file, in which
 the label was one clause inside the reporting step — one run of two obeyed it. That is why `LABEL:`
@@ -543,8 +649,9 @@ predate that change and are reproduced as they came out, not as they should have
 
 ### 1. A student-register essay — `no_reliable_indicators`
 
-CLI, no flags passed (the caller stated only a path). `score` is shown rounded to six decimals here;
-the CLI prints twelve so the contribution-sum invariant can be checked from the JSON alone:
+CLI as it stood on the run date, no flags passed (the caller stated only a path). `score` is shown
+rounded to six decimals here; the CLI prints twelve so the contribution-sum invariant can be checked
+from the JSON alone. **The score has since moved to 0.1289** — the label has not:
 
 ```json
 {
@@ -597,7 +704,8 @@ WHAT WOULD CHANGE THIS VERDICT
 
 ### 2. A Claude-written essay with a fingerprint — `fingerprint_found`
 
-CLI, no flags passed:
+CLI as it stood on the run date, no flags passed. **The score has since moved to 0.7544** — the
+label has not:
 
 ```json
 {
@@ -674,21 +782,21 @@ WHAT WOULD CHANGE THIS VERDICT
   all three argue the same case in a school-student voice, and every verdict below reproduces under
   `--preset essay`, `--context prose --lang en --genre essay`, `--context prose` and `--context auto`
   alike.
-  - **A tidier register used to draw a flag, and that is what HEAD-RULINGS R43 fixed.**
+  - **A tidier register used to draw a flag, and two rulings have since taken it away.**
     `student-essay-v1-tidy.txt` — same argument, same length, but even sentence rhythm and every
-    apostrophe in place — was `leaning_llm` → `ai_style_indicators`. Its LLM channel is carried by
-    `terminal_punct_ratio` (+0.600 of +0.921), a register proxy that measures a keyboard habit;
-    `sentence_len_mode_mass` adds +0.291 and the second non-proxy signal, `parallel_openers`, adds
-    **+0.030**. R24 required two non-proxy signals from two groups and that sliver satisfied it, so a
-    full stop at the end of every line was convicting a careful student. R43 makes a non-proxy signal
-    count only when its contribution is **≥ 0.10**. On the shipped build the same file is now
-    `uncertain` → **`no_reliable_indicators`** with `register_only_evidence`, and the report names
-    the immaterial signal rather than hiding it: *"parallel_openers (+0.030) is below the 0.10
-    materiality floor … A formal, careful or non-native HUMAN produces these for free, so they may
-    rank a queue but they may not carry a verdict."* The score did not move (0.5330); what moved is
-    what the tool is willing to say on the strength of it. Rewritten messier
-    (`student-essay-v2.txt`) the same argument returns **`too_short_or_no_signal`** — not a flag and
-    not a clearance either, nothing to read.
+    apostrophe in place — was `leaning_llm` → `ai_style_indicators`. Its LLM channel was carried by
+    `terminal_punct_ratio` (+0.600), a register proxy that measures a keyboard habit, with
+    `sentence_len_mode_mass` (+0.291) and `parallel_openers` (+0.030) supplying the "two non-proxy
+    signals from two groups" R24 asks for — so a full stop at the end of every line was convicting a
+    careful student on the strength of a +0.030 sliver. **R43** disqualified that sliver (a non-proxy
+    signal counts only at contribution ≥ 0.10). **R50(c)** then stopped `parallel_openers` counting
+    function-word sentence starters at all, and on this text it no longer fires, leaving one signal
+    from one group. On the shipped build the file is `uncertain` → **`no_reliable_indicators`** with
+    `register_only_evidence`, whose note names which of its two forms applies: *"material non-proxy
+    evidence from one group only (rhythm)"*. The score moved a little with the feature change
+    (0.5330 → 0.5255); the label is the point. Rewritten messier (`student-essay-v2.txt`) the same
+    argument returns **`too_short_or_no_signal`** — not a flag and not a clearance either, nothing
+    to read.
   - **Punctuation moves the human side, not the flag.** The README sample above is
     `student-essay-v2.txt` with five apostrophes dropped (`didn't` → `didnt`) and nothing else
     changed. That takes it from `too_short_or_no_signal` to **`no_reliable_indicators`**, human
@@ -699,9 +807,10 @@ WHAT WOULD CHANGE THIS VERDICT
   Together: none of the three drafts is flagged on the shipped build, but getting there took a
   ruling, and **the human evidence that moves a text toward "human" is still the evidence cheapest to
   fake** — five dropped apostrophes. This is the false-positive class the false-flag rate in the
-  table above is about — 2.5% on general prose, 0.4% on essays, both at the fitted threshold on the
-  eval side, not on these labels, so the two are not the same number and should not be quoted as one.
-  It is why a label goes to a person and not to a gradebook.
+  table above is about. The number that applies to a **label** is the product's: **1.2% of real human
+  essays are flagged** by the shipped CLI. The eval side's 0.4% (essays) and 1.4% (general prose) are
+  a *fitted model at a fitted threshold* and are not rates about these labels — the two must never be
+  quoted as one. It is why a label goes to a person and not to a gradebook.
 
 ---
 
@@ -776,9 +885,11 @@ Ordered by how likely each is to happen in production this quarter.
       content, and the instrument goes from unanimous to silent, then past silent to wrong. The
       recall given up here was keyboard detection, and the design's answer for chat is
       `--aggregate`, not a per-message verdict. **R43 tightened R24 further — a non-proxy signal
-      counts only at contribution ≥ 0.10 — and cost 0 of 100 LLM fixture rows** (the 50 authored
-      `llm-en`/`llm-tr` rows plus the verify-round LLM rows): no LLM row changed verdict, and no
-      human row did either. The careful-student false positive it removed was free.
+      counts only at contribution ≥ 0.10 — and cost 0 of 100 LLM fixture rows.** Note what class of
+      text that bought, though: R43's case is **chat-length and proxy-carried**, and on a later round
+      of 29 authored human-register essays it protected **none of them** while demoting one evaded
+      machine essay. It closed a real hole in the chat cell; it is not the essay defence, and this
+      README should not have let it read like one.
     - **R28 (a machine marker inside a human-looking message is a hybrid) costs marker confidence,
       and the demotion is spelling-driven.** The same assistant reply carrying a configured marker
       is `likely_llm`; lowercase it and add about six tokens of slang (`lol`, `u`, `ur`, `pls`, a
@@ -904,7 +1015,7 @@ Say these out loud before quoting anything this tool produces.
   produced by a second model through a paid API (R10). Provenance is recorded per row.
 - **Prose between 50 and about 120 tokens mostly abstains.** The rhythm features switch on at
   120–250 tokens, and the measured `en:prose` 50–149 bucket says the instrument is barely useful
-  there anyway (AUC 0.752, hard mode 0.672, recall 2.8% at a 0.8% false-flag rate). G4 was
+  there anyway (AUC 0.717, hard mode 0.641, recall 1.4% at a 0.3% false-flag rate). G4 was
   deliberately **not**
   lowered to score that band (HEAD-RULINGS R25); the humanization fixtures were rewritten at
   160–260 tokens instead, so that the `§F.3` collapse assertion is measurable at all. A 90-word
