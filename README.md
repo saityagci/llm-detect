@@ -263,7 +263,7 @@ for what you are allowed to say. The judge agent's obligations for the first fou
 | `cell_not_fitted_prior_used` | You passed `--weights eval/out/weights.fitted.json` and the `{language}:{shape}` cell this text routes to was not fitted (R36(c)). The prior cell scored it instead. `version.provenance` still says `fitted`, and for **this** document that is misleading — read it as uncalibrated. Only two of the four cells were fitted this round. |
 | `weights_expired` | The weights file is past its 180-day expiry. The lexicon is a snapshot of a moving register; treat the score as stale, not as wrong-by-a-known-amount. |
 | `expiry_not_checked` | The library was called without `opts.now`, so `detect()` stayed pure and skipped the expiry clock. Nobody checked whether the weights are stale. |
-| `register_only_evidence` | **R24.** The LLM lean rests only on register proxies — correct terminal punctuation, capitalised sentence openers, a greeting/signoff frame, a politeness formula, a formal copula, an out-of-channel register, a weak lexicon hit, and (since R38(f)) `colon_led_list`, because humans write labelled lists all day: `- Check-in: 14:00` on WhatsApp is a guest, not a model. Those are what a careful, formal or non-native human produces for free, so the verdict is capped at `uncertain`. In chat-length text a style-only `leaning_llm` now needs a strong-lexicon hit **plus** a structure signal (`bold_lead_in_list`, `colon_led_list`, `balanced_contrast_frame`) or a Tier-0 rule. The recall given up here was keyboard detection. |
+| `register_only_evidence` | **R24, with R43's materiality floor.** The LLM lean rests only on register proxies — correct terminal punctuation, capitalised sentence openers, a greeting/signoff frame, a politeness formula, a formal copula, an out-of-channel register, a weak lexicon hit, and (since R38(f)) `colon_led_list`, because humans write labelled lists all day: `- Check-in: 14:00` on WhatsApp is a guest, not a model. **A non-proxy signal counts toward the two-from-two-groups requirement only if its contribution is ≥ 0.10** (R43): a signal worth +0.030 beside a proxy worth +0.600 was letting a keyboard habit carry a verdict. Immaterial signals are named in the note as "below the 0.10 materiality floor" rather than dropped silently, so a reader can see what was discounted and why. Those are what a careful, formal or non-native human produces for free, so the verdict is capped at `uncertain`. In chat-length text a style-only `leaning_llm` now needs a strong-lexicon hit **plus** a structure signal (`bold_lead_in_list`, `colon_led_list`, `balanced_contrast_frame`) or a Tier-0 rule. The recall given up here was keyboard detection. |
 | `hybrid_suspect` | Two instruments inside the tool disagree about the same text (G6), or a known-machine marker fired inside a message that also carries human evidence (**R28**). In the marker case the verdict drops to `uncertain`: a machine-written *segment* is present, the message is not machine-written, and the sender may be forwarding it. |
 | `pasted_machine_text` | A configured `markers.json` pattern matched. The string is machine-written. **Origin is not attribution** — the sender may be a person forwarding it. |
 | `templated_or_copied` | `near_duplicate` fired against a different sender. The text was not independently authored: template, copy or spam. **Not** proof of LLM authorship (R3); `likely_llm` through this rule needs a second Tier-0 rule. |
@@ -283,6 +283,308 @@ for what you are allowed to say. The judge agent's obligations for the first fou
 | `unsupported_language` (gate reason) | **R22.** The dominant script is not one this build scores. `verdict: insufficient_text`, `score: null`, `gates.failed: ["G3_lang"]`, zero signals. Arabic-script input is gated here and never scored. |
 | `below_char_floor` / `too_few_active_features` (gate reasons) | Two different findings wearing one verdict. The first means the text is too short to look at; the second means the text was long enough and the instrument still found nothing. |
 | `no_evidence_either_way` (gate reason) | Every gate passed and both channels sat below the 0.25 evidence floor (SPEC §D.3 bottom-left cell). A long-enough text that produces nothing to score with is an answer, not a failure; the note carries both channel values. |
+
+---
+
+## Using this in a school platform
+
+A platform collecting student essays and exam answers is the case this section is written for. The
+short version: **the tool never gives the platform a yes/no, and a label is never a grade input.**
+
+### The four labels
+
+`detect()` returns `summary.label`, derived from the verdict. There are four values and there is
+never a fifth:
+
+| `summary.label` | from | what a teacher-facing UI should show |
+|---|---|---|
+| `fingerprint_found` | `likely_llm` | The **matched string**, quoted. This is the only label backed by a near-100%-precision rule. It means a machine wrote that string — not that this student did not write the essay. A pasted confirmation, a quoted assistant reply and a forwarded draft all land here. |
+| `ai_style_indicators` | `leaning_llm` | A prompt to **read the essay**, with the evidence spans highlighted and the base rate beside them. This is a weak style prior, and it is biased against careful and non-native writers. |
+| `no_reliable_indicators` | `uncertain`, `leaning_human`, `likely_human` | Nothing, or the words "no indicators". **This is not a clearance.** It is the absence of evidence either way, which is the normal outcome. |
+| `too_short_or_no_signal` | `insufficient_text` | The **gate reason**, not a verdict. Either below the length floor, or above it with nothing to read. Do not let the UI round this to "clean". |
+
+`summary.humanReviewRequired` is `true` on **every** report the tool produces. `summary.caveat`
+carries the base-rate sentence and travels with the label wherever the label goes.
+
+### What the numbers actually are
+
+Measured on held-out English prose. These are the tool's own numbers, and they are the reason
+`humanReviewRequired` is not a formality:
+
+| length | recall | false-flag rate | precision at a 20% prior | at 5% | at 1% |
+|---|---|---|---|---|---|
+| **150–499 words** | **65%** | **7.6%** | **0.68** | **0.31** | **0.08** |
+| 50–149 words | 3.7% | 1.1% | — the instrument is barely useful here | | |
+| under 50 words | no answer — below the floor | | | | |
+
+Read the 5% column twice. If one essay in twenty is AI-written, **seven flags in ten are wrong**. At
+one in a hundred, **more than nine in ten are wrong**. A class of thirty produces two or three false
+flags a term from an instrument working exactly as designed. That is what a review flag costs, and it
+is why the label must reach a person and not a gradebook.
+
+### The caveats that apply hardest here
+
+- **Non-native writers.** The non-native stratum has **never been measured** for this tool — the
+  eval could not find twenty held-out non-native rows to bind a threshold on. What is known comes
+  from the literature: seven commercial detectors flagged **61.22% of 91 TOEFL essays** by non-native
+  writers, against **5.19%** for US eighth-graders; a 2026 re-test still measured **23.1% versus 0%**.
+  A class with ESL students is the exact population this instrument is known to be unfair to, and
+  nothing in this build fixes that.
+- **One prompt line defeats it.** Measured in-house: telling a generator to write casually takes a
+  `leaning_llm` at score 0.889 to `insufficient_text`. Ten clean assistant replies went from 10/10
+  flagged to 0/10 after stripping bold and lowercasing four labels. A student who knows this walks
+  through; a student who does not gets flagged for writing carefully. **The tool is hardest on the
+  honest.**
+- **Essays have not been measured at all.** Every English number here comes from product reviews and
+  QA answers. Student essays are a different genre. See the essay-genre row in the evaluation
+  report's held-out results section; until that row exists, treat the essay case as **unmeasured**.
+
+### The integration that actually helps: per-student history
+
+Every student on a platform has multiple submissions, and that is the strongest lever available —
+the tool's own three-humans caveat says *calibrate per sender against that sender's own history, and
+abstain until there is history*. Two calls, answering different questions:
+
+```bash
+# is this submission unlike the rest of this student's work?
+node stylometry.mjs --file essay.txt --preset essay --history prior-submissions.jsonl --allow-uncalibrated --json
+
+# what does this student's whole body of work look like?
+node stylometry.mjs --aggregate all-submissions-by-this-student.jsonl --allow-uncalibrated --json
+```
+
+`--history` needs at least two prior documents of ≥150 tokens, and it adds
+`style_shift_vs_history` — naming the features that moved — or a consistency note. **It can move a
+lean toward `uncertain` and never away from it.** A style shift is a reason to look, never a reason
+to accuse: a student who improves across a term, or switches genre, or has a bad week, trips it
+honestly.
+
+### The backend states the shape — the file name never will
+
+**Your backend must tell the tool what it is looking at; a file name is not a caller statement and
+the agent will refuse to treat one as such.** In the second sample report below, the agent was given
+a file called `assistant-essay.txt` and explicitly declined to pass `--preset essay` on that basis:
+RUBRIC §9 forbids inferring a flag from the text or the filename, because a flag the caller did not
+state is a claim the tool made up. A platform knows the shape — it collected the submission — so it
+says so. The call to make is:
+
+```bash
+node stylometry.mjs --file <submission.txt> \
+  --preset essay \
+  --history <this-student-prior-submissions.jsonl> \
+  --allow-uncalibrated --json
+```
+
+`--preset essay` expands to `--context prose --genre essay --lang en`. Pass `--channel` too if you
+know it (`web` for a browser form). Omit `--history` for a student's first submission; the tool says
+`history_insufficient` rather than pretending.
+
+A runnable backend example is in [`examples/platform-essay.mjs`](examples/platform-essay.mjs):
+`node examples/platform-essay.mjs <essay.txt> [--history prior.jsonl]`. See
+[`examples/README.md`](examples/README.md) for `detectBatch` over a whole class and `aggregate` per
+student.
+
+### What the tool does NOT do
+
+- **It does not rewrite, humanize or "clean" a text**, and it will not. There is no mode that makes
+  a text pass, and none will be added.
+- **It does not tell you a student cheated.** It judges strings. A person pastes machine-written text
+  for a dozen honest reasons.
+- **It does not produce a percentage** — no confidence, no probability, no "87% AI".
+- **It has no exam-answer corpus behind it.** Short exam answers land in the 50–149 and under-50
+  rows above, where the tool's honest output is mostly "no answer".
+
+---
+
+## What a report looks like
+
+Two real runs through the **installed** agent (`~/.claude/agents/llm-text-detector.md`), reproduced
+verbatim below. The command in both cases was:
+
+```bash
+env -u CLAUDECODE LLM_DETECT_HOME=/path/to/llm-detect \
+  claude -p --model opus --dangerously-skip-permissions \
+  "use the llm-text-detector agent on <path> and print its full report verbatim"
+```
+
+**Provenance, stated plainly: both texts below are Claude-authored.** The first was written to
+imitate a school student — imperfect, personal, one visible self-correction, apostrophes dropped, no
+assistant phrasing. The second is a Claude-written essay left with its drafting frame and closer
+intact. Neither is a real student's work, and neither is a measurement: they show what the two ends
+of the output look like, not how often the tool is right. **The tool does not rewrite, humanize or
+"clean" a text and never will** — the first sample was written that way from the start, not produced
+by running the second through anything.
+
+The reports are shown inside fences here so this file renders them as blocks. The agent itself
+prints them plain (RUBRIC §5); a fence around a real report would break the CAVEATS labels.
+
+One inconsistency in the pair below is left visible on purpose: the first report carries the platform
+label on its own line and the second does not. Both runs used the same installed agent file, in which
+the label was one clause inside the reporting step — one run of two obeyed it. That is why `LABEL:`
+is now a line of the §5 skeleton rather than a clause (HEAD-RULINGS R42 addendum). These two reports
+predate that change and are reproduced as they came out, not as they should have.
+
+### 1. A student-register essay — `no_reliable_indicators`
+
+CLI, no flags passed (the caller stated only a path). `score` is shown rounded to six decimals here;
+the CLI prints twelve so the contribution-sum invariant can be checked from the JSON alone:
+
+```json
+{
+  "verdict": "leaning_human",
+  "score": 0.124793,
+  "summary": {
+    "label": "no_reliable_indicators",
+    "humanReviewRequired": true,
+    "matched": [],
+    "reason": null,
+    "caveat": "This score is not a probability. At 2% FPR and 60% recall, precision is 0.968 at a 50% prevalence, 0.612 at 5%, 0.380 at 2% and 0.233 at 1%. Measured on the private calibration corpus at its own operating points: precision 0.183 at a 1% prior \u2014 four of five flags wrong."
+  }
+}
+```
+
+The agent's report, verbatim:
+
+```
+VERDICT: leaning_human                 confidence band: moderate
+no_reliable_indicators
+CLI: leaning_human (score 0.12, 299 tokens, lang=en context=prose) — flags actually passed: `--json --file <path> --allow-uncalibrated` (no `--context`, `--channel`, `--genre`, `--domain` or `--lang` was passed; the caller stated only a path, so shape=prose and lang=en are the tool's own detection, not a claim I made)
+JUDGE: leaning_human — moderate
+
+RULES FOUND (artifact matches — high precision, printed separately from the score)
+  • none — `rules[]` is empty. No leaked assistant frame, no markdown, no configured machine marker, no near-duplicate (no `--corpus` supplied). The artifact route to `likely_llm` was never open on this text.
+
+EVIDENCE (3-6 bullets, each quoting the text)
+  • [C08] "Wait, thats not quite right. Other people had complained before him, loads of them." — an in-line retraction the writer left standing instead of editing the original claim away; single-pass generated prose does not usually keep its own wrong turn (→HUMAN, M)
+  • [C08] "...my teacher will probably write "expand this" in the margin" — the document ends mid-thought with no terminal punctuation; it stops rather than closing its frame (→HUMAN, M)
+  • [C04, inverted] "One book, one person, months of work." and "Ten!" beside "The part I actually care about is what happened next, which is that people started arguing with each other in print." — verbless fragment and one-word exclamation against a long subordinated sentence; this is the anti-uniformity pole of C04, and the CLI measures the same thing as `sentence_len_cv` 0.65 (→HUMAN, M)
+  • [C07, inverted] "so here we are" / "That bit everyone agrees on" / "But heres the problem with my own argument." — the text leans on shared context and then argues against its own thesis, the opposite of over-complete specification (→HUMAN, M)
+  • [C19, inverted] "didnt", "thats", "heres", "cant", "Id" — apostrophes dropped throughout while capitalization stays correct, which is the human order of operations; the same word is misspelled the same way twice ("didnt" ×2, "thats" ×2), C17's natural pattern rather than evenly-spread injected noise (→HUMAN, W/M)
+  • [C03] "The press made learning to read worth the effort. Reading made the press worth building." — one tidy chiasmus, the only →LLM criterion I can evidence; C03 needs two such constructions in a short text to weigh more, and there is only one (→LLM, M, single instance)
+
+Checked and not evidenced, so not counted: C01, C02, C05 (no envelope, no "First/Second/Finally", no "In summary", no headings), C09 (zero register-lexicon members — no delve, leverage, robust, crucial, seamless, tapestry), C17/C18 (no letter-level typos at all, so no distribution argument runs in either direction). C06 is mixed and I did not count it toward LLM: there is one spaced em dash in "Luther is the famous example — his complaints", but the quotes are straight ASCII and there are no curly apostrophes anywhere.
+
+CAVEATS
+  • length: 300 words (299 tokens) — enough for the rhythm and structure criteria, and above every floor, but a well-instructed humanizer can stage a mid-text "Wait, thats not quite right" and drop apostrophes uniformly. That possibility is exactly why this stops at leaning and not at likely. `likely_human` additionally requires several messages from one sender; this is a single document, so C20 idiolect continuity was unavailable and the ceiling was fixed before I read a word.
+  • language: English, native-sounding ("cop out", "loads of them"). The English trap that applies is C09's: academic and business English uses assistant-register vocabulary natively — here that trap is moot because the density is zero. Published rate, for calibration of your own expectations only, named with its source: seven commercial detectors flagged 61.22% of 91 TOEFL essays by non-native writers (Liang et al., quoted in README §The two caveats).
+  • writer: unknown, and no support-desk or business context was stated, so no `--domain` flag was passed and no lexicon row was suppressed. Nothing in the text reads as a script or a snippet library.
+  • provenance: no pasted-template, forwarded-machine-text or reference-code shape appears anywhere, so no origin-versus-attribution split arises. Note that this file sits in a scratch directory alongside sibling samples; the path tells me nothing about who typed it, and I judged the bytes only.
+  • calibration: the CLI returned `uncalibrated_weights` — the weights are the shipped prior (`prior-2026-09-09`), the cell `en:prose` has no fitted model, and 0.12 is a ranking prior with no validated threshold behind it. One further honesty note: my lead human evidence, the in-line repair, produced no CLI signal at all — the tool's human lean rests mainly on `contraction_apostrophe_drop`, which its own note calls the cheapest thing a humanizer injects. The two instruments agree, but the instrument reached agreement on weaker grounds than I did. `no_reliable_indicators` means absence of evidence either way; it is not a clearance of any person.
+
+WHAT WOULD CHANGE THIS VERDICT
+  • Four or five more pieces of writing from the same author: idiolect continuity (a stable apostrophe habit, the same word misspelled the same way, a recurring tic) is the only evidence that could lift this to `likely_human`, and its absence is the only thing capping it now.
+  • The draft history or revision timeline — an editor's version log, or a document with the retracted clause visible in an earlier state — would make the "Wait, thats not quite right" repair expensive to fake instead of merely cheap to write.
+  • A caller statement about shape and channel (that this is an essay or exam answer, and where it was submitted) would route it to the essay preset and a different scoring cell; I did not infer one from the filename.
+  • A prior-submissions corpus passed via `--corpus`, which would let the near-duplicate rule run; a hit there would prove "not independently authored" — template or copy — though still not LLM authorship on its own.
+```
+
+### 2. A Claude-written essay with a fingerprint — `fingerprint_found`
+
+CLI, no flags passed:
+
+```json
+{
+  "verdict": "likely_llm",
+  "score": 0.727016,
+  "summary": {
+    "label": "fingerprint_found",
+    "humanReviewRequired": true,
+    "matched": [
+      "assistant_frame_leak: \"Here's a polished version\""
+    ],
+    "reason": null,
+    "caveat": "This score is not a probability. At 2% FPR and 60% recall, precision is 0.968 at a 50% prevalence, 0.612 at 5%, 0.380 at 2% and 0.233 at 1%. Measured on the private calibration corpus at its own operating points: precision 0.183 at a 1% prior \u2014 four of five flags wrong."
+  }
+}
+```
+
+The agent's report, verbatim:
+
+```
+VERDICT: likely_llm                 confidence band: strong
+CLI: likely_llm (score 0.73, 265 tokens, lang=en context=auto)
+JUDGE: likely_llm — strong
+
+CLI invocation — flags actually passed: `--json --file /Users/sfaai/Desktop/llm-detect/.scratch/fix-b2/samples/assistant-essay.txt --allow-uncalibrated`
+No `--context`, `--channel`, `--genre`, `--domain`, `--lang`, `--preset`, `--history`, `--markers` or `--corpus` was passed: the caller stated nothing about shape, channel, genre, domain or language, and RUBRIC §9 forbids inferring a flag from the text or from a filename. The CLI resolved lang=en and shape=prose on its own; channel=unknown, genre=unspecified, domain=general are its defaults, not my claims. (Note for the record: the file is *named* assistant-essay.txt, but a filename is not a caller statement, so `--preset essay` was withheld.)
+
+RULES FOUND (artifact matches — high precision, printed separately from the score)
+  • assistant_frame_leak: "Here's a polished version"
+
+EVIDENCE (each bullet quotes the text)
+  • [C05] "Here's a polished version of your essay on the printing press:" — a drafting frame left in place, addressed to a requester who is not in the document; this is the artifact, and it is the same span the CLI's Tier-0 rule matched (→LLM, S)
+  • [C01] "I hope this helps! Let me know if you would like me to expand any section or adjust the tone." — a closer offering further help, wrapping an essay that needed no wrapper (→LLM, S)
+  • [C02] "First, the press dramatically reduced the cost of producing books." / "Second, it is worth noting that the press accelerated the circulation of ideas." / "Finally, the press contributed to the standardisation of vernacular languages" / "In conclusion, although the printing press did not single-handedly produce the modern world" — a full ordinal scaffold plus a summarizing frame over ~250 words of prose (→LLM, S)
+  • [C09] "it is worth noting that" and "a testament to the power of the new medium" — two literal members of the assistant-register lexicon, used unprompted (→LLM, M)
+  • [C03] "While literacy rates remained low for centuries, the infrastructure for mass education had been established." and "not merely in the technology itself, but in the cascading consequences" — antithesis as a rhetorical default, twice (→LLM, M)
+  • [C04] "Prior to Gutenberg's innovation around 1440, manuscripts were laboriously copied by hand, a process that rendered books prohibitively expensive and confined literacy largely to clerical and aristocratic elites." followed by "The introduction of movable type enabled the production of identical copies at a fraction of the previous cost, democratising access to written material in an unprecedented manner." — two consecutive sentences of near-identical length and identical main-clause-plus-appositive-tail shape (→LLM, M)
+
+Checked and NOT evidenced, so not counted: C10 (non-native fluency profile) was searched for and is absent — its absence is never inverted into LLM evidence; C08 (repair) is absent, and I do not cite cleanliness or the absence of typos as evidence; C20 (idiolect continuity) is unavailable on a single document; C06 has nothing to cite in either direction (no em dash, no markdown, no emoji). The consistent British spelling ("democratising", "standardisation", "endeavour") is a spelling convention and is not scored in either direction.
+
+Two CLI signals I decline to carry into my own bullets, because RUBRIC §8's logic about register proxies applies to them by name in their own notes: terminal_punct_ratio ("register and keyboard, not authorship") and parallel_openers / enumerated_openers, which the CLI itself flags as a KNOWN ESL BIAS — L2 writers are explicitly taught exactly this scaffolding. My C02 bullet rests on the ordinal scaffold plus the summarizing frame as a rubric criterion, not on the CLI's weight for it. Note also that two CLI signals point human (content_word_repeat, sentence_len_cv) and are printed here rather than buried: the instrument is not unanimous below the rule line, and the rule is what carries this verdict.
+
+How the two instruments combined: CLI likely_llm × judge likely_llm is the LL×LL cell of RUBRIC §3 — likely_llm. No ⚠ cell fired, so no CONFLICT block. My judge column reached likely_llm through the artifact route (one artifact-class criterion, quoted verbatim, well over 20 words), not through style: all three S-class criteria I found sit in Group A, and the style route needs two different groups. Without the leaked frame this text would have stopped at leaning_llm on style alone.
+
+CAVEATS
+  • length: 266 words / 265 tokens — comfortably above the 20-word, 100-character floor and above the 80-word line below which typo distribution cannot be argued, so length is not a limitation on this verdict. It is still one document, which is why no human-side criterion requiring a thread (C20, cross-message C08) could be tested at all.
+  • language: English, monolingual Latin script, CLI language confidence 0.7. The English FP trap that applies is the register lexicon (C09/llm_lexicon_strong): academic and business English uses "it is worth noting" and "a testament to" natively, which is why those are M-class corroborators here and not the spine of the verdict. The published non-native FPR belongs here and nowhere else: seven commercial detectors flagged 61.22% of 91 TOEFL essays by non-native English writers versus 5.19% for US eighth-graders (Liang et al., carried in this tool's own caveats and README) — if this tool leans LLM about a careful non-native writer, that is exactly how it is known to fail.
+  • writer: unknown. Nothing states who wrote or sent this, and no sender history was supplied. I checked C10 for a non-native profile and found none, but "no non-native profile" is not evidence of a machine, and an essay-scaffolded, formally-punctuated text is precisely the shape a schooled L2 writer produces for free. No support-desk or business context was stated, so `--domain customer_service` was correctly withheld and C01 was not downgraded.
+  • provenance: origin is not attribution. This verdict is about the text, not about any person. The matched string "Here's a polished version" is assistant-written framing, and the document as a whole reads as a machine-drafted reply — but a person may perfectly well be holding, forwarding or submitting it, may have written the prompt behind it and may mean every word of its content. The CLI raised no known_machine_marker and no hybrid_suspect, so this is not the hybrid case; it is a document whose own opening line advertises a drafting frame. Do not call anyone a bot on the strength of it. I also declined RUBRIC §3 invariant 4's one-step-toward-human shift for "pasted machine-written text": that reason exists for booking recaps and business templates a human forwards, and applying it here would discount the very artifact under examination.
+  • calibration: the CLI returned warnings ["uncalibrated_weights"] with provenance "prior" — weights prior-2026-09-09, expiring 2027-03-08, cell en:prose. The 0.73 is a ranking prior with no validated threshold, not a probability and not a confidence; `--allow-uncalibrated` was required to get any verdict at all. The instrument's own base-rate caveat: at 2% FPR and 60% recall, precision is 0.968 at 50% prevalence but 0.233 at 1%, and on the private calibration corpus precision was 0.183 at a 1% prior — four of five flags wrong. The human side of that corpus is three people, and in a leave-one-writer-out test the model flagged 86% of one real writer's messages. "Strong" here means multiple independent strong tells with no counter-evidence, anchored on a Tier-0 artifact. It does not mean proof, and this is not admissible as proof of anything about a person.
+
+WHAT WOULD CHANGE THIS VERDICT
+  • Context showing the frame is quoted or discussed rather than spoken — e.g. the surrounding thread revealing that "Here's a polished version..." is being reported or pasted as an example. R27 suppresses the leak rule in that case, the artifact route closes, and the verdict falls to leaning_llm on style alone.
+  • The caller stating the shape and provenance — "this is a student essay submission", "this arrived by email", "this is from our support desk". That licenses `--preset essay` or `--domain customer_service`, moves the text into a different scoring cell and, for customer_service, zeroes the register rows my C09 bullet uses.
+  • Prior submissions from the same author (`--history`) or a thread from the same sender. Idiolect continuity (C20) is the strongest human evidence available and it outranks any single-message lexical tell; conversely a corpus index (`--corpus`) could surface a near_duplicate, which would prove "not independently authored" — template or copy — without proving LLM authorship.
+  • Removing the first and last lines and re-running. If the essay body alone still scored likely_llm the verdict would rest on more than one artifact; if it dropped to leaning_llm or uncertain, that tells the reader precisely how much of this verdict is the two frame lines and how much is the prose between them.
+```
+
+### What these two runs actually show
+
+- **The label is derived, not invented.** `likely_llm` → `fingerprint_found` and `leaning_human` →
+  `no_reliable_indicators`, and in the second case the whole verdict rests on one quoted string,
+  `"Here's a polished version"`. Delete that line and the same essay stops at `leaning_llm` — the
+  agent says so itself under WHAT WOULD CHANGE THIS VERDICT.
+- **Neither run inferred a flag.** Both were given a path and nothing else, so neither passed
+  `--preset essay`, and the second explicitly refused to read `assistant-essay.txt` as a caller
+  statement. That is RUBRIC §9 working: a filename is not a claim.
+- **`no_reliable_indicators` is not a clearance,** and the first report says so in its own caveats:
+  the human lean rests mainly on dropped apostrophes, which the tool's own note calls the cheapest
+  thing a humanizer injects. Its strongest human evidence — the in-line self-correction — produced no
+  CLI signal at all.
+- **Two honest caveats about the first sample, and they are different facts.** Three drafts of that
+  essay are committed in [`examples/samples/`](examples/samples/) with the exact command for each;
+  all three argue the same case in a school-student voice, and every verdict below reproduces under
+  `--preset essay`, `--context prose --lang en --genre essay`, `--context prose` and `--context auto`
+  alike.
+  - **A tidier register used to draw a flag, and that is what HEAD-RULINGS R43 fixed.**
+    `student-essay-v1-tidy.txt` — same argument, same length, but even sentence rhythm and every
+    apostrophe in place — was `leaning_llm` → `ai_style_indicators`. Its LLM channel is carried by
+    `terminal_punct_ratio` (+0.600 of +0.921), a register proxy that measures a keyboard habit;
+    `sentence_len_mode_mass` adds +0.291 and the second non-proxy signal, `parallel_openers`, adds
+    **+0.030**. R24 required two non-proxy signals from two groups and that sliver satisfied it, so a
+    full stop at the end of every line was convicting a careful student. R43 makes a non-proxy signal
+    count only when its contribution is **≥ 0.10**. On the shipped build the same file is now
+    `uncertain` → **`no_reliable_indicators`** with `register_only_evidence`, and the report names
+    the immaterial signal rather than hiding it: *"parallel_openers (+0.030) is below the 0.10
+    materiality floor … A formal, careful or non-native HUMAN produces these for free, so they may
+    rank a queue but they may not carry a verdict."* The score did not move (0.5330); what moved is
+    what the tool is willing to say on the strength of it. Rewritten messier
+    (`student-essay-v2.txt`) the same argument returns **`too_short_or_no_signal`** — not a flag and
+    not a clearance either, nothing to read.
+  - **Punctuation moves the human side, not the flag.** The README sample above is
+    `student-essay-v2.txt` with five apostrophes dropped (`didn't` → `didnt`) and nothing else
+    changed. That takes it from `too_short_or_no_signal` to **`no_reliable_indicators`**, human
+    channel 0.093 → 0.416 — from *no signal* to *human markers*, carried almost entirely by
+    `contraction_apostrophe_drop`, which the tool's own note calls "exactly what a humanizer tool
+    injects, the cheapest fake there is".
+
+  Together: none of the three drafts is flagged on the shipped build, but getting there took a
+  ruling, and **the human evidence that moves a text toward "human" is still the evidence cheapest to
+  fake** — five dropped apostrophes. This is the false-positive class the 7.6% figure in the table
+  above is about; note that the 7.6% is measured on the eval side at the fitted threshold, not on
+  these labels, so the two are not the same number and should not be quoted as one. It is why a label
+  goes to a person and not to a gradebook.
 
 ---
 
@@ -356,7 +658,10 @@ Ordered by how likely each is to happen in production this quarter.
       and **three flip to `leaning_human`, all three Turkish**. Two cosmetic edits, no change of
       content, and the instrument goes from unanimous to silent, then past silent to wrong. The
       recall given up here was keyboard detection, and the design's answer for chat is
-      `--aggregate`, not a per-message verdict.
+      `--aggregate`, not a per-message verdict. **R43 tightened R24 further — a non-proxy signal
+      counts only at contribution ≥ 0.10 — and cost 0 of 100 LLM fixture rows** (the 50 authored
+      `llm-en`/`llm-tr` rows plus the verify-round LLM rows): no LLM row changed verdict, and no
+      human row did either. The careful-student false positive it removed was free.
     - **R28 (a machine marker inside a human-looking message is a hybrid) costs marker confidence,
       and the demotion is spelling-driven.** The same assistant reply carrying a configured marker
       is `likely_llm`; lowercase it and add about six tokens of slang (`lol`, `u`, `ur`, `pls`, a
@@ -504,6 +809,8 @@ lexicon-src/  build-lexicon.mjs  lexicon.v1.json  weights.v1.json  markers.json
 selftest.mjs                    node selftest.mjs → exit 0
 RUBRIC.md                       the 20 judge criteria, decision table, signal-name map
 agent/llm-text-detector.md      the judge agent      install.sh  → ~/.claude/agents/
+examples/                       platform-essay.mjs — the shape a backend calls; see examples/README.md
+                                `node examples/platform-essay.mjs <essay.txt> [--history prior.jsonl]`
 eval/                           run-eval.mjs, fetch-public-datasets.mjs, make-splits.mjs,
                                 adapters/, fixtures/, data/ (gitignored), out/
 docs/design/                    SPEC.md (the contract), HEAD-RULINGS.md (overrides SPEC)

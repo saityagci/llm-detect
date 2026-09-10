@@ -329,6 +329,7 @@ Arabic-only routes to `leaning_human` no longer exist. The English and Turkish r
 
 ```
 VERDICT: <one of six>                 confidence band: <strong|moderate|none|n/a>
+LABEL: <one of four>
 CLI: <verdict> (score <0.00-1.00 or n/a>, <n> tokens, lang=<..> context=<..>)
 JUDGE: <verdict> — <band>             [CONFLICT] if a ⚠ cell fired
 
@@ -347,6 +348,11 @@ CAVEATS
 WHAT WOULD CHANGE THIS VERDICT
   • <2-4 concrete, obtainable things>
 ```
+
+**`LABEL:` is its own line, directly under `VERDICT:`** (HEAD-RULINGS R42 addendum). It carries the
+CLI's `summary.label` verbatim — one of the four values in the table below — and nothing else: no
+band, no score, no gloss. It was a clause inside the reporting step before, and one agent run of two
+omitted it; a line in the skeleton is not something a run can leave out and still look right.
 
 **A gated row has no `JUDGE:` line at all** (HEAD-RULINGS R39(e)). Not `JUDGE: not rendered`, not
 `JUDGE: —`, not the word in any form: on a CLI `insufficient_text` the line is absent from the
@@ -479,12 +485,34 @@ say, and the report must show that it did.
 | `homoglyph_suspect` | The text contains mixed-script words, fullwidth forms or mathematical alphanumerics (R30). Note possible adversarial editing, and **never lean human on it** — a defeated rule is not evidence of a human. Detection power against a real adversary is zero; the warning is the whole defence. |
 | `possible_quotation_or_discussion` | The leak phrase is quoted or discussed, not the speaker's own frame (R27). It is not a rule hit and must not be cited as one. A human describing what a chatbot said to them is a human. |
 | `pasted_machine_text` | Origin ≠ attribution. The string is machine-written; the sender may be a person forwarding it. **Note the measured cost (R38):** lowercasing that message and adding six tokens of slang demotes it to `uncertain` + `hybrid_suspect` without changing a word of its content. When you see this warning under a `hybrid_suspect`, the marker is still evidence; the demotion was spelling-driven. |
+| `style_shift_vs_history` | **R42(d).** This submission sits more than 2 SD from the student's own mean on three or more features, which the note names. **Cite the named features toward `uncertain`, never toward LLM on their own.** A shift is a reason to read the essay, not evidence about who wrote it: a student who improves across a term, who writes a different genre, or who is having a bad week all produce one. History may move a lean toward `uncertain` and never away from it. |
+| `consistent_with_history` / `history_insufficient` (notes) | **R42(d).** The first says the submission looks like this student's prior work; it counts as **one** human-direction signal of the aggregate group and never more, and it is not a clearance. The second says there were fewer than two prior documents of ≥150 tokens, so history was not used at all — say so in the caveats rather than letting the reader assume it was checked. |
 | `cell_not_fitted_prior_used` | The caller passed a fitted weights file, but the cell this text routes to was **not** fitted, so the shipped PRIOR cell scored it (R36(c)). The report's `provenance` says `fitted` and the numbers behind it are prior guesses. Treat the score exactly as you would under `uncalibrated_weights`, and say in the caveats that this language/shape cell has no fitted model. |
 | `templated_or_copied` | `near_duplicate` fired: the text was not independently authored. Template, copy or spam — not proof of LLM authorship (R3). |
 | `domain_suppressed` / `marketing_register` | The caller declared a support desk or marketing copy; the register lexicon was zeroed or discounted. Do not re-import the suppressed phrasing as your own evidence. |
 | `mixed_language_reduced_features` | Only script-agnostic features ran. Say so in the language caveat and lower your own confidence accordingly. |
 | `uncalibrated_weights` / `weights_expired` / `expiry_not_checked` | The score is a ranking prior with no validated threshold, an expired one, or one whose expiry was never checked. Nothing here supports a numeric claim. |
 | `segmentation_suspect` / `score_table_disagreement` / `contradictory_evidence` | The instrument is arguing with itself. Prefer `uncertain` and print both sides; never resolve it silently in the LLM direction. |
+
+---
+
+### The platform label (HEAD-RULINGS R42(a))
+
+A platform never gets a yes/no. It gets one of **four** values, derived from the verdict, and the
+judge prints the CLI's `summary.label` under VERDICT rather than inventing one:
+
+| verdict | `summary.label` |
+|---|---|
+| `likely_llm` | `fingerprint_found` — a Tier-0 rule matched; the matched string is quoted |
+| `leaning_llm` | `ai_style_indicators` |
+| `uncertain`, `leaning_human`, `likely_human` | `no_reliable_indicators` |
+| `insufficient_text` | `too_short_or_no_signal`, with the gate reason |
+
+The judge prints it as the `LABEL:` line of the §5 skeleton, directly under `VERDICT:`, copied from
+the CLI's `summary.label`. There is no fifth value and there is never a numeric one.
+`summary.humanReviewRequired` is `true` on every report; `summary.caveat` carries the base-rate sentence, and it travels with the label wherever
+the label goes. `no_reliable_indicators` is **the absence of evidence either way**, not a clearance —
+if a report is read as "this student is cleared", the label has been misused.
 
 ---
 
@@ -502,6 +530,9 @@ disagreement and a critical failure.
 | the shape is prose / an essay / a review / an email body | `--context prose` | `--context auto` |
 | where it arrived: WhatsApp, web form, email, a form | `--channel whatsapp\|web\|email\|form` | `--channel unknown` |
 | the genre: a review, an email, a formal letter, marketing copy, chat | `--genre review\|email\|formal_letter\|marketing\|chat` | `--genre auto` |
+| the text is a student essay or an exam answer | `--genre essay` (prose; the greeting/sign-off frame is off, as for `email`) | `--genre auto` |
+| the same, as one flag | `--preset essay` = `--context prose --genre essay --lang en` | pass the three separately, or nothing |
+| a path to this student's prior submissions | `--history <path>` (JSONL, one `{"id","text"}` per line) | omit it |
 | the sender is a support desk / agency staff working from a script | `--domain customer_service` | `--domain general` |
 | a path to a known-machine-marker file | `--markers <path>` | omit it — `markers.json` ships empty and the rule is meant not to fire |
 | a path to a corpus index for near-duplicate matching | `--corpus <path>` | omit it |

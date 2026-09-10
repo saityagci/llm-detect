@@ -50,7 +50,9 @@ OPTIONS
   --context chat|prose|auto      what the text LOOKS like              (default auto)
   --channel whatsapp|web|email|form|unknown   where it ARRIVED         (default unknown)
   --lang auto|en|tr                                                    (default auto)
-  --genre auto|review|email|chat|formal_letter|marketing               (default auto)
+  --genre auto|review|email|chat|essay|formal_letter|marketing         (default auto)
+  --preset essay                 = --context prose --genre essay --lang en (R42c)
+  --history <path>         NDJSON {id,text} of the SAME author's PRIOR submissions (R42d)
   --domain general|customer_service                                    (default general)
   --corpus <path>          NDJSON {id,sender,text} index enabling near_duplicate
   --markers <path>         known-machine markers (default ./markers.json, ships as [])
@@ -71,7 +73,8 @@ gates.failed ["G3_lang"] and reason "unsupported_language". It is never scored.
 `;
 
 const FLAGS_WITH_VALUE = new Set(['--file', '--text', '--jsonl', '--aggregate', '--context',
-  '--channel', '--lang', '--genre', '--domain', '--corpus', '--weights', '--markers']);
+  '--channel', '--lang', '--genre', '--domain', '--corpus', '--weights', '--markers',
+  '--preset', '--history']);
 const BOOL_FLAGS = new Set(['--allow-uncalibrated', '--explain', '--pretty', '--json',
   '--version', '--help', '-h']);
 
@@ -99,6 +102,19 @@ function parseArgs(argv) {
   return o;
 }
 
+// R42(c): a preset supplies DEFAULTS. An explicit flag always wins, wherever it sits on the
+// command line — a preset that could be silently overridden by argument order would be worse
+// than no preset at all.
+const PRESETS = { essay: { context: 'prose', genre: 'essay', lang: 'en' } };
+
+export function applyPreset(a) {
+  if (a.preset === undefined) return a;
+  const p = PRESETS[a.preset];
+  if (!p) fail(1, `--preset must be one of: ${Object.keys(PRESETS).join('|')}`);
+  for (const [k, v] of Object.entries(p)) if (a[k] === undefined) a[k] = v;
+  return a;
+}
+
 function optsFrom(a) {
   const shape = a.context ?? 'auto';
   if (!['auto', 'chat', 'prose'].includes(shape)) fail(1, `--context must be chat|prose|auto`);
@@ -109,7 +125,7 @@ function optsFrom(a) {
   const channel = a.channel ?? 'unknown';
   if (!['whatsapp', 'web', 'email', 'form', 'unknown'].includes(channel)) fail(1, 'bad --channel');
   const genre = a.genre ?? 'auto';
-  if (!['auto', 'review', 'email', 'chat', 'formal_letter', 'marketing'].includes(genre)) fail(1, 'bad --genre');
+  if (!['auto', 'review', 'email', 'chat', 'essay', 'formal_letter', 'marketing'].includes(genre)) fail(1, 'bad --genre');
   const domain = a.domain ?? 'general';
   if (!['general', 'customer_service'].includes(domain)) fail(1, 'bad --domain');
   return {
@@ -123,6 +139,12 @@ function optsFrom(a) {
 function pretty(r) {
   const L = [];
   const pad = (s, n) => String(s).padEnd(n);
+  // R42(a): the platform-facing label comes first, before the verdict vocabulary.
+  if (r.summary) {
+    L.push(`SUMMARY: ${r.summary.label}   (human review required: ${r.summary.humanReviewRequired})`);
+    if (r.summary.matched.length) for (const m of r.summary.matched) L.push(`  matched: ${m}`);
+    if (r.summary.reason) L.push(`  reason: ${r.summary.reason}`);
+  }
   L.push(`VERDICT: ${r.verdict}${r.mode === 'aggregate' ? '   (aggregate over ' + r.messageCount + ' messages)' : ''}`);
   const ch = r.channels ?? { human: 0, llm: 0 };
   L.push(`  score: ${r.score === null ? 'n/a' : r.score.toFixed(3)}   `
@@ -202,7 +224,7 @@ function assertContributionSum(r) {
 }
 
 function main() {
-  const a = parseArgs(process.argv.slice(2));
+  const a = applyPreset(parseArgs(process.argv.slice(2)));
   if (a.bools.has('--help') || a.bools.has('-h')) { process.stdout.write(USAGE); process.exit(0); }
   if (a.bools.has('--version')) {
     process.stdout.write(JSON.stringify({ ...VERSION, node: process.version }, null, 2) + '\n');
@@ -231,6 +253,16 @@ function main() {
   } else {
     validateWeights(RES.weights, 'weights.v1.json');
     guardUncalibrated(o);
+  }
+
+  if (a.history !== undefined) {
+    if (!existsSync(a.history)) fail(2, `history file not found: ${a.history}`);
+    const rows = readJsonl(a.history);
+    const bad = rows.filter((r) => !r.ok).length;
+    o.history = rows.filter((r) => r.ok).map((r) => r.row.text)
+      .filter((t) => typeof t === 'string' && t.length > 0);
+    if (o.history.length === 0) fail(2, `history file has no usable {id,text} rows: ${a.history}`);
+    if (bad) process.stderr.write(`llm-detect: ${bad} malformed history line(s) skipped\n`);
   }
 
   if (a.corpus) {

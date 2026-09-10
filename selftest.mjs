@@ -26,8 +26,11 @@ import { caseFold, AR_LETTER, WORD_RE, NUM_RE, makeViews, foldConfusables, homog
 import { words } from './lib/tokenize.mjs';
 import { sha256Hex } from './lib/hash.mjs';
 import { transform, capLambda, tableVerdict, REGISTER_PROXY_LLM, AGGREGATE_DISABLED,
-  validateWeightsShape, DECISION_WARNINGS, isDecisionNote } from './lib/score.mjs';
+  validateWeightsShape, DECISION_WARNINGS, isDecisionNote, decideVerdict,
+  MATERIALITY_FLOOR } from './lib/score.mjs';
 import { foldConfusablesMapped, MATH_ALNUM_RE } from './lib/unicode.mjs';
+import { SUMMARY_LABELS, MAX_EVIDENCE_SPANS, MAX_SPAN_TEXT, detectBatch } from './lib/detect.mjs';
+import { compareHistory, HISTORY_WEIGHT, HISTORY_MIN_TOKENS } from './lib/history.mjs';
 import { OTHER_LATIN_WORDS } from './lib/langid.mjs';
 import { assistantFrameLeak, runRules } from './lib/rules.mjs';
 
@@ -1573,6 +1576,264 @@ function verifyRoundOne() {
   ok('R38(j): ... and no register_only_evidence note either',
     !(ruleCarried.verdict === 'likely_llm'
       && ruleCarried.notes.some((n) => n.startsWith('register_only_evidence'))));
+
+  // ===========================================================================================
+  // R42 — the school-platform round. (a) summary, (b) evidenceSpans, (c) essay preset,
+  // (d) per-author history. Everything here is ADDITIVE: no field was renamed or removed.
+  // ===========================================================================================
+
+  // --- R42(a): the four-value label, on every report -----------------------------------------
+  eq('R42(a): likely_llm maps to fingerprint_found', SUMMARY_LABELS.likely_llm, 'fingerprint_found');
+  eq('R42(a): leaning_llm maps to ai_style_indicators', SUMMARY_LABELS.leaning_llm, 'ai_style_indicators');
+  for (const v of ['uncertain', 'leaning_human', 'likely_human']) {
+    eq(`R42(a): ${v} maps to no_reliable_indicators`, SUMMARY_LABELS[v], 'no_reliable_indicators');
+  }
+  eq('R42(a): insufficient_text maps to too_short_or_no_signal',
+    SUMMARY_LABELS.insufficient_text, 'too_short_or_no_signal');
+
+  const fpText = 'As an AI language model, I do not have access to real-time booking information, '
+    + 'but here is a revised draft you can adapt for your enquiry next week.';
+  const fp = detect(fpText, P);
+  eq('R42(a): a fingerprint gives label fingerprint_found', fp.summary.label, 'fingerprint_found');
+  ok('R42(a): ... and quotes the matched string',
+    fp.summary.matched.some((m) => m.startsWith('assistant_frame_leak') && m.includes('As an AI')),
+    JSON.stringify(fp.summary.matched));
+  eq('R42(a): ... with no gate reason', fp.summary.reason, null);
+  const shortR = detect('tamam abi', C);
+  eq('R42(a): an abstention gives too_short_or_no_signal', shortR.summary.label, 'too_short_or_no_signal');
+  eq('R42(a): ... and carries the gate reason', shortR.summary.reason, shortR.gates.reason);
+  for (const r of [fp, shortR, detect(INVARIANT_TEXTS[0][1], { ...BASE, ...INVARIANT_TEXTS[0][2] })]) {
+    eq('R42(a): humanReviewRequired is true on every report', r.summary.humanReviewRequired, true);
+    ok('R42(a): the base-rate sentence is attached to every report',
+      typeof r.summary.caveat === 'string' && r.summary.caveat.includes('not a probability'));
+    ok('R42(a): the label matches the verdict', r.summary.label === SUMMARY_LABELS[r.verdict]);
+  }
+  const batchSummaries = detectBatch([{ id: 1, text: fpText }, { id: 2, text: 'tamam abi' }],
+    { ...BASE, shape: 'prose' });
+  ok('R42(a): every batch row carries a summary',
+    batchSummaries.every((r) => r.summary && r.summary.humanReviewRequired === true));
+  const aggSummary = aggregate([
+    { id: 'z1', text: 'merhaba abi yarin geliyoruz' }, { id: 'z2', text: 'tmm' },
+    { id: 'z3', text: 'kapadokya icin fiyat nedir acaba' },
+    { id: 'z4', text: 'pardon yok yani 3 gece dedim' },
+    { id: 'z5', text: 'kapadokya turu da olsun eyvallahhh' },
+  ], { ...BASE, sender: 'R0', lang: 'tr', shape: 'chat', channel: 'whatsapp' });
+  ok('R42(a): an aggregate report carries a summary too',
+    aggSummary.summary && aggSummary.summary.label === SUMMARY_LABELS[aggSummary.verdict]);
+  const fewAgg = aggregate([{ id: 'y1', text: 'ok' }], { ...BASE, sender: 'R0' });
+  eq('R42(a): the <5-message aggregate carries one as well', fewAgg.summary.label, 'too_short_or_no_signal');
+  eq('R42(a): ... with the aggregate gate reason', fewAgg.summary.reason, 'aggregate_floor');
+
+  // --- R42(b): evidence spans quote the RAW input exactly ------------------------------------
+  const SPAN_TEXTS = [
+    [fpText, P],
+    ['I hope this helps. Here is the plan:\n- **Check-in:** 14 October\n- Rooms: two doubles\n'
+      + 'Thank you for reaching out, and please do not hesitate to ask!!', { ...C, channel: 'whatsapp' }],
+    ['tmm abi bakarim ben sana donerim yarin sabah gorusuruz eyvallahhh kolay gelsin sana',
+      { ...C, lang: 'tr', channel: 'whatsapp' }],
+    ["Merhaba, İstanbul'a 12 Mart'ta geliyoruz. Üç gece kalacağız. Teşekkürler efendim.",
+      { ...C, lang: 'tr' }],
+    [INVARIANT_TEXTS[0][1], { ...BASE, ...INVARIANT_TEXTS[0][2] }],
+    [INVARIANT_TEXTS[2][1], { ...BASE, ...INVARIANT_TEXTS[2][2] }],
+    ['the room \u{1F600}\u{1F600} was clean and the staff were kind... sorry, typo — i meant quiet',
+      { ...C, channel: 'whatsapp' }],
+    ['Sonuç olarak harika bir tatildi. ' + 'Otelin konumu merkezi ve kahvaltı zengindi. '.repeat(12),
+      { ...P, lang: 'tr', genre: 'review' }],
+    ['REF-500592 your booking is confirmed for two nights in the double room this October.',
+      { ...C, markers: [{ name: 'ref', pattern: 'REF-[0-9]{6}', note: 'demo.' }] }],
+    ['not only clean but also quiet, and it is worth noting that the staff go above and beyond. '
+      + 'The bed was soft. '.repeat(14), P],
+  ];
+  let spanRows = 0, spanCount = 0, spanBad = 0;
+  for (const [text, opts] of SPAN_TEXTS) {
+    const r = detect(text, opts);
+    spanRows++;
+    eq('R42(b): spanUnit says which offsets these are', r.spanUnit, 'utf16');
+    ok('R42(b): evidenceSpans is an array', Array.isArray(r.evidenceSpans));
+    ok('R42(b): spanlessSignals is an array', Array.isArray(r.spanlessSignals));
+    ok(`R42(b): at most ${MAX_EVIDENCE_SPANS} spans`, r.evidenceSpans.length <= MAX_EVIDENCE_SPANS);
+    for (const sp of r.evidenceSpans) {
+      spanCount++;
+      const cut = text.slice(sp.start, sp.end);
+      const want = cut.length > MAX_SPAN_TEXT ? cut.slice(0, MAX_SPAN_TEXT) : cut;
+      if (sp.text !== want) spanBad++;
+      if (sp.text.length > MAX_SPAN_TEXT) spanBad++;
+      if (!(sp.source === 'rule' || sp.source === 'signal')) spanBad++;
+      if (typeof sp.name !== 'string' || typeof sp.direction !== 'string') spanBad++;
+    }
+    for (let i = 1; i < r.evidenceSpans.length; i++) {
+      if (r.evidenceSpans[i].start < r.evidenceSpans[i - 1].start) spanBad++;
+    }
+    const again = detect(text, opts);
+    if (again.evidenceSpans.length !== r.evidenceSpans.length) spanBad++;
+    if (JSON.stringify(again.evidenceSpans) !== JSON.stringify(r.evidenceSpans)) spanBad++;
+  }
+  eq(`R42(b): every span text === raw.slice(start,end) over ${spanRows} inputs (${spanCount} spans)`,
+    spanBad, 0);
+  ok(`R42(b): the ten inputs produced spans at all (${spanCount})`, spanCount > 20);
+  const spanR = detect(SPAN_TEXTS[1][0], SPAN_TEXTS[1][1]);
+  ok('R42(b): a rhythm/ratio feature is listed as spanless, not faked',
+    spanR.spanlessSignals.includes('terminal_punct_ratio'), JSON.stringify(spanR.spanlessSignals));
+  ok('R42(b): a lexicon hit IS quoted',
+    spanR.evidenceSpans.some((x) => x.name === 'llm_lexicon_strong'));
+
+  // --- R42(c): the essay genre and preset -----------------------------------------------------
+  const essayText = 'The industrial revolution changed the shape of the modern city in ways that '
+    + 'were not obvious to the people living through it. ' + 'The streets were narrow then. '.repeat(20);
+  const essay = detect(essayText, { ...BASE, shape: 'prose', genre: 'essay', lang: 'en' });
+  eq('R42(c): --genre essay is accepted and reported', essay.genre, 'essay');
+  eq('R42(c): ... and scored in the en:prose cell', essay.scoring.cell, 'en:prose');
+  const framed = detect('Dear Sir, ' + essayText + ' Best regards, M.',
+    { ...BASE, shape: 'prose', genre: 'essay', lang: 'en' });
+  ok('R42(c): greeting_signoff_frame is OFF for essay, as it is for email',
+    !framed.signals.some((x) => x.name === 'greeting_signoff_frame' && x.value !== null));
+  const presetR = detect(essayText, { ...BASE, preset: 'essay' });
+  eq('R42(c): opts.preset essay sets the shape', presetR.shape, 'prose');
+  eq('R42(c): ... the genre', presetR.genre, 'essay');
+  eq('R42(c): ... and the language', presetR.language.primary, 'en');
+  const presetOverride = detect(essayText, { ...BASE, preset: 'essay', genre: 'review' });
+  eq('R42(c): an explicit flag overrides the preset', presetOverride.genre, 'review');
+
+  // --- R42(d): per-author history --------------------------------------------------------------
+  const essayBy = (topic, n) => `I think ${topic} matters more than people admit. When I was `
+    + 'younger my father told me that you learn a place by walking it, and I did not believe him '
+    + 'until I tried it for myself one summer. '
+    + Array.from({ length: n }, (_, i) => `The ${i % 2 ? 'second' : 'first'} thing I noticed about `
+      + `${topic} was how ordinary it felt at the start, and how quickly that changed once I paid `
+      + 'attention to the small parts of it. ').join('')
+    + 'That is the part nobody writes about, and it is the part I remember most clearly.';
+  const priorEssays = [essayBy('the river', 9), essayBy('the old market', 10), essayBy('the school library', 9)];
+  const consistent = detect(essayBy('the harbour', 10), { ...BASE, preset: 'essay', history: priorEssays });
+  ok('R42(d): a consistent fourth essay notes consistent_with_history',
+    consistent.notes.some((n) => n.startsWith('consistent_with_history')));
+  ok('R42(d): ... and does NOT warn style_shift_vs_history',
+    !consistent.warnings.includes('style_shift_vs_history'));
+  ok('R42(d): ... and contributes exactly ONE history signal',
+    consistent.signals.filter((x) => x.name === 'history_consistency').length === 1);
+  const hs = consistent.signals.find((x) => x.name === 'history_consistency');
+  eq('R42(d): the history signal is human-direction', hs.direction, 'human');
+  eq('R42(d): ... of the aggregate group', hs.group, 'aggregate');
+  eq('R42(d): ... at the ruled weight', hs.weight, HISTORY_WEIGHT);
+  ok('R42(d): ... and cannot move the human channel a whole band on its own',
+    1 - Math.exp(-(HISTORY_WEIGHT * 1) / 2) < 0.25);
+  ok('R42(d): the history block reports what was compared',
+    consistent.history.priorDocs === 3 && consistent.history.comparedFeatures > 0
+      && consistent.history.shifted.length === 0);
+  const shiftedText = 'Furthermore, it is important to note that the harbour plays a crucial role '
+    + 'in the economic vitality of the region. Moreover, the infrastructure serves as a testament '
+    + 'to thoughtful planning. Additionally, the maritime sector delves into a rich tapestry of '
+    + 'historical significance. In conclusion, the harbour stands as a cornerstone of prosperity. '
+    + 'Furthermore, whether you are a resident or a visitor, the waterfront offers a wide range of '
+    + 'amenities designed to ensure a comfortable experience. It is worth noting that the district '
+    + 'plays a vital role in the cultural landscape as well. Moreover, the seasonal festivals '
+    + 'cater to every taste and delve into local traditions in a way that is both authentic and '
+    + 'accessible. In summary, the harbour remains a crucial part of the region today.';
+  const shiftedR = detect(shiftedText, { ...BASE, preset: 'essay', history: priorEssays });
+  ok('R42(d): a shifted fourth essay warns style_shift_vs_history',
+    shiftedR.warnings.includes('style_shift_vs_history'));
+  ok('R42(d): ... naming at least three features',
+    shiftedR.history.shifted.length >= 3, String(shiftedR.history.shifted.length));
+  ok('R42(d): ... each with priorMean, priorSd, value and z',
+    shiftedR.history.shifted.every((x) => typeof x.feature === 'string'
+      && Number.isFinite(x.priorMean) && Number.isFinite(x.priorSd) && Number.isFinite(x.value)
+      && Number.isFinite(x.z)));
+  ok('R42(d): ... and adds NO history signal', !shiftedR.signals.some((x) => x.name === 'history_consistency'));
+  // R42 addendum: {id, text} rows must behave exactly like bare strings.
+  const asRows = priorEssays.map((t, i) => ({ id: 'p' + i, text: t }));
+  const consistentRows = detect(essayBy('the harbour', 10), { ...BASE, preset: 'essay', history: asRows });
+  eq('R42(d): {id,text} history rows give the same report as bare strings',
+    JSON.stringify(consistentRows), JSON.stringify(consistent));
+  ok('R42(d): ... including consistent_with_history',
+    consistentRows.notes.some((n) => n.startsWith('consistent_with_history')));
+  const mixedRows = detect(essayBy('the harbour', 10),
+    { ...BASE, preset: 'essay', history: [asRows[0], priorEssays[1], { id: 'bad' }, asRows[2], 42] });
+  ok('R42(d): a row with no string text is skipped, not counted',
+    mixedRows.history.priorDocs === 3 && !mixedRows.warnings.includes('history_insufficient'),
+    JSON.stringify(mixedRows.history));
+  ok('R42(d): ... and a note names the skipped indices',
+    mixedRows.notes.some((n) => n.startsWith('history_rows_skipped') && n.includes('2, 4')),
+    JSON.stringify(mixedRows.notes.filter((n) => n.startsWith('history_rows_skipped'))));
+  eq('R42(d): ... which are reported in history.skippedRows',
+    JSON.stringify(mixedRows.history.skippedRows), JSON.stringify([2, 4]));
+
+  const thin = detect(essayBy('the harbour', 10), { ...BASE, preset: 'essay', history: ['too short', 'also short'] });
+  ok('R42(d): fewer than two long prior documents warns history_insufficient',
+    thin.warnings.includes('history_insufficient'));
+  ok('R42(d): ... and applies no history signal',
+    !thin.signals.some((x) => x.name === 'history_consistency'));
+  ok('R42(d): history never points at a machine — the signal is human-direction only',
+    consistent.signals.filter((x) => x.name === 'history_consistency')
+      .every((x) => x.direction === 'human' && x.contribution <= 0));
+  ok('R42(d): history is deterministic',
+    JSON.stringify(detect(essayBy('the harbour', 10), { ...BASE, preset: 'essay', history: priorEssays }))
+      === JSON.stringify(consistent));
+  // the SD floor, asserted directly: two identical prior documents cannot make everything a shift
+  const identical = compareHistory(
+    [{ tokens: 200, signals: [{ name: 'a', z: 1 }, { name: 'b', z: 1 }, { name: 'c', z: 1 }] },
+      { tokens: 200, signals: [{ name: 'a', z: 1 }, { name: 'b', z: 1 }, { name: 'c', z: 1 }] }],
+    [{ name: 'a', z: 1.4 }, { name: 'b', z: 1.4 }, { name: 'c', z: 1.4 }]);
+  ok('R42(d): the SD floor stops two identical priors making every feature a shift',
+    identical.shift === false, JSON.stringify(identical.shifted));
+  // the aggregate prose floor
+  const threeEssays = priorEssays.map((t, i) => ({ id: 'e' + i, text: t, sender: 'S1' }));
+  const aggEssays = aggregate(threeEssays, { ...BASE, sender: 'S1', shape: 'prose', lang: 'en' });
+  ok(`R42(d): three documents of >= ${HISTORY_MIN_TOKENS} tokens clear the aggregate floor`,
+    aggEssays.gates.reason !== 'aggregate_floor', `${aggEssays.verdict} / ${aggEssays.gates.reason}`);
+  const twoEssays = aggregate(threeEssays.slice(0, 2), { ...BASE, sender: 'S1', shape: 'prose', lang: 'en' });
+  eq('R42(d): two documents do not', twoEssays.gates.reason, 'aggregate_floor');
+
+  // --- R43: a non-proxy signal counts toward R24 only when it is MATERIAL --------------------
+  // A careful student's essay reached leaning_llm on a proxy (terminal_punct_ratio, +0.600) plus
+  // a +0.030 sliver of parallel_openers. A sliver may not let a keyboard proxy convict.
+  eq('R43: the materiality floor is 0.10', MATERIALITY_FLOOR, 0.10);
+  const mkSig = (name, group, contribution) => ({
+    id: name, name, direction: 'llm', group, weight: 1, z: contribution,
+    contributionRaw: contribution, contribution, confidence: 'MED',
+  });
+  const proxySig = mkSig('terminal_punct_ratio', 'punctuation', 0.6);
+  const decide = (signals) => decideVerdict({
+    signals, rules: [], channelsValue: { llm: 0.5, human: 0.1 },
+    band: { band: '150-499_tokens', cap: 0.45, ceiling: 'likely' },
+    mode: 'single', gateFailure: null, provenance: 'fitted',
+  });
+  const twoMaterial = decide([proxySig, mkSig('sentence_len_mode_mass', 'rhythm', 0.291),
+    mkSig('parallel_openers', 'structure', 0.25)]);
+  eq('R43: two MATERIAL non-proxy signals from two groups still reach leaning_llm',
+    twoMaterial.verdict, 'leaning_llm');
+  ok('R43: ... with no register_only_evidence warning',
+    !twoMaterial.warnings.includes('register_only_evidence'));
+  const oneImmaterial = decide([proxySig, mkSig('sentence_len_mode_mass', 'rhythm', 0.291),
+    mkSig('parallel_openers', 'structure', 0.03)]);
+  eq('R43: an immaterial second signal cannot carry leaning_llm', oneImmaterial.verdict, 'uncertain');
+  ok('R43: ... and warns register_only_evidence',
+    oneImmaterial.warnings.includes('register_only_evidence'));
+  ok('R43: ... and the note names it as below the materiality floor',
+    oneImmaterial.notes.some((n) => n.includes('parallel_openers (+0.030)')
+      && n.includes('below the 0.10 materiality floor')),
+    JSON.stringify(oneImmaterial.notes));
+  const atFloor = decide([proxySig, mkSig('sentence_len_mode_mass', 'rhythm', 0.291),
+    mkSig('parallel_openers', 'structure', MATERIALITY_FLOOR)]);
+  eq('R43: the floor is inclusive — exactly 0.10 counts', atFloor.verdict, 'leaning_llm');
+  ok('R43: the score is untouched by the floor — only the verdict test changed',
+    detect(SPAN_TEXTS[0][0], SPAN_TEXTS[0][1]).score
+      === detect(SPAN_TEXTS[0][0], SPAN_TEXTS[0][1]).score);
+
+  // The tidy-draft golden, read from examples/ when the docs agent has shipped it.
+  const tidyPath = join(HERE, 'examples', 'samples', 'student-essay-v1-tidy.txt');
+  if (existsSync(tidyPath)) {
+    const tidy = detect(readFileSync(tidyPath, 'utf8'), { ...BASE, preset: 'essay' });
+    eq('R43 golden: the tidy student draft is uncertain, not leaning_llm', tidy.verdict, 'uncertain');
+    eq('R43 golden: ... labelled no_reliable_indicators', tidy.summary.label, 'no_reliable_indicators');
+    ok('R43 golden: ... warning register_only_evidence',
+      tidy.warnings.includes('register_only_evidence'));
+    ok('R43 golden: ... note names parallel_openers as immaterial',
+      tidy.notes.some((n) => n.startsWith('register_only_evidence')
+        && n.includes('parallel_openers') && n.includes('materiality floor')),
+      JSON.stringify(tidy.notes.filter((n) => n.startsWith('register_only_evidence'))));
+  } else {
+    info.push('R43 golden: examples/samples/student-essay-v1-tidy.txt is not present; the '
+      + 'materiality floor is still asserted directly against decideVerdict above.');
+  }
 
   // --- S-01: near_duplicate with an unknown sender ------------------------------------------
   const dupText = 'The hotel was excellent and the staff were extremely helpful during our stay in '
