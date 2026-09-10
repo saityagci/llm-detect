@@ -56,12 +56,13 @@ Fitted weights NOT promoted (R23).
 
 ## Exact next step
 1. The owner creates the remote; the head pushes `main`.
-2. Next round candidates, in order: (a) agent runs that exercise `hybrid_suspect` (a real human turn
-   wrapping a marker), `homoglyph_suspect` and `possible_quotation_or_discussion` end to end;
-   (b) a committed batch fixture for T14 so the procedure test is reproducible; (c) re-pull the three
-   review corpora with the current fetcher (one attempt each, watchdog) to recover pair keys;
-   (d) more human rows for `tr:chat` / `en:chat` before any fitted cell can be trusted; (e) re-decide
-   R23 only when a cell has ≥100 human rows per bucket AND ≥20 per fairness stratum.
+2. Owner priority (R41): ENGLISH FIRST. Next round candidates, in order: (a) English agent runs that
+   exercise `hybrid_suspect` (a real human turn wrapping a marker), `homoglyph_suspect` and
+   `possible_quotation_or_discussion` end to end; (b) English human rows for `en:chat` and the
+   `en:prose` 500+ bucket before any fitted cell can be trusted; (c) re-pull the three review corpora
+   (English) with the current fetcher to recover pair keys; (d) a committed batch fixture for T14;
+   (e) re-decide R23 only when an English cell has ≥100 human rows per bucket AND ≥20 per fairness
+   stratum. Turkish: no further work until the owner asks; its gates keep running.
 
 ## Do not
 - Touch `~/Desktop/travelio-asim-shadow`. Re-pull the corpus. Call any paid API. Use fable/sonnet/haiku.
