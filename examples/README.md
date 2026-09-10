@@ -13,8 +13,11 @@ the evidence spans and the caveat, and exits 0. Zero dependencies, no child proc
 
 **The label is a review flag. It is never a grade input, never proof about a person, and never a
 yes/no.** `summary.humanReviewRequired` is `true` on every report this tool produces, and that is not
-a formality: on 150–499-word English prose the tool's own measured false-flag rate is 7.6%, and at a
-5% true prevalence of AI-written work a flag is right about **three times in ten**. Read
+a formality: on 150–499-token student essays the tool's own measured false-flag rate is 0.4% and its
+recall is 28.2%, so **roughly seven in ten AI-written essays are not flagged at all**; on general
+English prose the false-flag rate is 2.5% and at a 5% true prevalence a flag is right about **two
+times in five**. Both are eval-side numbers at the fitted threshold, not rates about the four labels.
+Read
 `README.md` § "Using this in a school platform" before wiring any of this to something a student
 sees. If your UI turns four labels into a number, you have built a different product from this one.
 

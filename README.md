@@ -308,36 +308,65 @@ carries the base-rate sentence and travels with the label wherever the label goe
 
 ### What the numbers actually are
 
-Measured on held-out English prose. These are the tool's own numbers, and they are the reason
-`humanReviewRequired` is not a formality:
+Held-out, measured. **The essay row is the one a school platform reads** — it is your genre — and the
+general-prose row sits beside it because that is what the tool is scored on everywhere else. Both are
+at the fitted threshold on the eval side (`eval/out/REPORT.md` §3b and §3); neither is a rate about
+the four labels.
 
-| length | recall | false-flag rate | precision at a 20% prior | at 5% | at 1% |
-|---|---|---|---|---|---|
-| **150–499 words** | **65%** | **7.6%** | **0.68** | **0.31** | **0.08** |
-| 50–149 words | 3.7% | 1.1% | — the instrument is barely useful here | | |
-| under 50 words | no answer — below the floor | | | | |
+| 150–499 tokens | **essays** (the platform's genre) | general English prose (all genres) |
+|---|---|---|
+| held-out rows | 224 human / 248 llm | 448 human / 545 llm |
+| gated before scoring | 28.4% of essay rows | 63.4% of prose rows |
+| AUC | **0.935** | 0.878 |
+| AUC, hard mode | **0.964** | 0.859 |
+| false-flag rate | **0.4%** | 2.5% |
+| recall | **28.2%** (44.0% hard) | 32.5% |
+| precision at a 20% prior | **0.940** | 0.768 |
+| at 5% | **0.769** | 0.410 |
+| at 1% | **0.390** | 0.118 |
 
-Read the 5% column twice. If one essay in twenty is AI-written, **seven flags in ten are wrong**. At
-one in a hundred, **more than nine in ten are wrong**. A class of thirty produces two or three false
-flags a term from an instrument working exactly as designed. That is what a review flag costs, and it
-is why the label must reach a person and not a gradebook.
+Shorter and longer essays have no numbers at all: the 50–149 and 500+ essay buckets are
+**INSUFFICIENT** — too few held-out rows on one side to measure. On general prose the 50–149 bucket
+is measurable and barely useful (AUC 0.752, hard mode 0.672, recall 2.8% at a 0.8% false-flag rate).
+Under 50 words the tool gives no answer at all.
+
+**The essay cell is the only one where hard mode scores *higher* than standard** (0.964 against
+0.935). Hard mode deletes every spelling and formatting feature. That the essay signal survives —
+improves, even — says the thing separating these two halves is rhythm and connectives, not
+punctuation or capitalisation. It is the one place in this project where the instrument is not
+mostly reading a keyboard.
+
+Read the columns together rather than picking one. At a 5% true prevalence a flag on an essay is
+right about **three times in four**; the same flag on general prose is right about **two times in
+five**. At 1% the essay flag is right **two times in five** and the prose flag **one time in eight**.
+And 28.2% recall means that **at best seven in ten AI-written essays are not flagged at all** — the
+low false-flag rate is bought with silence, which is the trade this design chose on purpose. Measured
+directly on the held-out set: **2 of 325 human essays were flagged (0.6%)**.
 
 ### The caveats that apply hardest here
 
-- **Non-native writers.** The non-native stratum has **never been measured** for this tool — the
-  eval could not find twenty held-out non-native rows to bind a threshold on. What is known comes
-  from the literature: seven commercial detectors flagged **61.22% of 91 TOEFL essays** by non-native
-  writers, against **5.19%** for US eighth-graders; a 2026 re-test still measured **23.1% versus 0%**.
-  A class with ESL students is the exact population this instrument is known to be unfair to, and
-  nothing in this build fixes that.
+- **Non-native writers — still unmeasured, and now unmeasured on essays specifically.** The
+  essay corpus carries no L1 or `ell_status` column, and every corpus that does is auth-gated, so
+  there are **zero** non-native rows behind the essay numbers above. What is known comes from the
+  literature: seven commercial detectors flagged **61.22% of 91 TOEFL essays** by non-native writers,
+  against **5.19%** for US eighth-graders; a 2026 re-test still measured **23.1% versus 0%**. A class
+  with ESL students is the exact population this instrument is known to be unfair to, the essay
+  numbers say nothing about it either way, and nothing in this build fixes that.
+- **One corpus, one generator family.** Every essay number comes from a single source of
+  school-assignment essays (`dmitva/human_ai_generated_text`, fetched through the permitted host and
+  used for local measurement only — its licence is undeclared there, so no row from it is committed
+  to this repository). Its machine half records **one unspecified generator family**. A number
+  measured on one corpus against one generator is a reading, not a law: a different assignment set or
+  a different model will move it, and nothing here says by how much.
 - **One prompt line defeats it.** Measured in-house: telling a generator to write casually takes a
   `leaning_llm` at score 0.889 to `insufficient_text`. Ten clean assistant replies went from 10/10
   flagged to 0/10 after stripping bold and lowercasing four labels. A student who knows this walks
   through; a student who does not gets flagged for writing carefully. **The tool is hardest on the
   honest.**
-- **Essays have not been measured at all.** Every English number here comes from product reviews and
-  QA answers. Student essays are a different genre. See the essay-genre row in the evaluation
-  report's held-out results section; until that row exists, treat the essay case as **unmeasured**.
+- **Exam answers have not been measured at all.** No exam-answer corpus was fetchable through the
+  permitted host — not gated, not licence-restricted, simply absent. Short answers land in the
+  50–149 and under-50 rows above, where the tool's honest output is mostly "no answer", and the essay
+  numbers do not transfer to them. Treat the exam-answer case as **unmeasured**.
 
 ### The integration that actually helps: per-student history
 
@@ -581,10 +610,10 @@ WHAT WOULD CHANGE THIS VERDICT
 
   Together: none of the three drafts is flagged on the shipped build, but getting there took a
   ruling, and **the human evidence that moves a text toward "human" is still the evidence cheapest to
-  fake** — five dropped apostrophes. This is the false-positive class the 7.6% figure in the table
-  above is about; note that the 7.6% is measured on the eval side at the fitted threshold, not on
-  these labels, so the two are not the same number and should not be quoted as one. It is why a label
-  goes to a person and not to a gradebook.
+  fake** — five dropped apostrophes. This is the false-positive class the false-flag rate in the
+  table above is about — 2.5% on general prose, 0.4% on essays, both at the fitted threshold on the
+  eval side, not on these labels, so the two are not the same number and should not be quoted as one.
+  It is why a label goes to a person and not to a gradebook.
 
 ---
 
@@ -757,6 +786,17 @@ Say these out loud before quoting anything this tool produces.
 
 - **No calibration has been run.** The shipped weights are priors — guesses with an expiry date, not
   fitted coefficients. Nothing in this repo has a measured threshold yet.
+- **The non-native / ELL stratum on essays is unmeasured**, and unmeasurably so with what is
+  fetchable: the essay corpus has no L1 or `ell_status` column and every corpus that carries one is
+  auth-gated. The essay numbers in the school-platform section are measured over a population whose
+  first language nobody recorded. Given that this is the bias the tool is most known for, that gap is
+  the single most important number missing from this build.
+- **Exam answers are unmeasured.** No exam-answer corpus was fetchable through the permitted host at
+  all. Short answers fall in buckets where the honest output is mostly "no answer", and the essay
+  numbers do not transfer to them.
+- **The essay numbers rest on one corpus and one generator family**, with an undeclared licence
+  (used for local measurement only, nothing committed). A second essay source would be the first
+  thing to fetch if one becomes available; the current numbers are a reading, not a law.
 - **No labelled Turkish resource exists beyond hotel reviews.** The only labelled Turkish
   human-vs-LLM data in existence is ~1,000 GPT-4 hotel reviews and their human counterparts
   (MAiDE-up). Turkish is also the language where GPT-4 output was measured to be *least* detectable
@@ -776,7 +816,8 @@ Say these out loud before quoting anything this tool produces.
   produced by a second model through a paid API (R10). Provenance is recorded per row.
 - **Prose between 50 and about 120 tokens mostly abstains.** The rhythm features switch on at
   120–250 tokens, and the measured `en:prose` 50–149 bucket says the instrument is barely useful
-  there anyway (AUC 0.739, hard mode 0.623, TPR 3.7% at 1.1% FPR). G4 was deliberately **not**
+  there anyway (AUC 0.752, hard mode 0.672, recall 2.8% at a 0.8% false-flag rate). G4 was
+  deliberately **not**
   lowered to score that band (HEAD-RULINGS R25); the humanization fixtures were rewritten at
   160–260 tokens instead, so that the `§F.3` collapse assertion is measurable at all. A 90-word
   review will usually get `insufficient_text` with `too_few_active_features`, and that is the
