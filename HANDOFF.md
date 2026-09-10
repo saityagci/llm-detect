@@ -2,7 +2,9 @@
 
 ## What exists now (all committed, all verified by running)
 - `stylometry.mjs` + `lib/` — zero-dependency EN/TR detector, importable and CLI; `node selftest.mjs`
-  → 818 assertions, exit 0, no arbitration items; `node eval/selftest-eval.mjs` → 11/11 guard checks. Prior weights (`weights.v1.json`) are the default.
+  → 838 assertions, exit 0, no arbitration items; `node eval/selftest-eval.mjs` → 11/11 guard checks.
+  Platform API: `summary.label`, `evidenceSpans`, `--preset essay`, `--history` / `--history-profile`,
+  `buildHistoryProfile()`, per-row history in `--jsonl` (R42, R45); samples + commands in `examples/`. Prior weights (`weights.v1.json`) are the default.
 - `eval/` — public-dataset fetcher (5 EN/TR sources, 13,991 rows on disk, sha256-verified),
   group-aware splits, `run-eval.mjs` (held-out metrics, hard mode, leave-one-writer-out, negative
   controls, base-rate table, `weights.fitted.json`), `gate-fixtures.mjs` (fixture gates through the
@@ -10,7 +12,7 @@
 - `agent/llm-text-detector.md` (898 words, `model: opus`) installed at `~/.claude/agents/` by
   `install.sh`; exercised END TO END through the installed copy on six texts and a six-row batch.
 - `README.md`, `RUBRIC.md`, `eval/README-eval.md` (findings log + ruling index), `LICENSE`.
-- `docs/design/HEAD-RULINGS.md` Part 3 — R23–R44, the build/verify/platform-round rulings. They override SPEC.
+- `docs/design/HEAD-RULINGS.md` Part 3 — R23–R45, the build/verify/platform-round rulings. They override SPEC.
 
 ## The honest numbers (TEST only, `eval/out/REPORT.md`; three human writers, R0 holds 92 % of the
 ## surviving human rows after the Arabic filter — every threshold is valid for them and nobody else)
@@ -59,8 +61,10 @@ Fitted weights NOT promoted (R23).
 1. The owner creates the remote; the head pushes `main`.
 2. Owner priority (R41): ENGLISH FIRST. Next round candidates, in order: (a) English agent runs that
    exercise `hybrid_suspect` (a real human turn wrapping a marker), `homoglyph_suspect` and
-   `possible_quotation_or_discussion` end to end; (b) English human rows for `en:chat` and the
-   `en:prose` 500+ bucket before any fitted cell can be trusted; (c) re-pull the three review corpora
+   `possible_quotation_or_discussion` end to end; (b) the non-native/ELL essay false-flag rate — searched for and not found on the permitted host (R44
+   addendum): either the owner supplies real platform essays with an ELL flag (best) or approves an
+   authenticated Hugging Face pull of W&I+LOCNESS with their own free token; then English human rows for
+   `en:chat` and the `en:prose` 500+ bucket before any fitted cell can be trusted; (c) re-pull the three review corpora
    (English) with the current fetcher to recover pair keys; (d) a committed batch fixture for T14;
    (e) re-decide R23 only when an English cell has ≥100 human rows per bucket AND ≥20 per fairness
    stratum. Turkish: no further work until the owner asks; its gates keep running.

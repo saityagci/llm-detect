@@ -77,3 +77,63 @@ node examples/platform-essay.mjs examples/samples/assistant-essay.txt \
 The second one is the case the platform cares about, and note what it is *not*: the `fingerprint_found`
 label there comes from the leaked drafting frame, not from the style shift. The shift is a reason for
 a person to look. A student who improves across a term shifts exactly the same way.
+
+## The stored profile
+
+`prior-profile.json` is the same three drafts compiled once into the reusable profile a platform
+stores beside the student (HEAD-RULINGS R45). It was built with exactly this command:
+
+```bash
+node stylometry.mjs --build-history-profile examples/samples/prior-submissions.jsonl \
+  --preset essay --allow-uncalibrated > examples/samples/prior-profile.json
+```
+
+(`--allow-uncalibrated` is required even though nothing is scored: the shipped weights are priors and
+the CLI refuses to load them without it.) The committed copy has its floats **rounded to six
+decimals** — a raw float prints a 15-digit run and trips the phone-shaped-digit acceptance grep on a
+tracked file, the same reason `weights.fitted.json` rounds (HEAD-RULINGS R26). The rounding does not
+change the result: the equality check below is run against the committed, rounded file. The profile
+is
+`{version: 1, cell: "en:prose", weightsId: "prior-2026-09-09", minTokensPerDoc: 150, priorDocs: 3,
+inputRows: 3, skippedRows: [], features: {…10 features, mean and sd…}}` — pure JSON, no text.
+
+**The two history paths are byte-identical.** Verified on the shipped build:
+
+```bash
+node stylometry.mjs --file examples/samples/student-essay-v3.txt --preset essay   --allow-uncalibrated --json --history examples/samples/prior-submissions.jsonl
+node stylometry.mjs --file examples/samples/student-essay-v3.txt --preset essay   --allow-uncalibrated --json --history-profile examples/samples/prior-profile.json
+```
+
+Both give `leaning_human` / `no_reliable_indicators`, score 0.091305, the note
+`consistent_with_history: … within 2 SD … on 10 compared feature(s)`, and the **same bytes** — the
+whole report, not just the label. The same equality holds through
+`examples/platform-essay.mjs --history` versus `--history-profile`.
+
+## The class batch
+
+`class-batch.jsonl` is four submissions from three students, built to exercise every history state
+in one file:
+
+| row | student | input | history state |
+|---|---|---|---|
+| `sub-1041` | `s-77` | `student-essay-v3.txt` | a valid stored profile → `consistent_with_history` |
+| `sub-1042` | `s-81` | `assistant-essay.txt` | the same profile → `style_shift_vs_history` on 5 features |
+| `sub-1043` | `s-90` | `student-essay-v1-tidy.txt` | none — a first submission |
+| `sub-1044` | `s-77` | `student-essay-v2.txt` | a profile with a **wrong `weightsId`** → `history_profile_mismatch` |
+
+```bash
+node examples/platform-class-batch.mjs examples/samples/class-batch.jsonl
+```
+
+```
+sub-1041      s-77      no_reliable_indicators  leaning_human     consistent with 3 prior submission(s)
+sub-1042      s-81      fingerprint_found       likely_llm        style shift on 5 feature(s) — a reason to look
+                        matched: assistant_frame_leak: "Here's a polished version"
+sub-1043      s-90      no_reliable_indicators  uncertain         no history supplied
+sub-1044      s-77      too_short_or_no_signal  insufficient_text PROFILE STALE — no comparison made
+```
+
+The last row is the one worth staring at: a stale profile produces **no comparison**, not a wrong
+one, and the platform is told so on stderr. That is the failure mode a platform would otherwise never
+notice. (`sub-1044`'s profile is `prior-profile.json` with `weightsId` changed to `fitted-deadbeef`;
+its embedded profiles are rounded to six decimals for the same reason as above.)

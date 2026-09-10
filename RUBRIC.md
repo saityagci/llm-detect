@@ -533,6 +533,7 @@ disagreement and a critical failure.
 | the text is a student essay or an exam answer | `--genre essay` (prose; the greeting/sign-off frame is off, as for `email`) | `--genre auto` |
 | the same, as one flag | `--preset essay` = `--context prose --genre essay --lang en` | pass the three separately, or nothing |
 | a path to this student's prior submissions | `--history <path>` (JSONL, one `{"id","text"}` per line) | omit it |
+| a path to a stored history **profile** for this student | `--history-profile <path>` (a profile built by `--build-history-profile`; byte-identical to `--history`, without re-reading the priors) | omit it |
 | the sender is a support desk / agency staff working from a script | `--domain customer_service` | `--domain general` |
 | a path to a known-machine-marker file | `--markers <path>` | omit it — `markers.json` ships empty and the rule is meant not to fire |
 | a path to a corpus index for near-duplicate matching | `--corpus <path>` | omit it |
@@ -546,6 +547,12 @@ Three things follow, and each of them was a real defect in the first gate run:
    support teams genuinely use. Passing it on a guess exonerates an LLM; withholding it when the
    caller *did* say "this is from our support desk" accuses a person. Both directions are damage,
    which is why the flag follows the statement and nothing else.
+Two notes on the history flags. A profile path stated by the caller means `--history-profile`, and a
+priors path means `--history`; they are alternatives and never both. A profile is valid only for the
+cell and weights id it was built in — on a mismatch the CLI warns `history_profile_mismatch` and
+makes **no** comparison, so the judge reports that the history check did not run rather than treating
+its silence as consistency.
+
 3. **The CLI line prints the flags ACTUALLY PASSED, copied from the command you ran** — not the
    defaults you believe apply. Two runs printed `domain=general` on a command that never passed
    `--domain`. Those agree by luck, and a reader cannot tell the difference between a flag that was

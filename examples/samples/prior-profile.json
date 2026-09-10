@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "minTokensPerDoc": 150,
+  "priorDocs": 3,
+  "inputRows": 3,
+  "skippedRows": [],
+  "features": {
+    "content_word_repeat": {
+      "mean": 0.047609,
+      "sd": 0.020616
+    },
+    "exclam_single_regular": {
+      "mean": 0,
+      "sd": 0
+    },
+    "hedge_density": {
+      "mean": -0.339438,
+      "sd": 0.178273
+    },
+    "llm_lexicon_weak": {
+      "mean": -1.155,
+      "sd": 0
+    },
+    "paragraph_uniformity": {
+      "mean": -0.465755,
+      "sd": 0.121702
+    },
+    "parallel_openers": {
+      "mean": -0.072952,
+      "sd": 0.194394
+    },
+    "sentence_len_cv": {
+      "mean": 0.357563,
+      "sd": 0.311993
+    },
+    "sentence_len_mode_mass": {
+      "mean": 0.295697,
+      "sd": 0.751657
+    },
+    "space_hygiene": {
+      "mean": 0,
+      "sd": 0
+    },
+    "terminal_punct_ratio": {
+      "mean": 0.305555,
+      "sd": 0.601407
+    }
+  },
+  "cell": "en:prose",
+  "weightsId": "prior-2026-09-09"
+}

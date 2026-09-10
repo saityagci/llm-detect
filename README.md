@@ -388,6 +388,59 @@ lean toward `uncertain` and never away from it.** A style shift is a reason to l
 to accuse: a student who improves across a term, or switches genre, or has a bad week, trips it
 honestly.
 
+#### Do it with a stored profile, not by re-reading the priors
+
+`--history` re-scores every prior submission on every call. A platform holds thousands of
+submissions and knows each student's history already, so it should do the comparison the other way
+round (HEAD-RULINGS R45): **build one profile per student when a submission is accepted, store it
+beside the student, and pass it back on every later submission.** The profile is plain JSON and
+`buildHistoryProfile()` is pure, so it fits in a database column.
+
+```bash
+# once, when a submission is accepted — store the result against the student
+node stylometry.mjs --build-history-profile prior-submissions.jsonl \
+  --preset essay --allow-uncalibrated > profile.json
+
+# on every later submission — no re-scoring of priors
+node stylometry.mjs --file new-essay.txt --preset essay \
+  --history-profile profile.json --allow-uncalibrated --json
+```
+
+From a Node backend, one batch per class with each row carrying its own student's profile:
+
+```js
+import { detect, detectBatch, buildHistoryProfile } from './stylometry.mjs';
+
+// once per student, when a submission is accepted
+const historyProfile = buildHistoryProfile(priorTexts, { preset: 'essay' });
+
+// one submission
+detect(text, { preset: 'essay', historyProfile });
+
+// a whole class in one pass — a row's own historyProfile wins over anything shared
+detectBatch([
+  { id: 'sub-1041', text: essayA, historyProfile: profileFor77 },
+  { id: 'sub-1042', text: essayB, history: ['…a prior essay…'] },   // still supported, still costlier
+  { id: 'sub-1043', text: essayC },                                  // first submission: no history, and it says so
+], { preset: 'essay' });
+```
+
+`--history` and `--history-profile` produce **byte-identical reports** — verified on the committed
+samples, and the equality is the point: the profile is a cache, not a different measurement.
+
+**A profile is valid only for the cell and the weights file it was built in.** Change the language or
+shape a student's work routes to, or change the weights, and the stored profile no longer describes
+the same measurement. The core does not guess: it warns `history_profile_mismatch` and makes **no
+comparison at all**, rather than a silently wrong one. Rebuild the profile when that appears. An
+empty `history: []` warns `history_insufficient`; omitting history entirely emits no history block,
+which is the correct output for a student's first submission.
+
+| the caller has | flag | what it costs |
+|---|---|---|
+| a path to prior submissions | `--history <prior.jsonl>` | one `detect()` per prior, on every call |
+| a stored profile | `--history-profile <profile.json>` | nothing — the priors are not re-read |
+| neither, and wants to build one | `--build-history-profile <prior.jsonl>` | prints the profile and exits 0 without scoring |
+
 ### The backend states the shape — the file name never will
 
 **Your backend must tell the tool what it is looking at; a file name is not a caller statement and
@@ -408,10 +461,13 @@ node stylometry.mjs --file <submission.txt> \
 know it (`web` for a browser form). Omit `--history` for a student's first submission; the tool says
 `history_insufficient` rather than pretending.
 
-A runnable backend example is in [`examples/platform-essay.mjs`](examples/platform-essay.mjs):
-`node examples/platform-essay.mjs <essay.txt> [--history prior.jsonl]`. See
-[`examples/README.md`](examples/README.md) for `detectBatch` over a whole class and `aggregate` per
-student.
+Two runnable backend examples:
+[`examples/platform-essay.mjs`](examples/platform-essay.mjs) for one submission
+(`node examples/platform-essay.mjs <essay.txt> [--history prior.jsonl | --history-profile p.json]`)
+and [`examples/platform-class-batch.mjs`](examples/platform-class-batch.mjs) for a whole class in one
+pass with a per-row profile (`node examples/platform-class-batch.mjs <class.jsonl>`, or
+`--build-profile <prior.jsonl>`). See [`examples/README.md`](examples/README.md), and
+[`examples/samples/`](examples/samples/) for committed inputs with the exact command for each.
 
 ### What the tool does NOT do
 

@@ -29,7 +29,7 @@ judge alone, cap at `leaning_*`.
    `node "$LLM_DETECT_HOME/stylometry.mjs" --json --file <path> --allow-uncalibrated <flags>`
    Map statements to flags **exactly per RUBRIC §9**: a flag is passed only when the caller states
    the thing it encodes, never inferred. "Essay" or "exam answer" ⇒ `--preset essay`; a
-   prior-submissions path ⇒ `--history <path>`.
+   prior-submissions path ⇒ `--history <path>`; a stored profile path ⇒ `--history-profile <path>`.
 4. **Read the CLI JSON.** A rule is a matched artifact, a signal a weak style prior — never merge
    them. RUBRIC's table, invariants and §8 bind you.
 5. **Report** in RUBRIC §5's skeleton, every line of it, plain — never inside code fences. That

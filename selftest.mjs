@@ -31,7 +31,7 @@ import { transform, capLambda, tableVerdict, REGISTER_PROXY_LLM, AGGREGATE_DISAB
 import { foldConfusablesMapped, MATH_ALNUM_RE } from './lib/unicode.mjs';
 import { SUMMARY_LABELS, MAX_EVIDENCE_SPANS, MAX_SPAN_TEXT, detectBatch } from './lib/detect.mjs';
 import { compareHistory, HISTORY_WEIGHT, HISTORY_MIN_TOKENS,
-  HISTORY_PROFILE_VERSION } from './lib/history.mjs';
+  HISTORY_PROFILE_VERSION, HISTORY_PROFILE_DECIMALS } from './lib/history.mjs';
 import { buildHistoryProfile } from './lib/detect.mjs';
 import { OTHER_LATIN_WORDS } from './lib/langid.mjs';
 import { assistantFrameLeak, runRules } from './lib/rules.mjs';
@@ -1794,6 +1794,26 @@ function verifyRoundOne() {
   const profileFromRows = buildHistoryProfile(asRows, { ...BASE, preset: 'essay' });
   eq('R45: buildHistoryProfile takes {id,text} rows as well as strings',
     JSON.stringify(profileFromRows), JSON.stringify(profile));
+
+  // R45 addendum (2): every float in the profile is rounded to 6 decimals, so a committed
+  // profile carries no 15-digit float run (which trips the phone-shaped-digit acceptance grep),
+  // and the ROUNDED values are what both paths compare — the equality above holds by
+  // construction, not by luck.
+  const decimalsOf = (x) => {
+    const str = String(x);
+    const dot = str.indexOf('.');
+    return dot < 0 ? 0 : str.length - dot - 1;
+  };
+  ok(`R45: every profile float is rounded to ${HISTORY_PROFILE_DECIMALS} decimals`,
+    Object.values(profile.features).every((f) => decimalsOf(f.mean) <= HISTORY_PROFILE_DECIMALS
+      && decimalsOf(f.sd) <= HISTORY_PROFILE_DECIMALS),
+    JSON.stringify(profile.features));
+  ok('R45: ... so a serialised profile has no long float run in it',
+    !/\d{10,}/.test(JSON.stringify(profile)), JSON.stringify(profile).slice(0, 200));
+  eq('R45: a report built from the ROUNDED profile is byte-identical to one from the raw priors',
+    JSON.stringify(detect(newEssay, { ...BASE, preset: 'essay',
+      historyProfile: JSON.parse(JSON.stringify(profile)) })),
+    JSON.stringify(consistent));
 
   for (const [why, broken] of [
     ['another cell', { ...profile, cell: 'tr:chat' }],

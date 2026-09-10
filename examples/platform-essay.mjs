@@ -2,7 +2,7 @@
 /**
  * platform-essay.mjs — the shape a school platform's backend calls, in about a hundred lines.
  *
- *   node examples/platform-essay.mjs <essay.txt> [--history prior-submissions.jsonl]
+ *   node examples/platform-essay.mjs <essay.txt> [--history prior.jsonl | --history-profile p.json]
  *
  * It imports `detect()` from the shipped module — no child process, no network, no dependencies —
  * and prints the four things a teacher-facing UI needs and nothing it does not:
@@ -50,9 +50,17 @@ function usage(code) {
   process.stderr.write(`usage: node examples/platform-essay.mjs <essay.txt> [--history prior-submissions.jsonl]
 
   <essay.txt>   the submission, as plain UTF-8 text
-  --history     JSONL of the same student's PRIOR submissions, one {"id","text"} per line
-                (R42(d): >= 2 prior documents of >= 150 tokens, or the tool says so and stops
-                using them). History can move a lean toward "uncertain", never away from it.
+  --history           JSONL of the same student's PRIOR submissions, one {"id","text"} per line
+                      (R42(d): >= 2 prior documents of >= 150 tokens, or the tool says so and stops
+                      using them). Costs one detect() per prior, on every call.
+  --history-profile   a profile built once and stored, instead of re-reading the priors (R45).
+                      Byte-identical output, and the shape a platform should use:
+                        node stylometry.mjs --build-history-profile prior.jsonl \\
+                          --preset essay --allow-uncalibrated > profile.json
+                      A profile is valid only for the cell and weights id it was built in; a
+                      mismatch warns history_profile_mismatch and makes NO comparison.
+
+History can move a lean toward "uncertain", never away from it.
 `);
   process.exit(code);
 }
@@ -63,6 +71,10 @@ const file = argv[0];
 const hIdx = argv.indexOf('--history');
 const historyFile = hIdx >= 0 ? argv[hIdx + 1] : null;
 if (hIdx >= 0 && !historyFile) usage(1);
+const pIdx = argv.indexOf('--history-profile');
+const profileFile = pIdx >= 0 ? argv[pIdx + 1] : null;
+if (pIdx >= 0 && !profileFile) usage(1);
+if (historyFile && profileFile) { process.stderr.write('pass --history or --history-profile, not both\n'); usage(1); }
 if (!existsSync(file)) { process.stderr.write(`no such file: ${file}\n`); process.exit(2); }
 
 const text = readFileSync(file, 'utf8');
@@ -70,6 +82,11 @@ let history = null;
 if (historyFile) {
   if (!existsSync(historyFile)) { process.stderr.write(`no such history file: ${historyFile}\n`); process.exit(2); }
   history = readFileSync(historyFile, 'utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
+}
+let historyProfile = null;
+if (profileFile) {
+  if (!existsSync(profileFile)) { process.stderr.write(`no such profile: ${profileFile}\n`); process.exit(2); }
+  historyProfile = JSON.parse(readFileSync(profileFile, 'utf8'));
 }
 
 // The essay preset (R42(c)) is `--context prose --genre essay --lang en`. Passing it through the
@@ -80,6 +97,7 @@ const opts = {
   explain: true,
   now: Date.now(),              // enables the weights-expiry check (R5); omit it and detect() stays pure
   ...(history ? { history } : {}),
+  ...(historyProfile ? { historyProfile } : {}),
 };
 
 let report;
@@ -118,6 +136,10 @@ out.push(`verdict:  ${report.verdict}`);
 out.push(`score:    ${report.score === null ? 'null (not scored)' : Number(report.score).toFixed(6)}   <- a ranking number, NOT a probability`);
 out.push(`tokens:   ${report.counts?.tokens ?? '?'}   gates failed: ${(report.gates?.failed || []).join(', ') || 'none'}`);
 out.push(`warnings: ${(report.warnings || []).join(', ') || 'none'}`);
+if ((report.warnings || []).includes('history_profile_mismatch')) {
+  out.push('          ^ the profile was built for a different cell or weights file. NO history');
+  out.push('            comparison was made — rebuild it rather than trusting a stale one.');
+}
 for (const n of (report.notes || [])) out.push(`note:     ${n}`);
 out.push('');
 

@@ -1,13 +1,20 @@
 # `examples/` — calling the detector from a backend
 
-One runnable example, and the rules that matter more than the code.
+Two runnable examples, and the rules that matter more than the code.
 
 ```bash
-node examples/platform-essay.mjs <essay.txt> [--history prior-submissions.jsonl]
+# one submission
+node examples/platform-essay.mjs <essay.txt> [--history prior.jsonl | --history-profile profile.json]
+
+# a whole class in one pass, each row carrying its own student's profile
+node examples/platform-class-batch.mjs <class.jsonl>
+node examples/platform-class-batch.mjs --build-profile <prior.jsonl> [--out profile.json]
 ```
 
-It imports `detect()` from `../stylometry.mjs`, prints the platform label, the verdict it came from,
-the evidence spans and the caveat, and exits 0. Zero dependencies, no child process, no network.
+The first imports `detect()`, prints the platform label, the verdict it came from, the evidence spans
+and the caveat. The second imports `detectBatch()` and `buildHistoryProfile()` and prints one label
+line per submission. Both are zero-dependency, no child process, no network, and exit 0.
+Committed inputs for both are in [`samples/`](samples/), with the exact command per file.
 
 ## The one rule
 
@@ -65,6 +72,32 @@ detect(newEssay, { ...opts, history: priorSubmissions });   // needs >= 2 priors
 // (2) "what does this student's whole body of work look like?"
 aggregate(allSubmissionsByThisStudent, opts);               // >= 3 documents of >= 150 tokens
 ```
+
+**In production use a stored profile, not (1) directly.** `history` re-scores every prior on every
+call. `buildHistoryProfile()` does that work once and returns plain JSON you keep beside the student
+(HEAD-RULINGS R45):
+
+```js
+import { detect, detectBatch, buildHistoryProfile } from './stylometry.mjs';
+
+const historyProfile = buildHistoryProfile(priorTexts, { preset: 'essay' });  // store this
+
+detect(text, { preset: 'essay', historyProfile });          // one submission
+
+detectBatch([                                              // a class in one pass
+  { id: 'sub-1041', text: essayA, historyProfile: profileFor77 },
+  { id: 'sub-1042', text: essayB, history: ['…a prior essay…'] },
+  { id: 'sub-1043', text: essayC },
+], { preset: 'essay' });
+```
+
+A row's own `historyProfile` (or `history`) wins over anything passed for the batch. The two paths
+give **byte-identical reports** — the profile is a cache, not a different measurement.
+
+**A profile is valid only for the cell and weights id it was built in.** On a mismatch the core warns
+`history_profile_mismatch` and makes **no comparison at all** rather than a silently wrong one:
+rebuild the profile when you see it. `history: []` warns `history_insufficient`; omitting history
+emits no history block, which is the right answer for a first submission.
 
 `--history` adds `style_shift_vs_history` (with the features named) or a consistency note. It can
 move a lean **toward** `uncertain` and never away from it: a style shift is a reason to look, never a

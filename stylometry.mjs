@@ -247,16 +247,21 @@ function main() {
   } else {
     validateMarkers(RES.markers, 'markers.json');
   }
+  // R45 addendum (1): `--build-history-profile` emits no verdict and no score, so the
+  // uncalibrated refusal has nothing to refuse. The weights SHAPE is still validated — a broken
+  // file must still exit 4 — but the exit-3 guard is skipped for this mode only. Every scoring
+  // mode is unchanged and still exits 3 without --allow-uncalibrated.
+  const scoresNothing = a['build-history-profile'] !== undefined;
   if (a.weights) {
     try { o.weights = JSON.parse(readText(a.weights)); }
     catch (e) { fail(2, `weights file unreadable: ${e.message}`); }
     validateWeights(o.weights, a.weights);
-    if (o.weights.provenance === 'prior' && !o.allowUncalibrated) {
+    if (!scoresNothing && o.weights.provenance === 'prior' && !o.allowUncalibrated) {
       fail(3, 'refusing to score with uncalibrated prior weights — pass --allow-uncalibrated');
     }
   } else {
     validateWeights(RES.weights, 'weights.v1.json');
-    guardUncalibrated(o);
+    if (!scoresNothing) guardUncalibrated(o);
   }
 
   const readHistoryRows = (path, what) => {
