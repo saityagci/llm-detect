@@ -12,6 +12,7 @@ import { loadResources, readText, readStdinSync, readJsonl, existsSync, isMain }
 import {
   detect as coreDetect, detectBatch as coreBatch, aggregate as coreAggregate,
   buildCorpusIndex, configure, DETECTOR_VERSION,
+  buildHistoryProfile as coreBuildHistoryProfile,
 } from './lib/detect.mjs';
 import { validateWeightsShape } from './lib/score.mjs';
 
@@ -30,6 +31,7 @@ export const VERSION = {
 export const detect = coreDetect;
 export const detectBatch = coreBatch;
 export const aggregate = coreAggregate;
+export const buildHistoryProfile = coreBuildHistoryProfile;
 export { buildCorpusIndex };
 
 // ===========================================================================
@@ -53,6 +55,8 @@ OPTIONS
   --genre auto|review|email|chat|essay|formal_letter|marketing         (default auto)
   --preset essay                 = --context prose --genre essay --lang en (R42c)
   --history <path>         NDJSON {id,text} of the SAME author's PRIOR submissions (R42d)
+  --history-profile <path> a profile built by --build-history-profile, instead of --history
+  --build-history-profile <path>   print the history profile JSON for those priors and exit 0
   --domain general|customer_service                                    (default general)
   --corpus <path>          NDJSON {id,sender,text} index enabling near_duplicate
   --markers <path>         known-machine markers (default ./markers.json, ships as [])
@@ -74,7 +78,7 @@ gates.failed ["G3_lang"] and reason "unsupported_language". It is never scored.
 
 const FLAGS_WITH_VALUE = new Set(['--file', '--text', '--jsonl', '--aggregate', '--context',
   '--channel', '--lang', '--genre', '--domain', '--corpus', '--weights', '--markers',
-  '--preset', '--history']);
+  '--preset', '--history', '--history-profile', '--build-history-profile']);
 const BOOL_FLAGS = new Set(['--allow-uncalibrated', '--explain', '--pretty', '--json',
   '--version', '--help', '-h']);
 
@@ -255,6 +259,31 @@ function main() {
     guardUncalibrated(o);
   }
 
+  const readHistoryRows = (path, what) => {
+    if (!existsSync(path)) fail(2, `${what} file not found: ${path}`);
+    const rows = readJsonl(path);
+    const bad = rows.filter((r) => !r.ok).length;
+    const texts = rows.filter((r) => r.ok).map((r) => r.row.text)
+      .filter((t) => typeof t === 'string' && t.length > 0);
+    if (texts.length === 0) fail(2, `${what} file has no usable {id,text} rows: ${path}`);
+    if (bad) process.stderr.write(`llm-detect: ${bad} malformed ${what} line(s) skipped\n`);
+    return texts;
+  };
+
+  // R45: build a reusable per-author profile and exit. No scoring, no verdict.
+  if (a['build-history-profile'] !== undefined) {
+    const texts = readHistoryRows(a['build-history-profile'], 'history');
+    process.stdout.write(JSON.stringify(coreBuildHistoryProfile(texts, o), null, 2) + '\n');
+    process.exit(0);
+  }
+  if (a['history-profile'] !== undefined) {
+    if (!existsSync(a['history-profile'])) fail(2, `history profile not found: ${a['history-profile']}`);
+    try { o.historyProfile = JSON.parse(readText(a['history-profile'])); }
+    catch (e) { fail(2, `history profile is not valid JSON: ${e.message}`); }
+    if (!o.historyProfile || typeof o.historyProfile !== 'object' || Array.isArray(o.historyProfile)) {
+      fail(2, 'history profile must be a JSON object built by --build-history-profile');
+    }
+  }
   if (a.history !== undefined) {
     if (!existsSync(a.history)) fail(2, `history file not found: ${a.history}`);
     const rows = readJsonl(a.history);
@@ -296,6 +325,9 @@ function main() {
         const r = coreDetect(p.row.text ?? '', {
           ...o, id: p.row.id, sender: p.row.sender,
           lang: p.row.lang ?? o.lang, shape: p.row.context ?? o.shape,
+          // R45: a row may carry the SAME author's priors, or a pre-built profile.
+          history: p.row.history ?? o.history,
+          historyProfile: p.row.historyProfile ?? o.historyProfile,
         });
         assertContributionSum(r);
         process.stdout.write(JSON.stringify(r) + '\n');

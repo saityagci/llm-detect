@@ -307,8 +307,8 @@ candidate dataset **is**, and downloads no row set:
 * `/rows?length=2` — two rows, described as `field=type/length`. **A probe never prints a text
   value.** `--probe-where` counts a labelled slice through `/filter` instead.
 
-Every probe is recorded in `eval/data/public/manifest.json` under `probes` (25 records, 21 distinct
-datasets). `--import-probes` folds a scratch probe manifest into the manifest of record, so probing
+Every probe is recorded in `eval/data/public/manifest.json` under `probes` (45 records, 41 distinct
+datasets: 21 in the essay-source round, 20 in the non-native round below). `--import-probes` folds a scratch probe manifest into the manifest of record, so probing
 can be done in `.scratch/` and imported rather than re-run against the release directory.
 
 **Licences are a known gap in this route.** `datasets-server /info` declared a licence for *none*
@@ -383,17 +383,40 @@ Read alongside:
 - **The three-humans caveat still applies to everything else in the report**, and a fourth caveat
   applies here: these essay writers are an unknown number of unknown students, and the threshold is
   still fitted over a corpus whose in-house human side is three people.
-- **The non-native stratum is UNMEASURED.** No essay row carries `non_native_en` (that stratum is
-  defined as an English message written by one of the Turkish-speaking corpus writers, and no essay
-  row has a writer), and the essay source ships no L1, ELL or nationality column. Both PERSUADE
-  mirrors probed — the corpora that DO carry `ell_status` — are behind authentication. The
-  literature puts vendor-default false-flag rates on non-native essays at up to 61% (R1 §3); this
-  release does not measure it and **nothing here licenses an estimate of it**.
+- **The non-native stratum is UNMEASURED, after a dedicated search.** See "The non-native / ELL
+  stratum: searched for, not found" below — 41 datasets probed, none with a fetchable L1 or
+  proficiency column. The literature puts vendor-default false-flag rates on non-native essays at
+  up to 61% (R1 §3); this release does not measure it and **nothing here licenses an estimate of
+  it**. Negative control (f) is absent, not passed.
 - **Not exam answers.** These are take-home-shaped school essays. No exam-answer corpus was
   fetchable at all, so the other half of the owner's product (R42) is unmeasured.
 - **One generator family, unnamed.** No per-generator recall, and no claim about any 2025-2026 model.
 - **A precision of 0.986 is measured at this corpus's own prior** (≈53% machine in that bucket).
   The base-rate row above is the one to quote at a school's real prior, which nobody has measured.
+
+### The non-native / ELL stratum: searched for, not found
+
+Measuring a false-flag rate needs **human essays only** — no machine half — so the search was for a
+fetchable, unauthenticated corpus of English-learner essays carrying an **L1 or proficiency**
+column. Twenty further probes, one attempt each, no row set downloaded:
+
+| candidate | result |
+|---|---|
+| `matejklemen/wi_locness` (W&I+LOCNESS: learner essays with CEFR A/B/C levels plus native LOCNESS essays — exactly the right shape) | **HTTP 501** — "the dataset viewer doesn't support this dataset because it runs arbitrary Python code". It exists and is the best candidate anywhere; it is not reachable through `/rows`. Three mirror names tried (`wi_locness`, `pszemraj/…`, `Rosenberg/…`): 404 / 401 / 401. |
+| ELLIPSE / Feedback-Prize-ELL mirrors: `nbroad/feedback-prize-ell`, `tasksource/ellipse`, `ELLIPSE` | HTTP 401 |
+| PERSUADE mirrors (carry `ell_status`): `LearningAgencyLab/persuade`, `learning-agency-lab/persuade-corpus-2.0`, `argilla/persuade`, plus round one's `nbroad/persuade_corpus_2.0`, `nbroad/persaude_corpus_2.0`, `tasksource/persuade` | HTTP 401, every one |
+| `toefl11`, `tasksource/toefl11`, `icnale`, `efcamdat`, `fce`, `lang8` | HTTP 401 |
+| `jfleg`, `nyu-mll/jfleg` | 404 renamed / 401 |
+| `jhu-clsp/jfleg` | **fetchable and useless for this**: 755 single SENTENCES (median 84 characters), fields `sentence` + `corrections`, no L1 and no proficiency column. Below the tool's own length floor and not a stratum. |
+| `SJTU-CL/ArguGPT` (round one), `SJTU-CL/ArguGPT-sent` | fetchable / 401 — and ArguGPT's `exam_type` (gre / toefl / weccl) labels **machine** essays imitating learner corpora, not learner writing. All 3,338 rows carry a model. |
+
+**Result: nothing was registered, no `control` side was added to `make-splits.mjs`, and negative
+control (f) is not implemented.** Writing the plumbing for a corpus that does not exist would be a
+switch nobody can turn on; the report says the stratum is unmeasured and names what was tried. The
+paths back in, for the head: an authenticated HF pull (outside this project's unauthenticated rule,
+not outside its zero-spend rule), the parquet branch of `matejklemen/wi_locness` if someone converts
+it, or an owner-supplied set of real non-native student essays, which is the only source that would
+also match the platform's own population.
 
 ### What the essay rows did to the numbers that were already there
 
@@ -508,6 +531,17 @@ now picked on a validation side that is ~20% essays: AUC 0.884 → 0.878 (hard 0
 FPR@t 7.6% → 2.5% and TPR@t 65.0% → 32.5%. Anyone quoting the pre-essay recall of 65% is quoting a
 threshold that no longer exists. Both tables are in `eval/out/REPORT.md`; the comparison is in
 "Essay genre (R42(e))" above.
+
+**E14 — the non-native/ELL false-flag rate cannot be measured from any corpus this project may
+fetch.** Twenty further probes for a HUMAN-ONLY English-learner essay corpus with an L1 or
+proficiency column (an FPR needs no machine half) found none. Every ELLIPSE, PERSUADE, TOEFL11,
+ICNALE, EFCAMDAT and Feedback-Prize mirror tried is **HTTP 401**; `matejklemen/wi_locness` — learner
+essays with CEFR levels, the right corpus — is **HTTP 501**, viewer disabled because it ships a
+loading script; the one fetchable learner resource, `jhu-clsp/jfleg`, is 755 single sentences with
+no L1 column. **Nothing was registered and negative control (f) was NOT implemented**: plumbing a
+`control` split side and an (f) table for a corpus that does not exist would be a switch nobody can
+turn on. The finding is the absence, and `REPORT.md` §3b now states it with the probe evidence
+rather than as a bare caveat. Repro: the `probes` array in `eval/data/public/manifest.json`.
 
 ## Verify round 1
 
@@ -817,3 +851,4 @@ measurement of the judge.
 | the probe tables print rule names, never probe text; the honesty guard's exemption list is deleted | R40 |
 | English first; Turkish supported but unscheduled | R41 |
 | the school-platform round: essay calibration, `--probe`, the by-prompt split, the essay-genre report row | R42, R42(e) |
+| the non-native/ELL essay stratum: 41 datasets probed, none fetchable with an L1 or proficiency column; control (f) absent, not passed | R42(e) follow-up (head to number) |

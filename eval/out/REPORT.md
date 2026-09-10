@@ -1,6 +1,6 @@
 # LLM-detect evaluation report
 
-generated 2026-09-10T19:34:27.191Z · node v24.5.0 · detector `stylometry.mjs`
+generated 2026-09-10T19:49:34.595Z · node v24.5.0 · detector `stylometry.mjs`
 
 Language scope is **English and Turkish only** (HEAD-RULINGS R22). Arabic-script rows were
 excluded upstream by make-splits.mjs and are never scored.
@@ -146,16 +146,24 @@ column is printed beside it so a silent instrument cannot look like a safe one.
 | en:prose essay | 500+ | 95 | 2 | 93 | 1 | 1.1% — INSUFFICIENT (n<100), an anecdote | 1 | 1.1% — INSUFFICIENT (n<100), an anecdote |
 | en:prose essay | ALL | 325 | 27 | 298 | 2 | 0.6% | 2 | 0.6% |
 
-**The non-native stratum is UNMEASURED on essays.** 0 essay row(s) carry the
-`non_native_en` stratum, because that stratum is defined as "an English message written by
-one of the Turkish-speaking corpus writers" and no essay row has a writer. The essay source
-ships no L1, ELL or nationality column — the two probed corpora that do carry an ELL flag
-(`nbroad/persuade_corpus_2.0` and its misspelling) are gated behind authentication and were
-not fetchable. So the single most important fairness number for a school platform — the
-false-flag rate on essays written by non-native English speakers, which the literature puts
-at up to 61% at vendor defaults (R1 §3) — is **not measured here and must not be inferred**
-from the rows above. 147 essay row(s) do carry the `formal_register` proxy; that is a
-register proxy, not a language-background one, and it is not a substitute.
+**The non-native stratum is UNMEASURED on essays, after a deliberate search for it.** 0 essay
+row(s) carry the `non_native_en` stratum, because that stratum is defined as "an English
+message written by one of the Turkish-speaking corpus writers" and no essay row has a writer.
+The essay source ships no L1, ELL or proficiency column, and a dedicated second probe round
+went looking for a HUMAN-ONLY English-learner corpus with one — an FPR needs no machine half.
+**41 datasets have now been probed and not one carries a fetchable L1 or proficiency column.**
+Every ELLIPSE / PERSUADE / TOEFL11 / ICNALE / EFCAMDAT / Feedback-Prize mirror tried returned
+HTTP 401 (gated or gone); `matejklemen/wi_locness` — learner essays with CEFR levels, the one
+corpus of the right shape that demonstrably exists — returns HTTP 501, its viewer disabled
+because the dataset runs a loading script; `jhu-clsp/jfleg` is fetchable but is 755 single
+SENTENCES with no L1 column, below this tool's length floor and not a stratum. The full probe
+table is in `eval/data/public/manifest.json` under `probes` and in `eval/README-eval.md`.
+So the single most important fairness number for a school platform — the false-flag rate on
+essays written by non-native English speakers, which the literature puts at up to 61% at
+vendor defaults (R1 §3) — is **not measured here, and nothing above licenses an estimate of
+it**. 147 essay row(s) do carry the `formal_register` proxy; that is a register proxy, not a
+language-background one, and it is not a substitute. Negative control (f) — non-native human
+essays flagged at t — is therefore **absent, not passed**: it has no corpus to run on.
 
 **What the essay rows are, and are not.** Provenance is stated because it bounds every number
 above: the source is a public English corpus of school-assignment essays whose two halves —
@@ -866,4 +874,4 @@ Probe text is not printed (HEAD-RULINGS R40); look a row up by its id in
 | N26 | en | no fire | no fire | ok | — |
 | N27 | en | no fire | no fire | ok | — |
 
-_CAL fixture gate wall-clock: 34.2s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._
+_CAL fixture gate wall-clock: 35.3s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._

@@ -30,7 +30,9 @@ import { transform, capLambda, tableVerdict, REGISTER_PROXY_LLM, AGGREGATE_DISAB
   MATERIALITY_FLOOR } from './lib/score.mjs';
 import { foldConfusablesMapped, MATH_ALNUM_RE } from './lib/unicode.mjs';
 import { SUMMARY_LABELS, MAX_EVIDENCE_SPANS, MAX_SPAN_TEXT, detectBatch } from './lib/detect.mjs';
-import { compareHistory, HISTORY_WEIGHT, HISTORY_MIN_TOKENS } from './lib/history.mjs';
+import { compareHistory, HISTORY_WEIGHT, HISTORY_MIN_TOKENS,
+  HISTORY_PROFILE_VERSION } from './lib/history.mjs';
+import { buildHistoryProfile } from './lib/detect.mjs';
 import { OTHER_LATIN_WORDS } from './lib/langid.mjs';
 import { assistantFrameLeak, runRules } from './lib/rules.mjs';
 
@@ -1755,6 +1757,57 @@ function verifyRoundOne() {
     JSON.stringify(mixedRows.notes.filter((n) => n.startsWith('history_rows_skipped'))));
   eq('R42(d): ... which are reported in history.skippedRows',
     JSON.stringify(mixedRows.history.skippedRows), JSON.stringify([2, 4]));
+
+  // --- R45: batch rows, and a reusable per-author profile ------------------------------------
+  const newEssay = essayBy('the harbour', 10);
+  const batchWithHistory = detectBatch([{ id: 'b1', text: newEssay, history: priorEssays }],
+    { ...BASE, preset: 'essay' });
+  const stripId = (r) => { const c = { ...r }; delete c.id; return JSON.stringify(c); };
+  eq('R45: a batch row carrying history === the same document run with --history',
+    stripId(batchWithHistory[0]), stripId(consistent));
+  const batchNoHistory = detectBatch([{ id: 'b2', text: newEssay }], { ...BASE, preset: 'essay' });
+  ok('R45: a batch row WITHOUT history behaves as before (no history block)',
+    !('history' in batchNoHistory[0]));
+  const batchEmpty = detectBatch([{ id: 'b3', text: newEssay, history: [] }], { ...BASE, preset: 'essay' });
+  ok('R45: a batch row with an EMPTY history array warns history_insufficient',
+    batchEmpty[0].warnings.includes('history_insufficient'), JSON.stringify(batchEmpty[0].warnings));
+  ok('R45: detect() with an empty history array does the same',
+    detect(newEssay, { ...BASE, preset: 'essay', history: [] }).warnings.includes('history_insufficient'));
+
+  const profile = buildHistoryProfile(priorEssays, { ...BASE, preset: 'essay' });
+  eq('R45: the profile carries its version', profile.version, HISTORY_PROFILE_VERSION);
+  eq('R45: ... the cell it was built in', profile.cell, 'en:prose');
+  eq('R45: ... the weights id', profile.weightsId, VERSION.weights);
+  eq('R45: ... the usable prior count', profile.priorDocs, 3);
+  eq('R45: ... and the floor it used', profile.minTokensPerDoc, HISTORY_MIN_TOKENS);
+  ok('R45: ... with a per-feature {mean, sd} map',
+    Object.keys(profile.features).length > 0
+      && Object.values(profile.features).every((f) => Number.isFinite(f.mean) && Number.isFinite(f.sd)));
+  ok('R45: the profile is JSON-serialisable and round-trips',
+    JSON.stringify(JSON.parse(JSON.stringify(profile))) === JSON.stringify(profile));
+  const viaProfile = detect(newEssay, { ...BASE, preset: 'essay', historyProfile: profile });
+  eq('R45: history and the equivalent historyProfile give BYTE-IDENTICAL output',
+    JSON.stringify(viaProfile), JSON.stringify(consistent));
+  const rowProfile = detectBatch([{ id: 'b4', text: newEssay, historyProfile: profile }],
+    { ...BASE, preset: 'essay' });
+  eq('R45: a batch row carrying a profile matches too', stripId(rowProfile[0]), stripId(consistent));
+  const profileFromRows = buildHistoryProfile(asRows, { ...BASE, preset: 'essay' });
+  eq('R45: buildHistoryProfile takes {id,text} rows as well as strings',
+    JSON.stringify(profileFromRows), JSON.stringify(profile));
+
+  for (const [why, broken] of [
+    ['another cell', { ...profile, cell: 'tr:chat' }],
+    ['another weights file', { ...profile, weightsId: 'fitted-something-else' }],
+    ['another profile version', { ...profile, version: HISTORY_PROFILE_VERSION + 1 }],
+  ]) {
+    const bad = detect(newEssay, { ...BASE, preset: 'essay', historyProfile: broken });
+    ok(`R45: a profile from ${why} is rejected with history_profile_mismatch`,
+      bad.warnings.includes('history_profile_mismatch'), JSON.stringify(bad.warnings));
+    ok(`R45: ... and no comparison is applied (${why})`,
+      bad.history.priorDocs === 0 && bad.history.comparedFeatures === 0
+        && !bad.signals.some((x) => x.name === 'history_consistency')
+        && !bad.notes.some((n) => n.startsWith('consistent_with_history')));
+  }
 
   const thin = detect(essayBy('the harbour', 10), { ...BASE, preset: 'essay', history: ['too short', 'also short'] });
   ok('R42(d): fewer than two long prior documents warns history_insufficient',

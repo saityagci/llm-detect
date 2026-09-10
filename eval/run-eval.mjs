@@ -844,16 +844,24 @@ async function main() {
     {
       const nn = essayAll.filter((r) => (r.strata || []).includes('non_native_en')).length;
       const fr = essayAll.filter((r) => (r.strata || []).includes('formal_register')).length;
-      emit(`**The non-native stratum is UNMEASURED on essays.** ${nn} essay row(s) carry the`);
-      emit('`non_native_en` stratum, because that stratum is defined as "an English message written by');
-      emit('one of the Turkish-speaking corpus writers" and no essay row has a writer. The essay source');
-      emit('ships no L1, ELL or nationality column — the two probed corpora that do carry an ELL flag');
-      emit('(`nbroad/persuade_corpus_2.0` and its misspelling) are gated behind authentication and were');
-      emit('not fetchable. So the single most important fairness number for a school platform — the');
-      emit('false-flag rate on essays written by non-native English speakers, which the literature puts');
-      emit('at up to 61% at vendor defaults (R1 §3) — is **not measured here and must not be inferred**');
-      emit(`from the rows above. ${fr} essay row(s) do carry the \`formal_register\` proxy; that is a`);
-      emit('register proxy, not a language-background one, and it is not a substitute.');
+      emit(`**The non-native stratum is UNMEASURED on essays, after a deliberate search for it.** ${nn} essay`);
+      emit('row(s) carry the `non_native_en` stratum, because that stratum is defined as "an English');
+      emit('message written by one of the Turkish-speaking corpus writers" and no essay row has a writer.');
+      emit('The essay source ships no L1, ELL or proficiency column, and a dedicated second probe round');
+      emit('went looking for a HUMAN-ONLY English-learner corpus with one — an FPR needs no machine half.');
+      emit('**41 datasets have now been probed and not one carries a fetchable L1 or proficiency column.**');
+      emit('Every ELLIPSE / PERSUADE / TOEFL11 / ICNALE / EFCAMDAT / Feedback-Prize mirror tried returned');
+      emit('HTTP 401 (gated or gone); `matejklemen/wi_locness` — learner essays with CEFR levels, the one');
+      emit('corpus of the right shape that demonstrably exists — returns HTTP 501, its viewer disabled');
+      emit('because the dataset runs a loading script; `jhu-clsp/jfleg` is fetchable but is 755 single');
+      emit('SENTENCES with no L1 column, below this tool\'s length floor and not a stratum. The full probe');
+      emit('table is in `eval/data/public/manifest.json` under `probes` and in `eval/README-eval.md`.');
+      emit('So the single most important fairness number for a school platform — the false-flag rate on');
+      emit('essays written by non-native English speakers, which the literature puts at up to 61% at');
+      emit('vendor defaults (R1 §3) — is **not measured here, and nothing above licenses an estimate of');
+      emit(`it**. ${fr} essay row(s) do carry the \`formal_register\` proxy; that is a register proxy, not a`);
+      emit('language-background one, and it is not a substitute. Negative control (f) — non-native human');
+      emit('essays flagged at t — is therefore **absent, not passed**: it has no corpus to run on.');
       emit('');
     }
 
