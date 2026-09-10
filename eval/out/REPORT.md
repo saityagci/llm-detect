@@ -1,6 +1,6 @@
 # LLM-detect evaluation report
 
-generated 2026-09-10T05:08:32.430Z · node v24.5.0 · detector `stylometry.mjs`
+generated 2026-09-10T05:59:16.176Z · node v24.5.0 · detector `stylometry.mjs`
 
 Language scope is **English and Turkish only** (HEAD-RULINGS R22). Arabic-script rows were
 excluded upstream by make-splits.mjs and are never scored.
@@ -44,9 +44,9 @@ scored remainder, and the coverage that produced it is printed beside it.
 | cell | rows | scored | gated (`insufficient_text`) | gate rate |
 |---|---:|---:|---:|---:|
 | en:chat | 613 | 9 | 604 | 98.5% |
-| en:prose | 12024 | 3352 | 8672 | 72.1% |
+| en:prose | 12029 | 3350 | 8679 | 72.2% |
 | tr:chat | 2522 | 223 | 2299 | 91.2% |
-| tr:prose | 2001 | 47 | 1954 | 97.7% |
+| tr:prose | 1996 | 47 | 1949 | 97.6% |
 
 ## 3. Held-out results (TEST only) — SPEC §G.1
 
@@ -59,15 +59,15 @@ number. A precision computed from three positives is a rounding artefact wearing
 | en:chat | 20-49 | 8 | 2 | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |
 | en:chat | 50-149 | 0 | 5 | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |
 | en:prose | <20 | 183 | 190 | NO COVERAGE — 373 of 373 rows are below the floor and were never scored | — | — | 0.0% | 0.0% | — | — |
-| en:prose | 20-49 | 376 | 356 | NO COVERAGE — 732 of 732 rows are below the floor and were never scored | — | — | 0.0% | 0.0% | — | — |
-| en:prose | 50-149 | 359 | 356 | 0.747 | 0.648 | 0.169 | 1.1% | 3.7% | 3.4% | 0.765 |
-| en:prose | 150-499 | 224 | 297 | 0.884 | 0.858 | 0.050 | 7.6% | 65.0% | 66.7% | 0.919 |
+| en:prose | 20-49 | 377 | 356 | NO COVERAGE — 733 of 733 rows are below the floor and were never scored | — | — | 0.0% | 0.0% | — | — |
+| en:prose | 50-149 | 359 | 356 | 0.739 | 0.623 | 0.176 | 1.1% | 3.7% | 3.4% | 0.765 |
+| en:prose | 150-499 | 224 | 297 | 0.884 | 0.857 | 0.041 | 7.6% | 65.0% | 66.7% | 0.919 |
 | en:prose | 500+ | 55 | 31 | INSUFFICIENT — placeholder, not a measurement | | | | | | |
 | tr:chat | <20 | 146 | 631 | NO COVERAGE — 776 of 777 rows are below the floor and were never scored | — | — | 0.0% | 0.0% | — | — |
 | tr:chat | 20-49 | 25 | 84 | INSUFFICIENT — placeholder, not a measurement | | | | | | |
 | tr:chat | 50-149 | 1 | 0 | INSUFFICIENT — placeholder, not a measurement | | | | | | |
 | tr:prose | <20 | 95 | 39 | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |
-| tr:prose | 20-49 | 74 | 151 | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |
+| tr:prose | 20-49 | 73 | 151 | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |
 | tr:prose | 50-149 | 21 | 31 | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |
 | tr:prose | 150-499 | 1 | 10 | INSUFFICIENT — no model for this cell: too few documents survived the gates on the fitting side | | | | | | |
 
@@ -90,7 +90,7 @@ Deleted in hard mode: `terminal_punct_ratio`, `sentence_initial_caps`, `all_lowe
 | cell | AUC standard | AUC hard mode | TPR@t standard | TPR@t hard mode |
 |---|---:|---:|---:|---:|
 | en:chat | — | — | — | — |
-| en:prose | 0.839 | 0.798 | 17.7% | 17.6% |
+| en:prose | 0.839 | 0.795 | 17.7% | 17.6% |
 | tr:chat | 0.975 | 0.450 | 11.2% | 2.1% |
 | tr:prose | — | — | — | — |
 
@@ -126,10 +126,10 @@ a gated row counted as a document that never fires. Under 100 rows it is an anec
 
 | cell | stratum | human rows (test) | gated | scored | flagged at t | FPR |
 |---|---|---:|---:|---:|---:|---:|
-| en:prose | formal_register | 15 | 14 | 1 | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote |
+| en:prose | formal_register | 16 | 15 | 1 | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote |
 | en:prose | mobile_typed | 36 | 25 | 11 | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote |
 | en:prose | lang:en | 1187 | 906 | 281 | 26 | **2.2%** |
-| en:prose | ALL | 1197 | 916 | 281 | 26 | **2.2%** |
+| en:prose | ALL | 1198 | 917 | 281 | 26 | **2.2%** |
 | tr:chat | non_native_en | 13 | 13 | 0 | 0 | 0.0% — INSUFFICIENT (n<100), an anecdote |
 | tr:chat | mobile_typed | 136 | 131 | 5 | 0 | **0.0%** |
 | tr:chat | lang:tr | 172 | 156 | 16 | 0 | **0.0%** |
@@ -147,13 +147,13 @@ A fitted coefficient whose sign is opposite to §B is **not flipped**. It is fla
 investigated, and either explained or the feature is dropped. A sign flip usually means a
 corpus artefact.
 
-- `en:prose` · `content_word_repeat` expected human-direction, fitted coefficient 0.857
-- `en:prose` · `ellipsis_hand_typed` expected human-direction, fitted coefficient 0.519
+- `en:prose` · `content_word_repeat` expected human-direction, fitted coefficient 0.856
+- `en:prose` · `ellipsis_hand_typed` expected human-direction, fitted coefficient 0.518
 - `en:prose` · `human_lexicon` expected human-direction, fitted coefficient 0.144
 - `en:prose` · `letter_elongation` expected human-direction, fitted coefficient 0.630
 - `en:prose` · `parallel_openers` expected llm-direction, fitted coefficient -0.445
-- `en:prose` · `repeated_punct_emoticon` expected human-direction, fitted coefficient 0.889
-- `en:prose` · `terminal_punct_ratio` expected llm-direction, fitted coefficient -0.202
+- `en:prose` · `repeated_punct_emoticon` expected human-direction, fitted coefficient 0.888
+- `en:prose` · `terminal_punct_ratio` expected llm-direction, fitted coefficient -0.203
 - `tr:chat` · `tr_chat_morphology` expected human-direction, fitted coefficient 0.257
 
 ## 7. Leave-one-writer-out — the binding limit on every threshold
@@ -207,8 +207,8 @@ R0 with the bulk of the rows and R1/R2 with very few, and the table above says e
 - 296 documents re-scored with their sentences shuffled by the shipped segmenter, original inter-sentence separators preserved.
 - **3** document(s) became `insufficient_text` AFTER the shuffle and are excluded from the deltas below — a shuffle that gates a document is itself a finding, and it used to leave the denominator without a line.
 - 0 document(s) could not be re-assembled from their segmented sentences (NFC normalisation moved the bytes) and 1 had no model for their cell; both are skipped and counted rather than dropped.
-- calibrated p: mean |delta| **0.005** · median **0.000** · max **0.242**
-- pre-isotonic score: mean |delta| **0.005** · max **0.153** (isotonic calibration is a step function and flattens small moves, so this is the sensitive one)
+- calibrated p: mean |delta| **0.005** · median **0.000** · max **0.244**
+- pre-isotonic score: mean |delta| **0.005** · max **0.154** (isotonic calibration is a step function and flattens small moves, so this is the sensitive one)
 - The score should barely move. A large move means the features are reading document order rather than style.
 
 Top 5 documents by |delta| on the pre-isotonic score, and the features that actually moved.
@@ -218,11 +218,11 @@ different boundaries in the shuffled text — that is the control measuring itse
 
 | row | cell | \|delta p\| | \|delta raw\| | features that moved (delta contribution) |
 |---|---|---:|---:|---|
-| hc3-en-llm-332 | en:prose | 0.242 | 0.153 | `colon_led_list` -1.048, `terminal_punct_ratio` -0.570, `sentence_len_cv` +0.420, `parallel_openers` +0.255, `sentence_len_mode_mass` -0.012 |
-| hc3-en-human-1211 | en:prose | 0.071 | 0.141 | `terminal_punct_ratio` -0.570, `parallel_openers` -0.187 |
-| hc3-en-llm-766 | en:prose | 0.071 | 0.136 | `space_hygiene` -0.559 |
-| hc3-en-llm-157 | en:prose | 0.109 | 0.105 | `terminal_punct_ratio` +0.699 |
-| hc3-en-llm-93 | en:prose | 0.119 | 0.105 | `colon_led_list` -1.048, `terminal_punct_ratio` -0.570, `sentence_len_cv` -0.329, `parallel_openers` +0.204, `sentence_len_mode_mass` -0.016 |
+| hc3-en-llm-332 | en:prose | 0.244 | 0.154 | `colon_led_list` -1.050, `terminal_punct_ratio` -0.573, `sentence_len_cv` +0.418, `parallel_openers` +0.255, `sentence_len_mode_mass` -0.012 |
+| hc3-en-human-1211 | en:prose | 0.071 | 0.141 | `terminal_punct_ratio` -0.573, `parallel_openers` -0.187 |
+| hc3-en-llm-766 | en:prose | 0.074 | 0.136 | `space_hygiene` -0.559 |
+| hc3-en-llm-157 | en:prose | 0.111 | 0.106 | `terminal_punct_ratio` +0.702 |
+| hc3-en-llm-93 | en:prose | 0.117 | 0.105 | `colon_led_list` -1.050, `terminal_punct_ratio` -0.573, `sentence_len_cv` -0.327, `parallel_openers` +0.204, `sentence_len_mode_mass` -0.016 |
 
 - across all 296 shuffled documents the features that moved most often were `terminal_punct_ratio` (19), `parallel_openers` (10), `sentence_len_cv` (9), `sentence_len_mode_mass` (9), `colon_led_list` (7), `space_hygiene` (5), `repeated_punct_emoticon` (2), `exclam_single_regular` (1).
 
@@ -252,16 +252,16 @@ strictest threshold it tested: four of five flags wrong. Nothing below should be
 
 | fixture | variant | transform | verdict | p | delta vs its clean sibling |
 |---|---|---|---|---:|---:|
-| en-hr-1 | clean | — | leaning_llm | 0.754 |  |
-| en-hr-2 | clean | — | leaning_llm | 0.550 |  |
+| en-hr-1 | clean | — | leaning_llm | 0.752 |  |
+| en-hr-2 | clean | — | leaning_llm | 0.535 |  |
 | en-hr-3 | clean | — | insufficient_text | — |  |
 | en-hr-4 | clean | — | leaning_llm | 0.413 |  |
-| en-hr-5 | humanized | b | uncertain | 0.577 | -0.177 |
-| en-hr-6 | humanized | c | uncertain | 0.499 | -0.051 |
+| en-hr-5 | humanized | b | uncertain | 0.554 | -0.198 |
+| en-hr-6 | humanized | c | uncertain | 0.500 | -0.035 |
 | en-hr-7 | humanized | a | insufficient_text | — |  |
-| en-pr-1 | clean | — | leaning_llm | 0.232 |  |
+| en-pr-1 | clean | — | leaning_llm | 0.231 |  |
 | en-pr-2 | clean | — | insufficient_text | — |  |
-| en-pr-3 | humanized | b | leaning_llm | 0.232 | 0.000 |
+| en-pr-3 | humanized | b | leaning_llm | 0.231 | 0.000 |
 | en-wa-1 | clean | — | insufficient_text | — |  |
 | en-wa-2 | clean | — | insufficient_text | — |  |
 | en-wa-3 | clean | — | uncertain | — |  |
@@ -274,7 +274,7 @@ strictest threshold it tested: four of five flags wrong. Nothing below should be
 | en-em-2 | clean | — | insufficient_text | — |  |
 | en-em-3 | humanized | b | insufficient_text | — |  |
 | en-em-4 | humanized | c | leaning_human | 0.383 |  |
-| en-es-1 | clean | — | leaning_llm | 0.609 |  |
+| en-es-1 | clean | — | leaning_llm | 0.605 |  |
 | en-es-2 | clean | — | insufficient_text | — |  |
 | en-es-3 | humanized | a | insufficient_text | — |  |
 | tr-hr-1 | clean | — | leaning_llm | — |  |
@@ -558,7 +558,7 @@ from their `requiresMarkers` field, because `markers.json` ships as `[]` (R17) a
 | H34 | human | non_native_en_formal | en/chat | — | uncertain | 0.800 | — | register_only_evidence, uncalibrated_weights | yes |
 | H35 | human | careful_tr_orthography | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes |
 | L01 | llm | llm_base | en/prose | — | leaning_llm | 0.889 | — | uncalibrated_weights | yes |
-| L02 | llm | llm_base | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | register_only_evidence, uncalibrated_weights | yes |
+| L02 | llm | llm_base | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes |
 | L03 | llm | llm_base | tr/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes |
 | L04 | llm | llm_transform_a | en/prose | — | insufficient_text | null | — | uncalibrated_weights | yes |
 | L05 | llm | llm_transform_b | en/prose | — | leaning_llm | 0.889 | — | uncalibrated_weights | yes |
@@ -578,52 +578,205 @@ A false fire is the worst output this tool has; a miss is only lost recall. They
 - missed (should fire, did not): **0**
 - **false fires (should NOT fire, did): 0**
 
-Three probe labels below quote an assistant-frame phrase that contains the word this report's
-honesty guard watches for. They are quotations of the INPUT, not statistics: this file fits
-nothing and has no fitting side. Those three lines carry a recorded, per-line exemption from the
-guard that appends this section to `REPORT.md`; no other line does.
+The probe TEXT is deliberately not printed here (HEAD-RULINGS R40): look a row up by its id in
+`eval/fixtures/verify-round-1.jsonl`. Some probes quote an assistant frame containing the word
+this report's honesty guard watches for, and an exemption list for them failed the moment a new
+fixture added a fourth. Nothing quoted, no exemption, guard absolute.
 
-| probe | lang | expect | fired | ok | what it is |
+| id | lang | expect | observed | result | rules fired |
 |---|---|---|---|---|---|
-| P01 | en | FIRE | FIRE | ok | as a large language model |
-| P02 | en | FIRE | FIRE | ok | I'm just an AI |
-| P03 | en | FIRE | FIRE | ok | I am merely an AI assistant |
-| P04 | en | FIRE | FIRE | ok | my knowledge cut-off (hyphen) |
-| P05 | en | FIRE | FIRE | ok | my knowledge cutoff |
-| P06 | en | FIRE | FIRE | ok | as of my last update |
-| P07 | en | FIRE | FIRE | ok | as of my latest training |
-| P08 | en | FIRE | FIRE | ok | as of my last training data |
-| P09 | en | FIRE | FIRE | ok | real time (no hyphen) |
-| P10 | en | FIRE | FIRE | ok | real-time (hyphen) |
-| P11 | en | FIRE | FIRE | ok | no access to the internet |
-| P12 | en | FIRE | FIRE | ok | unable to browse the web |
-| P13 | en | FIRE | FIRE | ok | here is a revised draft |
-| P14 | en | FIRE | FIRE | ok | here's your revised version |
-| P15 | en | FIRE | FIRE | ok | I have rewritten it below |
-| P16 | en | FIRE | FIRE | ok | I was trained on data |
-| P17 | tr | FIRE | FIRE | ok | bir yapay zeka modeli olarak |
-| P18 | tr | FIRE | FIRE | ok | bir yapay zekâ modeli olarak (circumflex) |
-| P19 | tr | FIRE | FIRE | ok | yapay zeka asistanıyım |
-| P20 | tr | FIRE | FIRE | ok | yapay zekâ asistanıyım (circumflex) |
-| P21 | tr | FIRE | FIRE | ok | bilgi kesim tarihim |
-| P22 | tr | FIRE | FIRE | ok | bilgi kesim tarihi |
-| P23 | tr | FIRE | FIRE | ok | eğitim verilerim |
-| P24 | tr | FIRE | FIRE | ok | bir dil modeli olarak |
-| P25 | tr | FIRE | FIRE | ok | gerçek zamanlı erişimim yok |
-| P26 | en | FIRE | FIRE | ok | split across a line break |
-| P27 | en | FIRE | FIRE | ok | double spaces |
-| P28 | en | FIRE | FIRE | ok | NBSP between words |
-| P29 | en | FIRE | FIRE | ok | language model across a line break |
-| P30 | tr | FIRE | FIRE | ok | yapay zeka split across a line break |
-| N01 | en | no fire | no fire | ok | quoted directly, cue adjacent |
-| N02 | en | no fire | no fire | ok | cue one sentence away (refuter D1 / H23 shape) |
-| N03 | en | no fire | no fire | ok | cue word "assistant" |
-| N04 | en | no fire | no fire | ok | cue word "AI" |
-| N05 | en | no fire | no fire | ok | cue word "LLM" |
-| N06 | en | no fire | no fire | ok | bare common-noun "language model" (refuter D3 / H24 shape) |
-| N07 | en | no fire | no fire | ok | human self-identification frame is NOT present |
-| N08 | en | no fire | no fire | ok | curly-quoted leak inside human prose |
-| N09 | tr | no fire | no fire | ok | human discussing yapay zeka |
-| N10 | tr | no fire | no fire | ok | human discussing a bot with the circumflex spelling |
+| P01 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P02 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P03 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P04 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P05 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P06 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P07 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P08 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P09 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P10 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P11 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P12 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P13 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P14 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P15 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P16 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P17 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P18 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P19 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P20 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P21 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P22 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P23 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P24 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P25 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| P26 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P27 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P28 | en | FIRE | FIRE | ok | assistant_frame_leak, invisible_chars |
+| P29 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| P30 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| N01 | en | no fire | no fire | ok | — |
+| N02 | en | no fire | no fire | ok | — |
+| N03 | en | no fire | no fire | ok | — |
+| N04 | en | no fire | no fire | ok | — |
+| N05 | en | no fire | no fire | ok | — |
+| N06 | en | no fire | no fire | ok | — |
+| N07 | en | no fire | no fire | ok | — |
+| N08 | en | no fire | no fire | ok | — |
+| N09 | tr | no fire | no fire | ok | — |
+| N10 | tr | no fire | no fire | ok | — |
 
-_CAL fixture gate wall-clock: 17.9s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._
+## CAL-F. Verify round 2 — `verify-round-2.jsonl` (HEAD-RULINGS R38)
+
+76 single-document rows, 4 aggregate senders and 37 leak probes, all authored
+in-session against the FIXED core (no corpus row). Beyond CAL-E's checks this section asserts
+`expectRules` (a named rule must fire), `expectWarning` / `expectNotWarning`, `expectLang`, and
+that an aggregate report's notes are de-duplicated.
+
+| gate | required | measured | verdict |
+|---|---|---|---|
+| `likely_llm` on human rows that call it critical | 0 of 37 | 0 | PASS |
+| `expectRule` probes correct | 37 of 37 | 37 | PASS |
+| `expectLang` rows correct | 11 of 11 | 11 | PASS |
+
+**VERIFY-ROUND-2 GATE PASSES.**
+
+| set | n | insufficient_text | uncertain | leaning_human | leaning_llm | likely_human | likely_llm |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| human | 37 | 14 | 16 | 2 | 5 | 0 | 0 |
+| llm | 43 | 8 | 8 | 3 | 10 | 0 | 14 |
+
+| id | truth | class | lang/ctx | mk | verdict | score | rules | warnings | in `allowed` | expectations |
+|---|---|---|---|---|---|---|---|---|---|---|
+| A01 | human | human-guest-list | en/chat | — | uncertain | 0.587 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A02 | human | human-guest-list | tr/chat | — | uncertain | 0.587 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A03 | human | human-esl-essay | en/prose | — | leaning_llm | 0.935 | — | uncalibrated_weights | yes | ok |
+| A04 | human | human-tr-petition | tr/prose | — | leaning_llm | 0.761 | — | uncalibrated_weights | yes | ok |
+| A05 | human | human-hotel-staff-email | en/prose | — | uncertain | 0.200 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A06 | human | human-friend-list | en/chat | — | uncertain | 0.273 | — | uncalibrated_weights | yes | ok |
+| A07 | human | human-wedding-list | tr/chat | — | uncertain | 0.481 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A08 | human | human-native-review | en/prose | — | leaning_llm | 0.826 | — | uncalibrated_weights | yes | ok |
+| A09 | human | human-tr-marketing | tr/prose | — | insufficient_text | null | — | marketing_register, uncalibrated_weights | yes | ok |
+| A10 | human | human-travel-writer | en/prose | — | leaning_llm | 0.743 | — | uncalibrated_weights | yes | ok |
+| A11 | human | human-esl-essay | en/prose | — | leaning_llm | 0.901 | — | uncalibrated_weights | yes | ok |
+| A12 | human | human-agent-list | tr/chat | — | uncertain | 0.533 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A13 | human | human-hotel-staff-chat | en/chat | — | uncertain | 0.722 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A14 | human | human-guest-list | tr/chat | — | uncertain | 0.722 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A15 | human | human-hotel-staff-chat | tr/chat | — | uncertain | 0.722 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A16 | human | human-friend-list | en/chat | — | uncertain | 0.675 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A17 | human | human-forum-answer | en/prose | — | uncertain | 0.572 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A18 | human | human-corp-rfq | tr/prose | — | uncertain | 0.200 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| A05cs | human | human-hotel-staff-email | auto/auto | — | insufficient_text | null | — | domain_suppressed, uncalibrated_weights | yes | ok |
+| A13cs | human | human-hotel-staff-chat | auto/auto | — | insufficient_text | null | — | domain_suppressed, uncalibrated_weights | yes | ok |
+| A15cs | human | human-hotel-staff-chat | auto/auto | — | insufficient_text | null | — | domain_suppressed, uncalibrated_weights | yes | ok |
+| B01 | llm | llm-chat-clean | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B01e | llm | llm-chat-edited | en/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| B01x1 | llm | llm-chat-strip-bold | en/chat | — | uncertain | 0.800 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| B01x2 | llm | llm-chat-lc-labels | en/chat | — | uncertain | 0.730 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| B01x3 | llm | llm-chat-lc+delex | en/chat | — | uncertain | 0.637 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| B02 | llm | llm-chat-clean | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B02e | llm | llm-chat-edited | en/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| B03 | llm | llm-chat-clean | tr/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B03e | llm | llm-chat-edited | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes | ok |
+| B03x1 | llm | llm-chat-strip-bold | tr/chat | — | uncertain | 0.800 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| B03x2 | llm | llm-chat-lc-labels | tr/chat | — | uncertain | 0.683 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| B03x3 | llm | llm-chat-lc+delex | tr/chat | — | uncertain | 0.461 | — | register_only_evidence, uncalibrated_weights | yes | ok |
+| B04 | llm | llm-chat-clean | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B04e | llm | llm-chat-edited | en/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| B05 | llm | llm-chat-clean | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B05e | llm | llm-chat-edited | en/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| B06 | llm | llm-chat-clean | tr/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B06e | llm | llm-chat-edited | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes | ok |
+| B07 | llm | llm-chat-clean | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B07e | llm | llm-chat-edited | en/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| B08 | llm | llm-chat-clean | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B08e | llm | llm-chat-edited | en/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| B09 | llm | llm-chat-clean | tr/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B09e | llm | llm-chat-edited | tr/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes | ok |
+| B10 | llm | llm-chat-clean | en/chat | — | leaning_llm | 0.800 | markdown_in_chat | uncalibrated_weights | yes | ok |
+| B10e | llm | llm-chat-edited | en/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| D01 | llm | llm+marker | en/chat | yes | likely_llm | 0.800 | known_machine_marker | pasted_machine_text, uncalibrated_weights | yes | ok |
+| D02 | llm | llm+marker+fake-human | en/chat | yes | uncertain | 0.200 | known_machine_marker | pasted_machine_text, hybrid_suspect, uncalibrated_weights | yes | ok |
+| D03 | human | human-forwarding-marker | tr/chat | yes | uncertain | 0.350 | known_machine_marker | pasted_machine_text, hybrid_suspect, uncalibrated_weights | yes | ok |
+| D04 | llm | llm+marker | en/chat | yes | likely_llm | 0.475 | known_machine_marker | pasted_machine_text, uncalibrated_weights | yes | ok |
+| D05 | human | human-forwarding-marker | en/chat | yes | uncertain | 0.350 | known_machine_marker | pasted_machine_text, hybrid_suspect, uncalibrated_weights | yes | ok |
+| E01 | llm | llm-leak-cyrillic | en/prose | — | likely_llm | 0.492 | assistant_frame_leak | homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E02 | llm | llm-leak-greek | en/prose | — | likely_llm | 0.492 | assistant_frame_leak | homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E03 | llm | llm-leak-cyrillic | en/prose | — | likely_llm | 0.492 | assistant_frame_leak | homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E04 | llm | llm-leak-math-bold | en/prose | — | likely_llm | 0.492 | assistant_frame_leak | homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E05 | llm | llm-leak-fullwidth | en/prose | — | likely_llm | 0.492 | assistant_frame_leak | homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E06 | llm | llm-lexicon-cyrillic | en/prose | — | insufficient_text | null | — | homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E07 | llm | llm-leak-tr-cyrillic | tr/prose | — | likely_llm | 0.441 | assistant_frame_leak | homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E08 | llm | marker-fullwidth-digits | en/chat | yes | likely_llm | 0.537 | known_machine_marker | pasted_machine_text, homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E09 | llm | marker-math-bold+clean-ref | en/chat | yes | likely_llm | 0.504 | known_machine_marker | pasted_machine_text, homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E10 | llm | marker-clean-control | en/chat | yes | likely_llm | 0.504 | known_machine_marker | pasted_machine_text, uncalibrated_weights | yes | ok |
+| E11 | llm | marker-math-bold-only | en/chat | yes | likely_llm | 0.537 | known_machine_marker | pasted_machine_text, homoglyph_suspect, uncalibrated_weights | yes | ok |
+| E12 | llm | marker-clean-control | en/chat | yes | likely_llm | 0.537 | known_machine_marker | pasted_machine_text, uncalibrated_weights | yes | ok |
+| E13 | llm | marker-fullwidth-digits | en/chat | yes | likely_llm | 0.418 | known_machine_marker | pasted_machine_text, homoglyph_suspect, uncalibrated_weights | yes | ok |
+| F01 | human | human-en-tr-suffixes | auto/prose | — | insufficient_text | null | — | mixed_language_reduced_features, uncalibrated_weights | yes | ok |
+| F02 | human | human-tr-brandnames | auto/prose | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| F03 | human | human-french | auto/prose | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| F04 | human | human-italian | auto/prose | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| F05 | human | human-spanish | auto/prose | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| F06 | human | human-azerbaijani | auto/prose | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| F07 | human | human-turkmen | auto/prose | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| F08 | human | human-tr-ascii-chat | auto/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| F09 | human | human-french-listy | auto/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| F10 | human | human-tr-ascii-chat | auto/chat | — | leaning_human | 0.350 | — | uncalibrated_weights | yes | ok |
+| F11 | human | human-french-listy | auto/chat | — | insufficient_text | null | — | uncalibrated_weights | yes | ok |
+| G01 | human | aggregate-human | en/chat (agg 6) | — | uncertain | 0.200 | — | uncalibrated_weights | yes | ok |
+| G02 | llm | aggregate-assistant | en/chat (agg 6) | — | uncertain | 0.800 | — | uncalibrated_weights | yes | ok |
+| G03 | human | aggregate-human | tr/chat (agg 6) | yes | uncertain | 0.350 | known_machine_marker | pasted_machine_text, uncalibrated_weights, hybrid_suspect | yes | ok |
+| G04 | human | aggregate-human | tr/chat (agg 6) | — | leaning_human | 0.350 | — | uncalibrated_weights | yes | ok |
+
+### The round-2 leak probes
+
+25 must fire, 12 must not.
+- correct: **37 / 37**
+- missed (should fire, did not): **0**
+- **false fires (should NOT fire, did): 0**
+
+Probe text is not printed (HEAD-RULINGS R40); look a row up by its id in
+`eval/fixtures/verify-round-2.jsonl`.
+
+| id | lang | expect | observed | result | rules fired |
+|---|---|---|---|---|---|
+| C01 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C02 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C03 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C04 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C05 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C06 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C07 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C08 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C09 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C10 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C11 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C12 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C13 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C14 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| C15 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| C16 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| C17 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| C18 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| C19 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| C20 | tr | FIRE | FIRE | ok | assistant_frame_leak |
+| N11 | en | no fire | no fire | ok | — |
+| N12 | en | no fire | no fire | ok | — |
+| N13 | en | no fire | no fire | ok | — |
+| N14 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| N15 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| N16 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| N17 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| N18 | tr | no fire | no fire | ok | — |
+| N19 | en | no fire | no fire | ok | — |
+| N20 | en | no fire | no fire | ok | — |
+| N21 | en | no fire | no fire | ok | — |
+| N22 | en | no fire | no fire | ok | — |
+| N23 | en | no fire | no fire | ok | — |
+| N24 | en | FIRE | FIRE | ok | assistant_frame_leak |
+| N25 | en | no fire | no fire | ok | — |
+| N26 | en | no fire | no fire | ok | — |
+| N27 | en | no fire | no fire | ok | — |
+
+_CAL fixture gate wall-clock: 32.5s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._

@@ -4,7 +4,7 @@
 # zeroes them (SPEC B.8, "domain suppression is not optional").
 # "as an AI (language model)" is NOT here: it stayed a Tier-0 rule (R1).
 # format: phrase | tag | domain | flags | note
-i hope this helps | strong | general | - | a human writing a helpful email says this too
+i hope this helps | strong | cs | - | a human writing a helpful email says this too; R38(g) retag: it carried the refuter A05/A13/A17 support-desk texts to leaning_llm
 i hope that helps | strong | general | - | a human writing a helpful email says this too
 i hope you find this helpful | strong | general | - | polite human email closers overlap
 let me know if you have any questions | weak | cs | - | literally in human support snippet libraries
@@ -14,8 +14,8 @@ feel free to reach out | weak | cs | - | literally in human support snippet libr
 feel free to ask | weak | cs | - | literally in human support snippet libraries
 would you like me to | weak | general | - | a human colleague offering help says this
 i would be happy to | weak | cs | - | in human support snippet libraries
-great question | strong | general | - | human teachers and podcasters say it
-certainly | strong | general | initial | sentence-initial only; mid-sentence "certainly" is ordinary
+great question | strong | cs | - | human teachers and podcasters say it; R38(g) retag: a support-desk opener
+certainly | strong | cs | initial | sentence-initial only; mid-sentence "certainly" is ordinary; R38(g) retag: a support-desk opener (refuter A13)
 absolutely | weak | general | initial | sentence-initial only; common human enthusiasm
 of course | weak | general | initial | sentence-initial only; very common in human speech
 sure | weak | general | initial | sentence-initial only; extremely common in human chat

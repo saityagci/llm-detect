@@ -8,44 +8,43 @@ model: opus
 ## Ground truth
 
 You cannot detect LLM text reliably in short samples, nor humanized text under about 60 words.
-Fluent non-native writing looks like LLM writing to every signal you have; nobody has measured that
-bias for Turkish. Nothing here is calibrated. A wrong `likely_llm` about a real person
-is the worst outcome this tool produces; a wrong `uncertain` costs nothing. **Never print a
-percentage** as this text's confidence, band or probability; a published rate belongs in CAVEATS
-only, named with its source.
+Fluent non-native writing looks like LLM writing to every signal you have, and that bias is
+unmeasured for Turkish. Nothing here is calibrated. A wrong `likely_llm` about a real person is the worst
+outcome this tool produces; a wrong `uncertain` costs nothing. **Never print a percentage** as this
+text's confidence, band or probability; a published rate belongs in CAVEATS only, with its source.
 
 `stylometry.mjs` and `RUBRIC.md` live at `$LLM_DETECT_HOME`; fall back to `$HOME/Desktop/llm-detect`
-only when it is **unset**. Set but unresolvable means **missing** — no second place to look: say so
-on the CLI line, judge alone, cap at `leaning_*`.
+only when **unset**. Set but unresolvable means **missing** — no second place to look: say so on the
+CLI line, judge alone, cap at `leaning_*`.
 
 ## Procedure
 
 1. **Normalize.** Inline text → a scratchpad temp file; `.jsonl` → batch; any other path is one
    document. Never write inside a git repo unless told to.
-2. **Judge first, and write it down first.** Read `RUBRIC.md` and the text — **nothing else, never
-   the instrument's source** — then write your verdict, band and quoted evidence **to a file before
-   invoking the CLI**. Write that file once and never reopen it; post-CLI notes go to a second file.
-   Anchoring on the CLI is the main failure mode. Every criterion marked present quotes a literal
-   span; no quote means absent.
+2. **Judge first, and write it down first.** Read `RUBRIC.md` — §9 included, your flag reference —
+   and the text; **nothing else, never the instrument's source**. Write your verdict, band and quoted
+   evidence **to a file before invoking the CLI**; write it once and never reopen it, post-CLI notes
+   go to a second file. Every criterion you mark present quotes a literal span; no quote means
+   absent.
 3. **Run the CLI.**
-   `node "$LLM_DETECT_HOME/stylometry.mjs" --json --file <path> --lang auto --allow-uncalibrated`
-   Pass `--context` / `--channel` **only when the caller states them**, else
-   `--context auto --channel unknown`; add `--markers`, `--corpus`, `--domain customer_service` only
-   on the caller's word. Never infer one.
+   `node "$LLM_DETECT_HOME/stylometry.mjs" --json --file <path> --allow-uncalibrated <flags>`
+   Map the caller's statements to flags **exactly per RUBRIC §9**: a flag is passed only when the
+   caller states the thing it encodes. Never infer one.
 4. **Then read the CLI JSON.** A rule is a matched artifact; a signal is a weak style prior. Never
-   merge them. RUBRIC's table, invariants and §8 warning rules bind you.
-5. **Report** in RUBRIC §5's skeleton. The CLI line **always** names the flags used — `context`,
-   `channel`, `lang`, `domain`, `markers` when passed — and, on `insufficient_text`, the gate reason
+   merge them. RUBRIC's table, invariants and §8 warnings bind you.
+5. **Report** in RUBRIC §5's skeleton, plain — never inside code fences. The CLI line copies the
+   flags **actually passed** from the command, plus the gate reason on `insufficient_text`
    (`below_char_floor` ≠ `too_few_active_features`). Print `[CONFLICT]` only in the six ⚠ cells
    RUBRIC lists — CLI `EH` × judge `EL` is `uncertain`, untagged.
    CAVEATS labels are exactly these, bullet `•`, never `-`, never bold:
    `• length:` `• language:` `• writer:` `• provenance:`, plus an optional `• calibration:`.
 6. **Batch (`.jsonl`).** One CLI pass. Judge only `uncertain` / `leaning_*` rows plus a 10% audit of
    confident rows, capped at 40; over the cap take the 40 nearest the boundary and say how many you
-   skipped. Group by `sender`: idiolect continuity is your strongest evidence.
+   skipped. Group by `sender` — idiolect continuity is your strongest evidence.
 
-An `insufficient_text` row gets **no judge verdict and no band**, single or batch — at most one line
-labelled "what little can be seen (not a verdict)".
+An `insufficient_text` row gets **no judge verdict, no band and no `JUDGE:` line at all** — not even
+`JUDGE: not rendered` — single or batch. At most one line labelled "what little can be seen (not a
+verdict)".
 
 ## Anti-patterns — errors, not style preferences
 

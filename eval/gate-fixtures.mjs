@@ -32,6 +32,11 @@
  *   E  verify-round-1.jsonl (HEAD-RULINGS R33) — the refuter's 35 human and 8 LLM texts plus the
  *        assistant-frame-leak probe list. Two gate lines: zero `likely_llm` on the human rows that
  *        name it as a critical failure, and every `expectRule` probe correct.
+ *   F  verify-round-2.jsonl (HEAD-RULINGS R38) — round two's 111 authored texts and 4 aggregate
+ *        senders. Everything CAL-E checks, plus `expectRules` (a named rule must fire),
+ *        `expectWarning` / `expectNotWarning`, `expectLang`, and de-duplicated aggregate notes.
+ *        Three gate lines: zero `likely_llm` on the human rows that call it critical, every
+ *        `expectRule` row correct, every `expectLang` row correct.
  *
  * Output goes to a DIRECTORY: --out <dir> (default eval/out), holding gate-fixtures.json and
  * gate-fixtures.md. --json <path> / --md <path> override the individual files. eval/out is the
@@ -197,27 +202,13 @@ function main() {
   const R = { generatedAt: new Date().toISOString(), detector: path.relative(ROOT, opts.detector), tau: opts.tau, tauSource };
   const L = [];                                    // markdown lines
   const emit = (s = '') => L.push(s);
-  // Lines that QUOTE a NAMED assistant-frame probe phrase. The honesty guard below is lexical, and
-  // three of the probe phrases contain the fitting word as part of the string being tested. They
-  // are quotations of the input, not statistics, and this file computes nothing on a fitting side —
-  // it has no splits, no model and no sides.
-  //
-  // The exemption is deliberately narrow and closed. A probe line qualifies ONLY if removing the
-  // three named phrases leaves no occurrence of the word: a fourth probe label carrying the word in
-  // any other wording is refused like anything else. `eval/selftest-eval.mjs` check 7 asserts both
-  // halves of that — the three pass, a fourth is refused.
-  const QUOTED_FIT_WORD_PHRASES = [
-    'as of my latest ' + FIT_WORD_SRC + 'ing',
-    'as of my last ' + FIT_WORD_SRC + 'ing data',
-    'I was ' + FIT_WORD_SRC + 'ed on data',
-  ];
-  const quotedProbeLines = new Set();
-  const emitProbe = (s = '') => {
-    let stripped = String(s);
-    for (const phrase of QUOTED_FIT_WORD_PHRASES) stripped = stripped.split(phrase).join(' ');
-    if (!new RegExp(FIT_WORD_SRC, 'i').test(stripped)) quotedProbeLines.add(L.length);
-    L.push(s);
-  };
+  // HEAD-RULINGS R40: there is no exemption from the honesty guard. There used to be one, for the
+  // three probe labels that quote an assistant-frame phrase containing the fitting word; a fourth
+  // label (verify-round-2's C10) then failed the release append, which is what an exemption list
+  // always does eventually. The probe tables no longer print the probe TEXT at all — id, language,
+  // expectation, observation, result and the rule names that fired, and nothing else. The text
+  // lives in the fixture and a reader looks it up by id. With nothing quoted, the guard is
+  // absolute.
 
   // ---------------- A. must-not-fire ------------------------------------
   const mnfFile = path.join(opts.fixtures, 'must-not-fire.jsonl');
@@ -598,7 +589,7 @@ function main() {
       const fired = rules.includes('assistant_frame_leak');
       return {
         id: row.id, lang: row.lang, probe: row.probe, expectRule: row.expectRule === true,
-        fired, correct: fired === (row.expectRule === true), verdict: rep.verdict,
+        fired, rules, correct: fired === (row.expectRule === true), verdict: rep.verdict,
         notes: (rep.notes || []).filter((n) => /quotation_or_discussion|assistant_frame/.test(String(n))),
         note: row.note || '',
       };
@@ -671,20 +662,196 @@ function main() {
     emit(`- missed (should fire, did not): **${missed.length}**${missed.length ? ` — ${missed.map((r) => r.id).join(', ')}` : ''}`);
     emit(`- **false fires (should NOT fire, did): ${falseFires.length}**${falseFires.length ? ` — ${falseFires.map((r) => r.id).join(', ')}` : ''}`);
     emit('');
-    emit('Three probe labels below quote an assistant-frame phrase that contains the word this report\'s');
-    emit('honesty guard watches for. They are quotations of the INPUT, not statistics: this file fits');
-    emit('nothing and has no fitting side. Those three lines carry a recorded, per-line exemption from the');
-    emit('guard that appends this section to `REPORT.md`; no other line does.');
+    emit('The probe TEXT is deliberately not printed here (HEAD-RULINGS R40): look a row up by its id in');
+    emit('`eval/fixtures/verify-round-1.jsonl`. Some probes quote an assistant frame containing the word');
+    emit('this report\'s honesty guard watches for, and an exemption list for them failed the moment a new');
+    emit('fixture added a fourth. Nothing quoted, no exemption, guard absolute.');
     emit('');
-    emit('| probe | lang | expect | fired | ok | what it is |');
+    emit('| id | lang | expect | observed | result | rules fired |');
     emit('|---|---|---|---|---|---|');
-    for (const r of probeRes) emitProbe(`| ${r.id} | ${r.lang} | ${r.expectRule ? 'FIRE' : 'no fire'} | ${r.fired ? 'FIRE' : 'no fire'} | ${r.correct ? 'ok' : '**WRONG**'} | ${r.probe} |`);
+    for (const r of probeRes) emit(`| ${r.id} | ${r.lang} | ${r.expectRule ? 'FIRE' : 'no fire'} | ${r.fired ? 'FIRE' : 'no fire'} | ${r.correct ? 'ok' : (r.expectRule ? '**MISS**' : '**FALSE FIRE**')} | ${r.rules.join(', ') || '—'} |`);
     emit('');
   } else {
     R.verifyRound1 = { error: `no fixture at ${vrFile}` };
     emit('## CAL-E. Verify round 1 — `verify-round-1.jsonl` (HEAD-RULINGS R33)');
     emit('');
     emit(`**NOT RUN**: no fixture at \`<repo>/${path.relative(ROOT, vrFile)}\`.`);
+    emit('');
+  }
+
+  // ---------------- F. verify-round-2 (HEAD-RULINGS R38) ----------------
+  // Round two attacked the FIXED core: the leak rule's reported-speech guard, the human checklist
+  // road under R24, the support-desk retag, homoglyph blocks the fold missed, out-of-scope Latin
+  // languages routed to the Turkish cell, and the aggregate report inheriting the discarded base
+  // pass's warnings. The fixture asserts the rulings, not today's output.
+  let verify2Pass = true;
+  const vr2File = path.join(opts.fixtures, 'verify-round-2.jsonl');
+  if (existsSync(vr2File)) {
+    const vr2 = readJsonl(vr2File);
+    const texts2 = vr2.filter((r) => r.kind === 'text');
+    const probes2 = vr2.filter((r) => r.kind === 'leakProbe');
+    const aggs2 = vr2.filter((r) => r.kind === 'aggregate');
+    const tmpMarkers2 = path.join(process.env.TMPDIR || '/tmp', `gate-markers2-${process.pid}-${Date.now()}.json`);
+    const tmpAgg = path.join(process.env.TMPDIR || '/tmp', `gate-agg-${process.pid}-${Date.now()}.jsonl`);
+
+    const markersFor = (row) => {
+      if (!row.markers || !Array.isArray(row.requiresMarkers) || !row.requiresMarkers.length) return null;
+      writeFileSync(tmpMarkers2, JSON.stringify(row.requiresMarkers) + '\n');
+      return tmpMarkers2;
+    };
+    /** Shared post-processing: what the row asked for, against what the report actually said. */
+    const assess = (row, rep) => {
+      const warnings = rep.warnings || [];
+      const notes = rep.notes || [];
+      const rules = (rep.rules || []).map((x) => x.rule || x.name || x);
+      const lang = rep.language?.primary ?? null;
+      const problems = [];
+      for (const w of (row.expectWarning || [])) if (!warnings.includes(w)) problems.push(`missing warning \`${w}\``);
+      for (const w of (row.expectNotWarning || [])) if (warnings.includes(w)) problems.push(`warning \`${w}\` must NOT be present`);
+      for (const rn of (row.expectRules || [])) if (!rules.includes(rn)) problems.push(`rule \`${rn}\` did not fire`);
+      if (row.expectLang && !row.expectLang.includes(lang)) problems.push(`language is \`${lang}\`, expected ${row.expectLang.map((x) => '`' + x + '`').join(' | ')}`);
+      if (row.expectUniqueNotes && notes.length !== new Set(notes).size) {
+        problems.push(`notes are not de-duplicated (${notes.length} notes, ${new Set(notes).size} distinct)`);
+      }
+      return {
+        id: row.id, kind: row.kind, truth: row.truth, class: row.class, lang: row.lang,
+        context: row.context, markers: Boolean(row.markers), expectedEvasion: row.expected_evasion === true,
+        verdict: rep.verdict, score: rep.score ?? null, gateReason: rep.gates?.reason || null,
+        detectedLang: lang, rules, warnings,
+        allowed: row.allowed || [], criticalFailure: row.criticalFailure || [],
+        inAllowed: (row.allowed || []).includes(rep.verdict),
+        critical: (row.criticalFailure || []).includes(rep.verdict),
+        expectations: problems, expectationsOk: problems.length === 0,
+        note: row.note || '', cliError: rep._cliError || null,
+      };
+    };
+
+    const textRes2 = texts2.map((row) => assess(row, runOne(opts.detector, row.text, {
+      context: row.context, channel: row.channel, lang: row.lang, genre: row.genre,
+      domain: row.domain, markers: markersFor(row),
+    })));
+
+    // Aggregate rows go through --aggregate, which is a different code path from --text and the
+    // only one R29 and R38(e) are about.
+    const aggRes2 = aggs2.map((row) => {
+      writeFileSync(tmpAgg, row.messages.map((m) => JSON.stringify(m)).join('\n') + '\n');
+      const args = [opts.detector, '--aggregate', tmpAgg, '--allow-uncalibrated'];
+      if (row.context) args.push('--context', row.context);
+      if (row.channel) args.push('--channel', row.channel);
+      if (row.lang) args.push('--lang', row.lang);
+      const mk = markersFor(row);
+      if (mk) args.push('--markers', mk);
+      let rep;
+      try {
+        const out = execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+        rep = JSON.parse(out.trim().split('\n').filter(Boolean).pop());
+      } catch (e) {
+        rep = { verdict: 'ERROR', score: null, _cliError: `exit ${e.status}: ${String(e.stderr || e.message).slice(0, 300)}` };
+      }
+      return { ...assess(row, rep), turns: row.messages.length };
+    });
+    for (const f of [tmpMarkers2, tmpAgg]) if (existsSync(f)) rmSync(f, { force: true });
+
+    const probeRes2 = probes2.map((row) => {
+      const rep = runOne(opts.detector, row.text, {
+        context: row.context, channel: row.channel, lang: row.lang, genre: row.genre, domain: row.domain,
+      });
+      const rules = (rep.rules || []).map((x) => x.rule || x.name || x);
+      const fired = rules.includes('assistant_frame_leak');
+      return {
+        id: row.id, lang: row.lang, klass: row.class, probe: row.probe, expectRule: row.expectRule === true,
+        fired, rules, correct: fired === (row.expectRule === true), verdict: rep.verdict, note: row.note || '',
+      };
+    });
+
+    const all2 = [...textRes2, ...aggRes2];
+    const humanRows2 = all2.filter((r) => r.truth === 'human');
+    const llmRows2 = all2.filter((r) => r.truth === 'llm');
+    const critLL2 = humanRows2.filter((r) => r.criticalFailure.includes('likely_llm'));
+    const gateLL2 = critLL2.filter((r) => r.verdict === 'likely_llm');
+    const gateLH2 = llmRows2.filter((r) => r.verdict === 'likely_human');
+    const probeWrong2 = probeRes2.filter((r) => !r.correct);
+    const missed2 = probeWrong2.filter((r) => r.expectRule);
+    const falseFires2 = probeWrong2.filter((r) => !r.expectRule);
+    const langRows2 = all2.filter((r) => (texts2.concat(aggs2).find((x) => x.id === r.id) || {}).expectLang);
+    const langWrong2 = langRows2.filter((r) => r.expectations.some((p) => p.startsWith('language is')));
+    const expWrong2 = all2.filter((r) => !r.expectationsOk);
+    const arb2 = all2.filter((r) => !r.inAllowed && !r.critical);
+
+    const g1 = gateLL2.length === 0;
+    const g2 = probeWrong2.length === 0;
+    const g3 = langWrong2.length === 0;
+    verify2Pass = g1 && g2 && g3;
+
+    R.verifyRound2 = {
+      textRows: textRes2.length, aggregateRows: aggRes2.length, probes: probeRes2.length,
+      humanRows: humanRows2.length, llmRows: llmRows2.length,
+      gate_zero_likely_llm_on_human: { required: `0 of ${critLL2.length}`, measured: gateLL2.length, pass: g1, offenders: gateLL2.map((r) => r.id) },
+      gate_every_probe_correct: { required: `${probeRes2.length} of ${probeRes2.length}`, measured: probeRes2.length - probeWrong2.length, pass: g2, missed: missed2.map((r) => r.id), falseFires: falseFires2.map((r) => r.id) },
+      gate_every_language_correct: { required: `${langRows2.length} of ${langRows2.length}`, measured: langRows2.length - langWrong2.length, pass: g3, wrong: langWrong2.map((r) => ({ id: r.id, got: r.detectedLang })) },
+      likely_human_on_llm: gateLH2.map((r) => r.id),
+      expectationFailures: expWrong2.map((r) => ({ id: r.id, problems: r.expectations })),
+      arbitration: arb2.map((r) => ({ id: r.id, verdict: r.verdict, allowed: r.allowed })),
+      tallyHuman: tally(humanRows2), tallyLlm: tally(llmRows2),
+      pass: verify2Pass, detail: all2, probeDetail: probeRes2,
+    };
+
+    emit('## CAL-F. Verify round 2 — `verify-round-2.jsonl` (HEAD-RULINGS R38)');
+    emit('');
+    emit(`${texts2.length} single-document rows, ${aggs2.length} aggregate senders and ${probes2.length} leak probes, all authored`);
+    emit('in-session against the FIXED core (no corpus row). Beyond CAL-E\'s checks this section asserts');
+    emit('`expectRules` (a named rule must fire), `expectWarning` / `expectNotWarning`, `expectLang`, and');
+    emit('that an aggregate report\'s notes are de-duplicated.');
+    emit('');
+    emit('| gate | required | measured | verdict |');
+    emit('|---|---|---|---|');
+    emit(`| \`likely_llm\` on human rows that call it critical | 0 of ${critLL2.length} | ${gateLL2.length}${gateLL2.length ? ` (${gateLL2.map((r) => r.id).join(', ')})` : ''} | ${g1 ? 'PASS' : 'FAIL'} |`);
+    emit(`| \`expectRule\` probes correct | ${probeRes2.length} of ${probeRes2.length} | ${probeRes2.length - probeWrong2.length} | ${g2 ? 'PASS' : 'FAIL'} |`);
+    emit(`| \`expectLang\` rows correct | ${langRows2.length} of ${langRows2.length} | ${langRows2.length - langWrong2.length} | ${g3 ? 'PASS' : 'FAIL'} |`);
+    emit('');
+    emit(`**VERIFY-ROUND-2 GATE ${verify2Pass ? 'PASSES' : 'FAILS'}.**`);
+    emit('');
+    emit(`| set | n | ${VERDICTS.join(' | ')} |`);
+    emit(`|---|---:|${VERDICTS.map(() => '---:').join('|')}|`);
+    emit(`| human | ${humanRows2.length} | ${tallyRow(R.verifyRound2.tallyHuman)} |`);
+    emit(`| llm | ${llmRows2.length} | ${tallyRow(R.verifyRound2.tallyLlm)} |`);
+    emit('');
+    emit('| id | truth | class | lang/ctx | mk | verdict | score | rules | warnings | in `allowed` | expectations |');
+    emit('|---|---|---|---|---|---|---|---|---|---|---|');
+    for (const r of all2) {
+      emit(`| ${r.id} | ${r.truth} | ${String(r.class)} | ${r.lang}/${r.context}${r.kind === 'aggregate' ? ` (agg ${r.turns})` : ''} | ${r.markers ? 'yes' : '—'} | ${r.verdict} | ${num(r.score)} | ${r.rules.join(', ') || '—'} | ${r.warnings.join(', ') || '—'} | ${r.inAllowed ? 'yes' : (r.critical ? '**CRITICAL**' : 'no — arbitration')} | ${r.expectationsOk ? 'ok' : '**' + r.expectations.join('; ') + '**'} |`);
+    }
+    emit('');
+    if (arb2.length) {
+      emit('Arbitration items (outside `allowed`, not a `criticalFailure` value — the head arbitrates, no lane edits a fixture to match the core):');
+      for (const r of arb2) emit(`- **${r.id}**: core says \`${r.verdict}\`, fixture allows ${r.allowed.map((x) => '`' + x + '`').join(' | ')}. ${r.note}`);
+      emit('');
+    }
+    if (expWrong2.length) {
+      emit(`${expWrong2.length} row(s) produced a verdict inside \`allowed\` but did not meet an explicit expectation:`);
+      for (const r of expWrong2) emit(`- **${r.id}**: ${r.expectations.join('; ')}. ${r.note}`);
+      emit('');
+    }
+    if (gateLH2.length) { emit(`**${gateLH2.length} LLM row(s) reached \`likely_human\`: ${gateLH2.map((r) => r.id).join(', ')}.**`); emit(''); }
+    emit('### The round-2 leak probes');
+    emit('');
+    emit(`${probes2.filter((p) => p.expectRule).length} must fire, ${probes2.filter((p) => !p.expectRule).length} must not.`);
+    emit(`- correct: **${probeRes2.length - probeWrong2.length} / ${probeRes2.length}**`);
+    emit(`- missed (should fire, did not): **${missed2.length}**${missed2.length ? ` — ${missed2.map((r) => r.id).join(', ')}` : ''}`);
+    emit(`- **false fires (should NOT fire, did): ${falseFires2.length}**${falseFires2.length ? ` — ${falseFires2.map((r) => r.id).join(', ')}` : ''}`);
+    emit('');
+    emit('Probe text is not printed (HEAD-RULINGS R40); look a row up by its id in');
+    emit('`eval/fixtures/verify-round-2.jsonl`.');
+    emit('');
+    emit('| id | lang | expect | observed | result | rules fired |');
+    emit('|---|---|---|---|---|---|');
+    for (const r of probeRes2) emit(`| ${r.id} | ${r.lang} | ${r.expectRule ? 'FIRE' : 'no fire'} | ${r.fired ? 'FIRE' : 'no fire'} | ${r.correct ? 'ok' : (r.expectRule ? '**MISS**' : '**FALSE FIRE**')} | ${r.rules.join(', ') || '—'} |`);
+    emit('');
+  } else {
+    R.verifyRound2 = { error: `no fixture at ${vr2File}` };
+    emit('## CAL-F. Verify round 2 — `verify-round-2.jsonl` (HEAD-RULINGS R38)');
+    emit('');
+    emit(`**NOT RUN**: no fixture at \`<repo>/${path.relative(ROOT, vr2File)}\`.`);
     emit('');
   }
 
@@ -701,7 +868,7 @@ function main() {
     const FIT_RE = new RegExp(FIT_WORD_SRC, 'i');
     const EXEMPT = /reference only/i;
     const offending = L.map((line, i) => [i, String(line)])
-      .filter(([i, line]) => FIT_RE.test(line) && !EXEMPT.test(line) && !quotedProbeLines.has(i));
+      .filter(([, line]) => FIT_RE.test(line) && !EXEMPT.test(line));
     if (offending.length) {
       process.stderr.write('honesty guard: refusing to append a section naming a fitting-side number without the '
         + '"(reference only)" marker.\n');
@@ -714,12 +881,13 @@ function main() {
 
   process.stderr.write(`gate-fixtures: must-not-fire ${gatePass ? 'PASS' : 'FAIL'} · ` +
     `verify-round-1 ${R.verifyRound1?.error ? 'not run' : (verifyPass ? 'PASS' : 'FAIL')} · ` +
+    `verify-round-2 ${R.verifyRound2?.error ? 'not run' : (verify2Pass ? 'PASS' : 'FAIL')} · ` +
     `llm fixtures ${R.llmFixtures.scored}/${R.llmFixtures.rows} scored · ` +
     `cs suppression list ${R.csSnippets.domainSuppressionList.length} · ` +
     `real rows FP ${R.realRows?.llmLeaningOrWorse ?? 'n/a'}/${R.realRows?.sampled ?? 'n/a'} · ` +
     `${R.wallClockSec}s\n`);
   process.stderr.write(`gate-fixtures: wrote ${path.relative(ROOT, jsonPath)} and ${path.relative(ROOT, mdPath)}\n`);
-  if (!gatePass || !verifyPass) process.exit(3);
+  if (!gatePass || !verifyPass || !verify2Pass) process.exit(3);
 }
 
 main();

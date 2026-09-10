@@ -143,10 +143,11 @@ directory not ignored), 3 refused for want of `--i-have-approval`.
 | file | rows | what it asserts |
 |---|---:|---|
 | `must-not-fire.jsonl` | 24 | D1 §7. 12 human-that-looks-LLM rows that must never come out `likely_llm`, 12 LLM-that-looks-human rows that must never come out `likely_human`, with at least 6 of those 12 abstaining. Each row carries an `allowed` verdict set and a `criticalFailure` set. |
-| `judge-tests.jsonl` | 14 | D2 §5. Each row carries `expectedFinal` and `criticalFailure` for the agent's final verdict, plus the trap it sets. |
+| `judge-tests.jsonl` | 14 | D2 §5. Each row carries `expectedFinal` and `criticalFailure` for the agent's final verdict, plus the trap it sets. **No script reads this file** — it is driven by hand through the installed agent. `T14` carries `requiresEvalData: true`: it needs the gitignored `eval/data/human-chat.jsonl`, and any script that ever iterates this fixture MUST SKIP such rows and print a line saying it did (HEAD-RULINGS R39(d)). |
 | `llm-en.jsonl` / `llm-tr.jsonl` | 25 each | SPEC §F.3. 15 clean + 10 humanized per language, in the genre mix §F.3 specifies, with `gen`, `prompt`, `postprocess` and `transform` per row. |
 | `cs-snippets.jsonl` | 30 | HEAD-RULINGS R7. Human support-desk phrasing, 15 en / 15 tr, used as negative control (e). |
 | `verify-round-1.jsonl` | 83 | HEAD-RULINGS R33. The verify round's 43 authored texts (35 human, 8 LLM) and 40 assistant-frame-leak probes. Schema below. |
+| `verify-round-2.jsonl` | 117 | HEAD-RULINGS R38. Round two against the FIXED core: 76 single-document rows, 37 leak probes and 4 aggregate senders. Same schema as round one plus `expectRules`, `expectWarning` / `expectNotWarning`, `expectLang`, `expectUniqueNotes`, and a `kind: "aggregate"` row carrying a `messages[]` array. |
 
 ### `verify-round-1.jsonl` — schema
 
@@ -187,6 +188,25 @@ separately** — a miss is lost recall, a false fire is an accusation.
 
 `gate-fixtures.mjs` section CAL-E runs the file and adds two gate lines (R33): zero `likely_llm` on
 the human rows that name it critical, and every `expectRule` row correct. Either failing exits 3.
+
+### `verify-round-2.jsonl` — what round two adds
+
+Same two row kinds plus a third, and four new expectation fields. CAL-F runs it and adds a **third**
+gate line: every `expectLang` row correct.
+
+| field | meaning |
+|---|---|
+| `expectRules` | a list of rule names (`assistant_frame_leak`, `known_machine_marker`) that must all appear in `rules[]`. Round one only ever asked about the leak rule; the homoglyph rows ask about the marker rule too. |
+| `expectWarning` / `expectNotWarning` | warnings that must, or must not, be present. `expectNotWarning` is how the aggregate rows assert R38(e): the aggregate must **not** inherit `register_only_evidence` from the per-document base pass it threw away. |
+| `expectLang` | the values `language.primary` may take. R38(h)'s rows live here: French, Italian, Spanish, Azerbaijani and Turkmen must not come back `tr`. |
+| `expectUniqueNotes` | the report's `notes[]` must contain no duplicate — R38(e) again, where an aggregate printed the R28 note twice because both passes emitted it and only `warnings` was de-duplicated. |
+| `kind: "aggregate"` | the row carries `messages[]` (`{id, sender, text}`) instead of `text`; the gate writes them to a temporary file and drives `--aggregate`, which is a different code path from `--text` and the only one R29 and R38(e) are about. |
+
+Rows the head has accepted as costs rather than defects carry it in `note` and in their expectations:
+`N11`/`N12`/`N18` are `expectRule: false` because an assistant that also mentions "the bot" elsewhere
+stays suppressed; `B**x1`/`x2`/`x3` carry `expected_evasion: true` for the R24 chat-recall ladder;
+`D02` records the spelling-driven R28 demotion. **A cost written into a fixture as an expectation is
+still a cost — it is recorded so it cannot later be mistaken for a bug, not asserted away.**
 
 ### Arabic rows, and what replaced them
 
@@ -288,8 +308,8 @@ forge than the LLM side. Recorded in README §"Ways this detector will be confid
 **E7 — the G4 dead band: prose between 50 and about 120 tokens abstains.**
 34 of the 50 authored LLM fixtures (90–110-token prose) returned `insufficient_text` with G1–G3
 passed and `too_few_active_features`, because the rhythm features switch on at 120–250 tokens. The
-measured `en:prose` 50–149 bucket says the instrument is barely useful there anyway (AUC 0.747, hard
-mode 0.648, TPR 3.7% at 1.1% FPR). **Ruling: HEAD-RULINGS R25** — G4 stays where it is; the band is
+measured `en:prose` 50–149 bucket says the instrument is barely useful there anyway (AUC 0.739, hard
+mode 0.623, TPR 3.7% at 1.1% FPR). **Ruling: HEAD-RULINGS R25** — G4 stays where it is; the band is
 documented as abstaining, and the ten prose humanization pairs (five per language) were rewritten at 160–260 tokens on
 both sides so the §F.3 collapse assertion became measurable. Measured effect: evaluable prose pairs
 went from **1 of 10 to 7 of 10** (total evaluable pairs 3 → 9). Read the `**R25 check**` line in
@@ -476,8 +496,13 @@ three things in the harness itself:
   the split" and then printed the numbers anyway. It rejects it now, and reports the cross-label
   count beside it. The real corpus is 0 and 0, so no published number moves. Repro: check 3 / 4.
 - **The CAL append exemption was too wide.** It was registered for every line of the leak-probe
-  table; it is now a closed list of the three phrases that actually carry the watched word, and a
-  fourth probe label wording is refused. Repro: check 7, which asserts both halves.
+  table; it was narrowed to a closed list of three phrases, and then **deleted entirely under
+  HEAD-RULINGS R40** when a fourth fixture label broke the release append. The probe tables print
+  id, language, expectation, observation, result and rule names, never the probe text — the text
+  lives in the fixture and a reader looks it up by id — so there is nothing left to exempt and the
+  guard is absolute. Repro: check 7, which asserts both halves (a fixture whose probe text is full
+  of the word appends with no occurrence of it; a fitting-side number in an emitted note is still
+  refused with exit 4).
 - **`run-eval.mjs` is importable.** `main()` used to run on import, so `emit()` and `headline()`
   could not be exercised in a child process. It is behind the same entry-point guard
   `make-splits.mjs` already used, and both functions are exported.
@@ -486,6 +511,101 @@ Recorded, and now ruled (HEAD-RULINGS R37): the self-test joins the release sequ
 is lane-neutral, and two sentences travel with every citation of it. **Ten green checks prove the guards refuse planted faults; the correctness of the numbers printed when nothing fires rests on the independent re-derivation of R36, which a fixture cannot replace.**
 And the synthetic "human" class is shaped to reach code paths — capitalised, terminated sentences so
 gate G4 passes — and models nothing about human writing (R37(d)).
+
+**Refuter round 2 (R38).** 111 authored texts and 4 aggregate senders through the FIXED core. No
+crash, no NaN, deterministic across separate processes, 200,000 characters in 0.25 s. R29 (aggregate
+gates) and R32 (ASCII-folded Turkish votes Turkish) both confirmed on their own targets. What it
+found, and what the head ruled:
+
+- **Four new roads from human prose to `likely_llm`, all through the leak rule** (R38(a), (b)):
+  reported speech using `it` rather than `he` (`N26` and `N27` differ by two characters and only one
+  was suppressed); one noun between the frame and the subject (`as an AI system he had no way…`,
+  three human court and procurement reports accused); a reporting clause before the frame with no
+  quotation marks and no product name (`The reply began As an AI I cannot access your booking` — a
+  customer complaining about a chatbot, with neither suppression route available to her); and three
+  cue words that are also ordinary words or names — "Gemini season", "Claude Bernard", "the copilot
+  on the second leg" — each *disabling* the rule on a text that genuinely self-identified.
+- **Fourteen of twenty new self-identification paraphrases missed, including all six Turkish ones**
+  (R38(c) adds twenty patterns). Two Turkish misses are R34's own doing: `Bir yapay zekâ olarak`, the
+  commonest Turkish opener in the wild, was excluded by R34's mandatory `(modeli|asistanı)` head
+  noun, and `gerçek zamanlı verilere erişimim bulunmuyor` missed because agglutination puts
+  morphology between the two words R27's pattern wanted adjacent.
+- **Two homoglyph blocks the fold missed** (R38(d)): Mathematical Alphanumeric Symbols defeated both
+  the leak rule and the marker rule outright, and fullwidth digits inside a reference code folded
+  correctly but raised **no warning at all** — the scan walks word tokens and a digit run is not a
+  word. The warning is the whole defence, so silent manipulation is the defect.
+- **The human checklist road under R24** (R38(f)): on eighteen authored human-register texts —
+  guest lists, wedding plans, agency room lists — `llm_lexicon_strong` (13), `bold_lead_in_list` (11)
+  and `colon_led_list` (10) were what carried ordinary people toward `leaning_llm`.
+  `bold_lead_in_list` now requires actual `**bold**`; the plain capitalised-lead shape moves to
+  `colon_led_list`, which joins `REGISTER_PROXY_LLM`.
+- **The support-desk mitigation did not fire on the failure mode** (R38(g)): three human
+  support-desk texts leaned LLM *with* `--domain customer_service` set, because the phrases carrying
+  them were never tagged `cs`. Retagged. Fixture rows `A05cs`, `A13cs`, `A15cs` now watch the
+  mitigation rather than the flag.
+- **Out-of-scope Latin routed into the Turkish cell** (R38(h)): a French formal letter came back
+  `tr` at confidence 0.70 because `de`, `ne`, `en`, `ce`, `la` sit on the Turkish stopword list; it
+  abstained on gate luck (G4), not on language ID. Azerbaijani and Turkmen came back `tr` with no
+  note at all and would have been scored against Turkish μ/σ and the Turkish lexicon.
+- **The aggregate report inherited the discarded base pass** (R38(e)): six assistant replies carried
+  `register_only_evidence` although the aggregate decision never applied R24 — the aggregate evidence
+  has two non-proxy LLM signals from two groups, which is what R24 requires. README and RUBRIC §8
+  both tell the judge to act on that warning, so a false one propagates into the agent's report. A
+  second aggregate printed the R28 note twice because `warnings` was de-duplicated and `notes` was not.
+
+**The two mitigations' measured costs**, now in README §H and in the fixture as expectations rather
+than as bugs: R24 takes ten clean assistant WhatsApp replies from **10/10 `leaning_llm` to 0/10**
+once the bold is stripped and four labels are lowercased — seven abstain and **three flip to
+`leaning_human`, all Turkish**. R28 demotes a marker-bearing assistant reply from `likely_llm` to
+`uncertain` + `hybrid_suspect` for about six tokens of slang and a lowercase pass; the human channel
+moves 0.000 → 0.816 on a text whose **content did not change**, so the demotion is spelling-driven,
+not evidence-driven. And the accepted miss stays accepted: an assistant that self-identifies *and*
+mentions "the bot on their website" anywhere else is suppressed, which is not an edge case.
+
+**Agent gate, first run (R39).** `judge-tests.jsonl` had never actually been run. Fourteen rows
+through the installed agent copy: **10 PASS / 0 CRITICAL / 3 OUTSIDE**, and the head ruled all three
+OUTSIDE rows fixture errors rather than agent errors. What the run established, and what it changed:
+
+- **Every §E.1 cell recomputed by hand matched the printed FINAL**, and `likely_llm` appeared as a
+  FINAL **for the first time in the project** — `T06`, the CLI's `known_machine_marker` crossing the
+  judge's artifact route (R31(e)). The `LL x LL` cell is reachable in practice, not only on paper.
+- **RUBRIC §8 was observed working:** the judge withdrew a pre-CLI evidence bullet on reading
+  `register_only_evidence`. CAVEATS labels were exact 13/13, `[CONFLICT]` never over-fired (`T08` is
+  the `EH x EL` cell, which is `uncertain` untagged), no gated row was judged, and judge-first held
+  14/14 by tool-call order. No round-1 or round-2 defect recurred.
+- **`T03`, `T07` and `T11` expected `likely_llm` from style alone, which the decision table cannot
+  produce.** Under SPEC §D.3 the FINAL reaches `likely_llm` only in `LL x LL`, and the CLI reaches
+  `LL` only through a Tier-0 rule; D2's draft predates that decision. `expectedFinal` is now
+  `leaning_llm | uncertain` for the three, `likely_llm` acceptable only if a rule fires;
+  `criticalFailure` keeps `leaning_human | likely_human`, because a human-leaning final on
+  unhumanized assistant output is still the failure those rows exist to catch.
+- **`T11` was untestable at its own stated shape.** It declares `prose` and carried 55 tokens, and
+  R25 documents `insufficient_text` as the CORRECT answer for 50-120-token prose — so the row's
+  `criticalFailure` listed the right answer as a failure. The authored Turkish text is lengthened to
+  **166 tokens**, same trap (one chat vocative painted onto flawless assistant prose) and same
+  register; `insufficient_text` is dropped from its `criticalFailure`. Measured at authoring time,
+  core in flux: `--context prose --lang tr` -> `leaning_llm`, score 0.729, all five gates passed.
+- **Flag mapping was the largest single source of disagreement.** Five of thirteen runs mapped a
+  stated shape differently from each other, and on `T11` that was the only thing between OUTSIDE and
+  CRITICAL. Two runs printed `domain=general` on a command that never passed `--domain` — a flag
+  that was assumed, printed as one that was passed. RUBRIC gains **§9 "Caller statements → CLI
+  flags"** as a table, the agent file points at it, and the CLI line now copies the flags ACTUALLY
+  PASSED from the command.
+- **`T14` cannot run from committed material** — it needs `eval/data/human-chat.jsonl`, gitignored
+  under R8 and produced by `make-splits.mjs` at eval time. It now carries `requiresEvalData: true`.
+  The **substitute run on committed material** (49 rows: the `llm-tr` and `must-not-fire` fixtures in
+  place of the corpus half) came out **20 `insufficient_text` / 25 `uncertain` / 4 `leaning_human` /
+  0 `leaning_llm` / 0 `likely_llm`**, and met all three of `T14`'s `criticalFailure` clauses: no row
+  the CLI floored was judged, no "final score" was produced, and no more than two long rows reached
+  `likely_llm` — zero did. It is a substitute, not the test: it has no real chat traffic in it.
+- **Minor, ruled:** a gated row must have **no `JUDGE:` line at all** (one run printed
+  `JUDGE: not rendered`), and the report skeleton is printed plain, never inside code fences —
+  CAVEATS labels stop being parseable at the top of a code block.
+
+Recorded, not fixed: `hybrid_suspect`, `homoglyph_suspect`, `possible_quotation_or_discussion`,
+`templated_or_copied` and `domain_suppressed` are **still unexercised through the agent**, and no
+genuine ⚠ cell arose in this round. Ten passes on fourteen hand-driven rows is a first run, not a
+measurement of the judge.
 
 ## Ruling index
 
@@ -506,3 +626,6 @@ gate G4 passes — and models nothing about human writing (R37(d)).
 | agent report discipline after the CONFLICT block first rendered | R35 |
 | eval-harness review: persona-level split leak, held-out control (a), loadable fitted weights, real corpusHash, HC3 pair key, tie-pooled isotonic, honest control (d), deeper honesty guard | R36 |
 | the harness self-test joins the release sequence; it proves refusal, not correctness | R37 |
+| refuter round 2: reported-speech suppression, name-cues, 20 new self-identification patterns, math/fullwidth homoglyphs, the human checklist road, the support-desk retag, out-of-scope Latin | R38 |
+| the agent gate's first run: judge `likely_llm` is a column not a final, the flag-mapping table, T11's length, T14's eval-data dependency | R39 |
+| the probe tables print rule names, never probe text; the honesty guard's exemption list is deleted | R40 |

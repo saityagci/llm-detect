@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T05:08:41.384Z",
+  "generatedAt": "2026-09-10T05:59:26.117Z",
   "detector": "stylometry.mjs",
   "tau": 0.5,
   "tauSource": "the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.",
@@ -3507,7 +3507,6 @@
           "markdown_in_chat"
         ],
         "warnings": [
-          "register_only_evidence",
           "uncalibrated_weights"
         ],
         "allowed": [
@@ -3715,6 +3714,9 @@
         "probe": "as a large language model",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3726,6 +3728,9 @@
         "probe": "I'm just an AI",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3737,6 +3742,9 @@
         "probe": "I am merely an AI assistant",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3748,6 +3756,9 @@
         "probe": "my knowledge cut-off (hyphen)",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3759,6 +3770,9 @@
         "probe": "my knowledge cutoff",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3770,6 +3784,9 @@
         "probe": "as of my last update",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3781,6 +3798,9 @@
         "probe": "as of my latest training",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3792,6 +3812,9 @@
         "probe": "as of my last training data",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3803,6 +3826,9 @@
         "probe": "real time (no hyphen)",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3814,6 +3840,9 @@
         "probe": "real-time (hyphen)",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3825,6 +3854,9 @@
         "probe": "no access to the internet",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3836,6 +3868,9 @@
         "probe": "unable to browse the web",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3847,6 +3882,9 @@
         "probe": "here is a revised draft",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3858,6 +3896,9 @@
         "probe": "here's your revised version",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3869,6 +3910,9 @@
         "probe": "I have rewritten it below",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3880,6 +3924,9 @@
         "probe": "I was trained on data",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3891,6 +3938,9 @@
         "probe": "bir yapay zeka modeli olarak",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3902,6 +3952,9 @@
         "probe": "bir yapay zekâ modeli olarak (circumflex)",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3913,6 +3966,9 @@
         "probe": "yapay zeka asistanıyım",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3924,6 +3980,9 @@
         "probe": "yapay zekâ asistanıyım (circumflex)",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3935,6 +3994,9 @@
         "probe": "bilgi kesim tarihim",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3946,6 +4008,9 @@
         "probe": "bilgi kesim tarihi",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3957,6 +4022,9 @@
         "probe": "eğitim verilerim",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3968,6 +4036,9 @@
         "probe": "bir dil modeli olarak",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3979,6 +4050,9 @@
         "probe": "gerçek zamanlı erişimim yok",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -3990,6 +4064,9 @@
         "probe": "split across a line break",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -4001,6 +4078,9 @@
         "probe": "double spaces",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -4012,6 +4092,10 @@
         "probe": "NBSP between words",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak",
+          "invisible_chars"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -4023,6 +4107,9 @@
         "probe": "language model across a line break",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -4034,6 +4121,9 @@
         "probe": "yapay zeka split across a line break",
         "expectRule": true,
         "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
         "correct": true,
         "verdict": "likely_llm",
         "notes": [],
@@ -4045,10 +4135,11 @@
         "probe": "quoted directly, cue adjacent",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [
-          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: chatgpt — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: a third-person subject follows the frame (reported speech) — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
         ],
         "note": "suppressed correctly before R27; must stay suppressed"
       },
@@ -4058,10 +4149,11 @@
         "probe": "cue one sentence away (refuter D1 / H23 shape)",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [
-          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: chatgpt — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: a third-person subject follows the frame (reported speech) — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
         ],
         "note": "refuter D1: the ~100-char window let this fire on a human. R27 moves the cue search to the whole document."
       },
@@ -4071,10 +4163,11 @@
         "probe": "cue word \"assistant\"",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [
-          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: assistant — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: a reporting clause (\"answered\") precedes the frame in the same sentence — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
         ],
         "note": "refuter D2: \"assistant\" was not in the suppression cue list"
       },
@@ -4084,10 +4177,11 @@
         "probe": "cue word \"AI\"",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [
-          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: ai — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+          "assistant_frame_suppressed: \"as an AI\" — possible_quotation_or_discussion: a reporting clause (\"said\") precedes the frame in the same sentence — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
         ],
         "note": "refuter D2: bare \"AI\" was not a cue"
       },
@@ -4097,10 +4191,11 @@
         "probe": "cue word \"LLM\"",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [
-          "assistant_frame_suppressed: \"I do not have real-time\" — possible_quotation_or_discussion: llm — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+          "assistant_frame_suppressed: \"I do not have real-time\" — possible_quotation_or_discussion: a reporting clause (\"said\") precedes the frame in the same sentence — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
         ],
         "note": "refuter D2: \"LLM\" was not a cue"
       },
@@ -4110,6 +4205,7 @@
         "probe": "bare common-noun \"language model\" (refuter D3 / H24 shape)",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [],
@@ -4121,6 +4217,7 @@
         "probe": "human self-identification frame is NOT present",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [],
@@ -4132,6 +4229,7 @@
         "probe": "curly-quoted leak inside human prose",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [
@@ -4145,10 +4243,11 @@
         "probe": "human discussing yapay zeka",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [
-          "assistant_frame_suppressed: \"yapay zeka modeli olarak\" — possible_quotation_or_discussion: yapay zeka — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+          "assistant_frame_suppressed: \"yapay zeka modeli olarak\" — possible_quotation_or_discussion: a reporting clause (\"cevap verdi\") precedes the frame in the same sentence — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
         ],
         "note": "TR cue yapay zek[aâ] must suppress a human quoting the bot"
       },
@@ -4158,14 +4257,3312 @@
         "probe": "human discussing a bot with the circumflex spelling",
         "expectRule": false,
         "fired": false,
+        "rules": [],
         "correct": true,
         "verdict": "insufficient_text",
         "notes": [
-          "assistant_frame_suppressed: \"bilgi kesim tarih\" — possible_quotation_or_discussion: yapay zekâ — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
+          "assistant_frame_suppressed: \"bilgi kesim tarih\" — possible_quotation_or_discussion: a reporting clause (\"yazdı\") precedes the frame in the same sentence — assistant self-identification or drafting frame; suppressed when quoted or when the document discusses an assistant (R27 runs that cue search over the whole document). A person can paste this deliberately."
         ],
         "note": "the cue must fold â as well, or R27 trades one false fire for another"
       }
     ]
   },
-  "wallClockSec": 17.9
+  "verifyRound2": {
+    "textRows": 76,
+    "aggregateRows": 4,
+    "probes": 37,
+    "humanRows": 37,
+    "llmRows": 43,
+    "gate_zero_likely_llm_on_human": {
+      "required": "0 of 37",
+      "measured": 0,
+      "pass": true,
+      "offenders": []
+    },
+    "gate_every_probe_correct": {
+      "required": "37 of 37",
+      "measured": 37,
+      "pass": true,
+      "missed": [],
+      "falseFires": []
+    },
+    "gate_every_language_correct": {
+      "required": "11 of 11",
+      "measured": 11,
+      "pass": true,
+      "wrong": []
+    },
+    "likely_human_on_llm": [],
+    "expectationFailures": [],
+    "arbitration": [],
+    "tallyHuman": {
+      "uncertain": 16,
+      "leaning_llm": 5,
+      "insufficient_text": 14,
+      "leaning_human": 2
+    },
+    "tallyLlm": {
+      "leaning_llm": 10,
+      "insufficient_text": 8,
+      "uncertain": 8,
+      "leaning_human": 3,
+      "likely_llm": 14
+    },
+    "pass": true,
+    "detail": [
+      {
+        "id": "A01",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-guest-list",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.586684,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(f): the checklist road — `- Check-in: 14:00` bullets plus one strong phrase. `bold_lead_in_list` must need real **bold**; the capitalised-lead shape belongs to `colon_led_list`, which joins REGISTER_PROXY_LLM.",
+        "cliError": null
+      },
+      {
+        "id": "A02",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-guest-list",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.586684,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(f): the same checklist road in Turkish.",
+        "cliError": null
+      },
+      {
+        "id": "A03",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-esl-essay",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.934688,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "known §G.2 confound: the prose rhythm/connector trio survives hard mode and is deliberately NOT a register proxy (R24). The head accepts leaning_llm here; likely_llm is still a critical failure.",
+        "cliError": null
+      },
+      {
+        "id": "A04",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-tr-petition",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.761278,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "known §G.2 confound: the prose rhythm/connector trio survives hard mode and is deliberately NOT a register proxy (R24). The head accepts leaning_llm here; likely_llm is still a critical failure.",
+        "cliError": null
+      },
+      {
+        "id": "A05",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-hotel-staff-email",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.2,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(g): a hotel-staff email whose lexicon rows are retagged `cs`. Run WITHOUT --domain here; the A05cs row is the same text with the flag.",
+        "cliError": null
+      },
+      {
+        "id": "A06",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-friend-list",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.273252,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(f): a friend listing plans, plain capitalised labels.",
+        "cliError": null
+      },
+      {
+        "id": "A07",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-wedding-list",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.481335,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(f): a Turkish wedding list.",
+        "cliError": null
+      },
+      {
+        "id": "A08",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-native-review",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.825846,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "known §G.2 confound: the prose rhythm/connector trio survives hard mode and is deliberately NOT a register proxy (R24). The head accepts leaning_llm here; likely_llm is still a critical failure.",
+        "cliError": null
+      },
+      {
+        "id": "A09",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-tr-marketing",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "marketing_register",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "--genre marketing is the documented mitigation for the marketing-register human (README failure mode #6).",
+        "cliError": null
+      },
+      {
+        "id": "A10",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-travel-writer",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.743216,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "known §G.2 confound: the prose rhythm/connector trio survives hard mode and is deliberately NOT a register proxy (R24). The head accepts leaning_llm here; likely_llm is still a critical failure.",
+        "cliError": null
+      },
+      {
+        "id": "A11",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-esl-essay",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.900882,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "known §G.2 confound: the prose rhythm/connector trio survives hard mode and is deliberately NOT a register proxy (R24). The head accepts leaning_llm here; likely_llm is still a critical failure.",
+        "cliError": null
+      },
+      {
+        "id": "A12",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-agent-list",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.533263,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(f): an agency staffer listing rooms.",
+        "cliError": null
+      },
+      {
+        "id": "A13",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-hotel-staff-chat",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.722021,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(g): support-desk chat. Run WITHOUT --domain here; A13cs is the same text with the flag.",
+        "cliError": null
+      },
+      {
+        "id": "A14",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-guest-list",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.722021,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(f): a Turkish guest list.",
+        "cliError": null
+      },
+      {
+        "id": "A15",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-hotel-staff-chat",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.722021,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(g): Turkish support-desk chat. A15cs is the same text with --domain customer_service.",
+        "cliError": null
+      },
+      {
+        "id": "A16",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-friend-list",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.675135,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(f): friends listing plans.",
+        "cliError": null
+      },
+      {
+        "id": "A17",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-forum-answer",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.571673,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a human answering a question on a forum, in the standard register of the genre.",
+        "cliError": null
+      },
+      {
+        "id": "A18",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-corp-rfq",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.2,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(g): a Turkish corporate RFQ; its politeness formulae are older than any language model.",
+        "cliError": null
+      },
+      {
+        "id": "A05cs",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-hotel-staff-email",
+        "lang": "auto",
+        "context": "auto",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "domain_suppressed",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(g): A05 with --domain customer_service. The lexicon rows that carried this text to leaning_llm are retagged `cs`, so the flag must actually zero them. A caller who passes the documented mitigation and still gets a lean is the failure mode README #4 describes.",
+        "cliError": null
+      },
+      {
+        "id": "A13cs",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-hotel-staff-chat",
+        "lang": "auto",
+        "context": "auto",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "domain_suppressed",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(g): A13 with --domain customer_service. The lexicon rows that carried this text to leaning_llm are retagged `cs`, so the flag must actually zero them. A caller who passes the documented mitigation and still gets a lean is the failure mode README #4 describes.",
+        "cliError": null
+      },
+      {
+        "id": "A15cs",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-hotel-staff-chat",
+        "lang": "auto",
+        "context": "auto",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "domain_suppressed",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(g): A15 with --domain customer_service. The lexicon rows that carried this text to leaning_llm are retagged `cs`, so the flag must actually zero them. A caller who passes the documented mitigation and still gets a lean is the failure mode README #4 describes.",
+        "cliError": null
+      },
+      {
+        "id": "B01",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B01e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B01x1",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-strip-bold",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "uncertain",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** from the labels. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B01x2",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-lc-labels",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "uncertain",
+        "score": 0.730299,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip bold and lowercase the four labels. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B01x3",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-lc+delex",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "uncertain",
+        "score": 0.636547,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip bold, lowercase the labels and delexicalise. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B02",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B02e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B03",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B03e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B03x1",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-strip-bold",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "uncertain",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** from the labels. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B03x2",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-lc-labels",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "uncertain",
+        "score": 0.683365,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip bold and lowercase the four labels. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B03x3",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-lc+delex",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "uncertain",
+        "score": 0.461446,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "register_only_evidence",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip bold, lowercase the labels and delexicalise. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B04",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B04e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B05",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B05e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B06",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B06e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B07",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B07e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B08",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B08e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B09",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B09e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "B10",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-clean",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "markdown_in_chat"
+        ],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a clean Claude-authored assistant WhatsApp reply — Claude-written text IS LLM text (R10).",
+        "cliError": null
+      },
+      {
+        "id": "B10e",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-chat-edited",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": true,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "no_evidence_either_way",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R24 recall cost, measured: strip the **bold** and lowercase four labels — the edit R38 measures the ladder on. Ten clean assistant WhatsApp replies went 10/10 leaning_llm to 0/10 across this ladder — 7 abstain, 3 leaning_human, all Turkish. Recorded as an accepted cost, not asserted away.",
+        "cliError": null
+      },
+      {
+        "id": "D01",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm+marker",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "likely_llm",
+          "uncertain"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a Claude-authored assistant reply with a marker in it and no human turn around it: likely_llm is the correct output.",
+        "cliError": null
+      },
+      {
+        "id": "D02",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm+marker+fake-human",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.2,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "hybrid_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "ACCEPTED COST (R28), measured: the same reply as D01, lowercased with about six tokens of slang added, demotes to uncertain + hybrid_suspect. Human channel 0.000 -> 0.816 on a text whose CONTENT did not change. The demotion is spelling-driven, not evidence-driven; the reader still sees pasted_machine_text.",
+        "cliError": null
+      },
+      {
+        "id": "D03",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-forwarding-marker",
+        "lang": "tr",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.35,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "hybrid_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "uncertain",
+          "leaning_human",
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R28 working as written: a human WhatsApp turn wrapped around a pasted Turkish confirmation.",
+        "cliError": null
+      },
+      {
+        "id": "D04",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm+marker",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.474615,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "likely_llm",
+          "uncertain"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "a machine confirmation with a marker and no human markers.",
+        "cliError": null
+      },
+      {
+        "id": "D05",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-forwarding-marker",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.35,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "hybrid_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "uncertain",
+          "leaning_human",
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R28 working as written: a human complaining around a pasted marker block.",
+        "cliError": null
+      },
+      {
+        "id": "E01",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-leak-cyrillic",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.492251,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "en",
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "warnings": [
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Cyrillic А/а inside \"As an AI\" — folded for rule matching, and the warning fires.",
+        "cliError": null
+      },
+      {
+        "id": "E02",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-leak-greek",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.492251,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "en",
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "warnings": [
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Greek ο inside \"language model\".",
+        "cliError": null
+      },
+      {
+        "id": "E03",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-leak-cyrillic",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.492251,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "en",
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "warnings": [
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Cyrillic о inside \"model\".",
+        "cliError": null
+      },
+      {
+        "id": "E04",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-leak-math-bold",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.492251,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "en",
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "warnings": [
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "D-R2 gap, ruled in R38(d): Mathematical bold 𝐀𝐬 𝐚𝐧 𝐀𝐈 DEFEATED the rule (insufficient_text) because Math Alphanumerics were detected but not folded. R38(d) folds them by the block formula, reserved holes included.",
+        "cliError": null
+      },
+      {
+        "id": "E05",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-leak-fullwidth",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.492251,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "en",
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "warnings": [
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "fullwidth Ａｓ ａｎ ＡＩ — folded before R38.",
+        "cliError": null
+      },
+      {
+        "id": "E06",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-lexicon-cyrillic",
+        "lang": "en",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Cyrillic о/а inside three strong lexicon phrases: all three matched through the fold. No rule here, only the lexicon.",
+        "cliError": null
+      },
+      {
+        "id": "E07",
+        "kind": "text",
+        "truth": "llm",
+        "class": "llm-leak-tr-cyrillic",
+        "lang": "tr",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.440547,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "tr",
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "warnings": [
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Cyrillic а inside Turkish yаpay zekâ.",
+        "cliError": null
+      },
+      {
+        "id": "E08",
+        "kind": "text",
+        "truth": "llm",
+        "class": "marker-fullwidth-digits",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.53743,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "D-R2-5, ruled in R38(d): fullwidth digits inside a marker folded correctly BUT raised NO warning at all — homoglyphScan walks word tokens and a digit run is not a word. The warning is the whole defence, so a silent manipulation is the defect.",
+        "cliError": null
+      },
+      {
+        "id": "E09",
+        "kind": "text",
+        "truth": "llm",
+        "class": "marker-math-bold+clean-ref",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.504167,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Mathematical bold beside a clean reference code: the clean marker fires, and the manipulation must still be reported.",
+        "cliError": null
+      },
+      {
+        "id": "E10",
+        "kind": "text",
+        "truth": "llm",
+        "class": "marker-clean-control",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.504167,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "clean control: the marker fires and NO homoglyph warning may appear.",
+        "cliError": null
+      },
+      {
+        "id": "E11",
+        "kind": "text",
+        "truth": "llm",
+        "class": "marker-math-bold-only",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.53743,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(d): Mathematical bold inside the marker itself. The marker is `\\u27E1V9\\u27E1`, so the hidden character must fold to `V`: this row uses U+1D415 MATHEMATICAL BOLD CAPITAL V, whose compatibility decomposition is `V`. The refuter's scratch text used U+1D493 MATHEMATICAL BOLD SCRIPT SMALL R, which decomposes to `r` — no fold can make that match `V`, so the row as first committed asserted an impossibility rather than the folded-marker path. Control: E12, the same confirmation with a clean marker, must reach likely_llm.",
+        "cliError": null
+      },
+      {
+        "id": "E12",
+        "kind": "text",
+        "truth": "llm",
+        "class": "marker-clean-control",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.53743,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "clean control for E11.",
+        "cliError": null
+      },
+      {
+        "id": "E13",
+        "kind": "text",
+        "truth": "llm",
+        "class": "marker-fullwidth-digits",
+        "lang": "en",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "likely_llm",
+        "score": 0.417997,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "homoglyph_suspect",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "D-R2-5 again: fullwidth digits in REF-…, marker fires, warning must now fire too (R38(d)).",
+        "cliError": null
+      },
+      {
+        "id": "F01",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-en-tr-suffixes",
+        "lang": "auto",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "mixed",
+        "rules": [],
+        "warnings": [
+          "mixed_language_reduced_features",
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R38(h) accepted: English that ties on Turkish suffix shapes (golden, wooden, burden, sellers) stays `mixed` and loses the English feature set. Contrived text, real mechanism.",
+        "cliError": null
+      },
+      {
+        "id": "F02",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-tr-brandnames",
+        "lang": "auto",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "too_few_active_features",
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Turkish carrying English brand names must stay Turkish. Confirmed before R38; kept so a vote change cannot lose it.",
+        "cliError": null
+      },
+      {
+        "id": "F03",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-french",
+        "lang": "auto",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "language_unknown",
+        "detectedLang": "unknown",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Finding F-i, ruled in R38(h): a French formal letter came back `tr` at confidence 0.70 because de/ne/en/ce/la sit on the Turkish stopword list. It abstained on gate luck (G4), not on language ID. Out-of-scope Latin must be `unknown` with note latin_other_language, and never scored.",
+        "cliError": null
+      },
+      {
+        "id": "F04",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-italian",
+        "lang": "auto",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "language_unknown",
+        "detectedLang": "unknown",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Italian: `mixed` with no votes before R38; `unknown` once the other-Latin vote lands. Either is out of scope and unscored.",
+        "cliError": null
+      },
+      {
+        "id": "F05",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-spanish",
+        "lang": "auto",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "language_unknown",
+        "detectedLang": "unknown",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Spanish, as F04.",
+        "cliError": null
+      },
+      {
+        "id": "F06",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-azerbaijani",
+        "lang": "auto",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "language_unknown",
+        "detectedLang": "unknown",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Finding F-iii, ruled in R38(h): Azerbaijani came back `tr` at 0.70 with NO note, and would be scored against Turkish mu/sigma and the Turkish lexicon. `ə` (>=2) must make it unknown.",
+        "cliError": null
+      },
+      {
+        "id": "F07",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-turkmen",
+        "lang": "auto",
+        "context": "prose",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "language_unknown",
+        "detectedLang": "unknown",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "Finding F-iii: Turkmen, as F06. `ý|ž|ň` (>=2).",
+        "cliError": null
+      },
+      {
+        "id": "F08",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-tr-ascii-chat",
+        "lang": "auto",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "below_token_floor",
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R32 confirmed: ASCII-folded Turkish chat votes Turkish, not English. Below the token floor, which is the correct answer for 19 tokens.",
+        "cliError": null
+      },
+      {
+        "id": "F09",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-french-listy",
+        "lang": "auto",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "language_unknown",
+        "detectedLang": "unknown",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "French with a bullet list on WhatsApp. It reached `uncertain` on the reduced feature set before R38 — an out-of-scope language that got a verdict at all is the thing R38(h) closes.",
+        "cliError": null
+      },
+      {
+        "id": "F10",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-tr-ascii-chat",
+        "lang": "auto",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R32 confirmed: ASCII-folded Turkish booking chat at 26 tokens routes to `tr` and reaches leaning_human.",
+        "cliError": null
+      },
+      {
+        "id": "F11",
+        "kind": "text",
+        "truth": "human",
+        "class": "human-french-listy",
+        "lang": "auto",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "insufficient_text",
+        "score": null,
+        "gateReason": "language_unknown",
+        "detectedLang": "unknown",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "French letter plus a bullet list, as F09.",
+        "cliError": null
+      },
+      {
+        "id": "G01",
+        "kind": "aggregate",
+        "truth": "human",
+        "class": "aggregate-human",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.2,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "uncertain",
+          "leaning_human",
+          "likely_human",
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R29 confirmed: six short human English WhatsApp turns (56 tokens) clear every gate and produce a report, not below_char_floor.",
+        "cliError": null,
+        "turns": 6
+      },
+      {
+        "id": "G02",
+        "kind": "aggregate",
+        "truth": "llm",
+        "class": "aggregate-assistant",
+        "lang": "en",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.8,
+        "gateReason": null,
+        "detectedLang": "en",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "insufficient_text",
+          "uncertain",
+          "leaning_human",
+          "leaning_llm",
+          "likely_llm"
+        ],
+        "criticalFailure": [
+          "likely_human"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "D-R2-6, ruled in R38(e): the aggregate carried register_only_evidence inherited from the DISCARDED per-document base pass. The aggregate evidence has two non-proxy LLM signals from two groups (llm_lexicon_strong, msg_length_uniformity), which is exactly what R24 requires — the warning was false, and README and RUBRIC §8 both tell the judge to act on it.",
+        "cliError": null,
+        "turns": 6
+      },
+      {
+        "id": "G03",
+        "kind": "aggregate",
+        "truth": "human",
+        "class": "aggregate-human",
+        "lang": "tr",
+        "context": "chat",
+        "markers": true,
+        "expectedEvasion": false,
+        "verdict": "uncertain",
+        "score": 0.35,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [
+          "known_machine_marker"
+        ],
+        "warnings": [
+          "pasted_machine_text",
+          "uncalibrated_weights",
+          "hybrid_suspect"
+        ],
+        "allowed": [
+          "uncertain",
+          "leaning_human",
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R28 in aggregate: a human Turkish sender one of whose turns is a pasted marker block. R38(e) also requires notes to be de-duplicated — this row printed the R28 note twice, byte-identical, because both passes emitted it.",
+        "cliError": null,
+        "turns": 6
+      },
+      {
+        "id": "G04",
+        "kind": "aggregate",
+        "truth": "human",
+        "class": "aggregate-human",
+        "lang": "tr",
+        "context": "chat",
+        "markers": false,
+        "expectedEvasion": false,
+        "verdict": "leaning_human",
+        "score": 0.35,
+        "gateReason": null,
+        "detectedLang": "tr",
+        "rules": [],
+        "warnings": [
+          "uncalibrated_weights"
+        ],
+        "allowed": [
+          "uncertain",
+          "leaning_human",
+          "likely_human",
+          "insufficient_text"
+        ],
+        "criticalFailure": [
+          "likely_llm"
+        ],
+        "inAllowed": true,
+        "critical": false,
+        "expectations": [],
+        "expectationsOk": true,
+        "note": "R29 confirmed on Turkish: six short turns, 35 tokens, a report rather than a gate failure.",
+        "cliError": null,
+        "turns": 6
+      }
+    ],
+    "probeDetail": [
+      {
+        "id": "C01",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "Speaking as an AI, I am not able to…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "fired before R38; kept so a pattern rewrite cannot lose it."
+      },
+      {
+        "id": "C02",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "I'm only a language model, so…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "fired before R38; kept so a pattern rewrite cannot lose it."
+      },
+      {
+        "id": "C03",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "Being an AI model, I do not have the ability to…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C04",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "My responses are generated from patterns in text…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C05",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "I don't have personal experiences, so…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C06",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "I cannot provide medical advice as an AI…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "fired before R38; kept so a pattern rewrite cannot lose it."
+      },
+      {
+        "id": "C07",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "As an artificial intelligence, I have no way of knowing…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C08",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "I have no ability to access the internet…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C09",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "I'm not able to browse the internet…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C10",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "My training data does not include events after…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "fired before R38; kept so a pattern rewrite cannot lose it."
+      },
+      {
+        "id": "C11",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "I do not have feelings or preferences…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C12",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "As a machine learning model, I can only work from…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C13",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "I was created by an AI company and I do not have access…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C14",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "Note that I am an automated assistant and cannot…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C15",
+        "lang": "tr",
+        "klass": "llm-leak-probe",
+        "probe": "TR Bir yapay zekâ olarak…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C16",
+        "lang": "tr",
+        "klass": "llm-leak-probe",
+        "probe": "TR Kişisel deneyimim yok…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C17",
+        "lang": "tr",
+        "klass": "llm-leak-probe",
+        "probe": "TR Yanıtlarım otomatik olarak üretildiği için…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C18",
+        "lang": "tr",
+        "klass": "llm-leak-probe",
+        "probe": "TR Gerçek zamanlı verilere erişimim bulunmuyor…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C19",
+        "lang": "tr",
+        "klass": "llm-leak-probe",
+        "probe": "TR Ben bir yapay zekâyım…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "C20",
+        "lang": "tr",
+        "klass": "llm-leak-probe",
+        "probe": "TR Duygularım veya tercihlerim yok…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(c): a first-person self-identification that missed in round 2. Fourteen of these twenty missed, all six Turkish ones among them."
+      },
+      {
+        "id": "N11",
+        "lang": "en",
+        "klass": "llm-leak+cue-bot",
+        "probe": "assistant self-identifies, then mentions \"the bot\" on a website",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "ACCEPTED COST (R27/R38): an assistant that also mentions a bot elsewhere stays suppressed. Not a defect — the trade is documented, and it is not an edge case: telling a user the website chatbot is unhelpful is a common assistant turn."
+      },
+      {
+        "id": "N12",
+        "lang": "en",
+        "klass": "llm-leak+cue-assistant",
+        "probe": "assistant self-identifies, then mentions \"our assistant\"",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "ACCEPTED COST (R27/R38), as N11."
+      },
+      {
+        "id": "N13",
+        "lang": "en",
+        "klass": "human-quoting-leak",
+        "probe": "human quoting a leak, and the word \"chatbot\" appears later",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "human. Quotation plus a cue: must stay suppressed."
+      },
+      {
+        "id": "N14",
+        "lang": "en",
+        "klass": "llm-leak-selfcue",
+        "probe": "As an AI assistant, I cannot verify… (the cue sits inside the match)",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R27's self-suppression guard: a cue overlapping the matched span does not count, so the rule cannot suppress itself."
+      },
+      {
+        "id": "N15",
+        "lang": "en",
+        "klass": "llm-leak+word-gemini",
+        "probe": "\"Gemini season\" (astrology) elsewhere in a genuine self-identification",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(b): `gemini` counts as a cue only within three tokens of an AI-context word. A star sign must not disable the only road to likely_llm."
+      },
+      {
+        "id": "N16",
+        "lang": "en",
+        "klass": "llm-leak+name-claude",
+        "probe": "\"Claude Bernard\" (a person) elsewhere in a genuine self-identification",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(b): a surname must not suppress a genuine leak."
+      },
+      {
+        "id": "N17",
+        "lang": "en",
+        "klass": "llm-leak+word-copilot",
+        "probe": "\"the copilot on the second leg\" (aircrew) elsewhere in a genuine self-identification",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "R38(b): a member of an aircraft flight crew must not suppress a genuine leak."
+      },
+      {
+        "id": "N18",
+        "lang": "tr",
+        "klass": "llm-leak+cue-chatbot",
+        "probe": "TR assistant self-identifies, then mentions the site chatbot",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "ACCEPTED COST (R27/R38), Turkish."
+      },
+      {
+        "id": "N19",
+        "lang": "en",
+        "klass": "human-mentions-assistant",
+        "probe": "\"Our assistant drafted the first version and I have rewritten most of it\"",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "human. R34 replaced R1's loose drafting frame; \"most of it\" is not \"(it|this|the)\"."
+      },
+      {
+        "id": "N20",
+        "lang": "en",
+        "klass": "human-reported-speech",
+        "probe": "The manager told the tribunal that as an AI system he had no way of checking…",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "D-R2-2, CRITICAL: reported speech with ONE noun between the frame and the subject reached likely_llm on human prose. R38(a) widens the third-person guard to four tokens."
+      },
+      {
+        "id": "N21",
+        "lang": "en",
+        "klass": "human-reported-speech",
+        "probe": "The witness explained that as an AI system it could not have made that decision…",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "D-R2-1 + D-R2-2, CRITICAL: `it` was missing from the guard AND a noun sat between. R38(a) adds it|its|they|their|the|this|that|his|her."
+      },
+      {
+        "id": "N22",
+        "lang": "en",
+        "klass": "human-reported-speech",
+        "probe": "Our lawyer argued that as an AI product the software could not form an intention…",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "D-R2-2, CRITICAL."
+      },
+      {
+        "id": "N23",
+        "lang": "en",
+        "klass": "human-quoting-leak-noquotes",
+        "probe": "The reply began As an AI I cannot access your booking, … (no quotation marks, no product name)",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "D-R2-4, CRITICAL: a customer complaining about a chatbot, with neither of the two suppression routes available to her. R38(a) adds the reporting clause BEFORE the frame — `the (reply|message|answer|…) (began|said|read|…)`."
+      },
+      {
+        "id": "N24",
+        "lang": "en",
+        "klass": "llm-leak-probe",
+        "probe": "My knowledge cutoff is not something I can change…",
+        "expectRule": true,
+        "fired": true,
+        "rules": [
+          "assistant_frame_leak"
+        ],
+        "correct": true,
+        "verdict": "likely_llm",
+        "note": "a genuine leak; fired before R38."
+      },
+      {
+        "id": "N25",
+        "lang": "en",
+        "klass": "human-quoting-leak",
+        "probe": "the same shape as N23 but with quotation marks",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "human; suppressed correctly before R38 and must stay so."
+      },
+      {
+        "id": "N26",
+        "lang": "en",
+        "klass": "human-reported-speech",
+        "probe": "The vendor insisted that as an AI it could not be biased…",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "D-R2-1, CRITICAL: N26 and N27 differ by two characters and only N27 was suppressed. R38(a)."
+      },
+      {
+        "id": "N27",
+        "lang": "en",
+        "klass": "human-reported-speech",
+        "probe": "the same sentence with \"he\" instead of \"it\"",
+        "expectRule": false,
+        "fired": false,
+        "rules": [],
+        "correct": true,
+        "verdict": "insufficient_text",
+        "note": "human; the pre-R38 guard already handled this one."
+      }
+    ]
+  },
+  "wallClockSec": 32.5
 }

@@ -330,16 +330,34 @@ const probeRow = (id, probe, text, expectRule, note) => ({
   lang: 'en', context: 'prose', channel: 'unknown', genre: 'auto', domain: 'general',
   expectRule, probe, note, text: text + PAD,
 });
-// (a) probe labels that quote one of the THREE phrases gate-fixtures exempts by name
-const vrAllowed = [
-  probeRow('SP1', 'as of my latest training', 'As of my latest training, the property was still operating under the previous management.', true, 'synthetic: an exempted quoted phrase'),
-  probeRow('SP2', 'I was trained on data', 'I was trained on data up to a certain point, so I may be out of date here.', true, 'synthetic: an exempted quoted phrase'),
+// HEAD-RULINGS R40: the probe tables print id / language / expectation / observation / result /
+// rule names, and never the probe TEXT. So a probe whose text and label are full of the fitting word
+// must still append cleanly — the word never reaches the markdown. The word is assembled here rather
+// than written, so this generator does not itself carry a string the honesty guard hunts for.
+const FIT = ['t', 'r', 'a', 'i', 'n'].join('');
+const vrFitWord = [
+  probeRow('SP1', `as of my latest ${FIT}ing`, `As of my latest ${FIT}ing, the property was still operating under the previous management.`, true,
+    `synthetic: the probe TEXT and LABEL both carry the fitting word. Under R40 neither is printed, so the appended section must contain no occurrence of it.`),
+  probeRow('SP2', `I was ${FIT}ed on data`, `I was ${FIT}ed on data up to a certain point, so I may be out of date here.`, true,
+    'synthetic: as SP1.'),
+  probeRow('SP3', `my ${FIT}ing data cutoff`, `My ${FIT}ing data does not include events after a certain point, so I may be wrong here.`, true,
+    'synthetic: the fourth label that broke the old exemption list, in miniature.'),
 ];
-// (b) a FOURTH label carrying the watched word in a phrase that is NOT on the exemption list.
-// The append guard must refuse this one; that is the whole point of the check.
-const vrRefused = [
-  ...vrAllowed,
-  probeRow('SP9', 'model retraining cadence 2026', 'As a large language model, I am not able to verify that claim for you.', true, 'synthetic: a fit-word label that is NOT on the exemption list'),
+
+// The guard must still be LIVE and absolute. A row whose `note` carries the fitting word and whose
+// `allowed` set cannot be satisfied lands in the arbitration list, which prints the note verbatim —
+// a real emit path, not a test seam. gate-fixtures must refuse to append that section.
+const vrGuardLive = [
+  ...vrFitWord,
+  {
+    kind: 'text', id: 'SG1', source: 'synthetic-split fixture, authored in-session',
+    class: 'guard-liveness', truth: 'human', lang: 'en', context: 'chat', channel: 'whatsapp',
+    genre: 'auto', domain: 'general', markers: null,
+    allowed: ['likely_human'],          // unreachable for a short chat turn: forces arbitration
+    criticalFailure: [],
+    note: `synthetic: this note names a fitting-side AUC of 0.9 and is printed verbatim in the arbitration list, so the append guard must refuse the whole section. Replace "fitting" with the word itself: ${FIT}ing-side AUC 0.9.`,
+    text: pick(SHORT_EN),
+  },
 ];
 
 // ---------------------------------------------------------------- write
@@ -352,8 +370,8 @@ const jsonl = (a) => a.map((x) => JSON.stringify(x)).join('\n') + '\n';
 writeFileSync(path.join(outDir, 'splits.jsonl'), jsonl(rows), 'utf8');
 writeFileSync(path.join(outDir, 'splits-report.json'), JSON.stringify(report, null, 2) + '\n', 'utf8');
 writeFileSync(path.join(outDir, 'must-not-fire.jsonl'), jsonl(mnf), 'utf8');
-writeFileSync(path.join(outDir, 'verify-round-1.allowed.jsonl'), jsonl(vrAllowed), 'utf8');
-writeFileSync(path.join(outDir, 'verify-round-1.refused.jsonl'), jsonl(vrRefused), 'utf8');
+writeFileSync(path.join(outDir, 'verify-round-1.fitword.jsonl'), jsonl(vrFitWord), 'utf8');
+writeFileSync(path.join(outDir, 'verify-round-1.guardlive.jsonl'), jsonl(vrGuardLive), 'utf8');
 
 // ---- self-assertions: the clean fixture must be clean, or the self-test's planted failures
 // prove nothing. A generator that quietly emits a leaky fixture is worse than no fixture.
@@ -378,4 +396,4 @@ writeFileSync(path.join(outDir, 'verify-round-1.refused.jsonl'), jsonl(vrRefused
 const bySide = {};
 for (const r of rows) { const k = `${r.side}/${r.label}`; bySide[k] = (bySide[k] || 0) + 1; }
 process.stderr.write(`synthetic-split: ${rows.length} rows ${JSON.stringify(bySide)}\n`);
-process.stderr.write(`wrote ${path.relative(process.cwd(), outDir)}/{splits.jsonl,splits-report.json,must-not-fire.jsonl,verify-round-1.*.jsonl}\n`);
+process.stderr.write(`wrote ${path.relative(process.cwd(), outDir)}/{splits.jsonl,splits-report.json,must-not-fire.jsonl,verify-round-1.fitword.jsonl,verify-round-1.guardlive.jsonl}\n`);

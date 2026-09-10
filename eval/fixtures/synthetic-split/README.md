@@ -17,8 +17,8 @@ copying private chat messages into a scratch directory. This corpus can be corru
 | `splits.jsonl` | 624 rows in the exact shape `eval/data/splits.jsonl` has. Every text is unique under `make-splits`' own `normKey`, which is what makes a planted duplicate meaningful. |
 | `splits-report.json` | The shape `make-splits.mjs` writes, so `run-eval` §1 can print the pair table, the contamination bands and the recorded-split-reuse line. |
 | `must-not-fire.jsonl` | 24 tiny rows so `gate-fixtures.mjs` will run at all (it exits 2 without this file). |
-| `verify-round-1.allowed.jsonl` | Probe rows whose labels quote the three assistant-frame phrases the CAL append guard exempts by name. |
-| `verify-round-1.refused.jsonl` | The same, plus a fourth label carrying the watched word in different wording. The append guard must refuse it; that is the check that keeps the exemption from widening. |
+| `verify-round-1.fitword.jsonl` | Probe rows whose text **and** label are full of the word the honesty guard watches for. Under HEAD-RULINGS R40 the probe tables print id, language, expectation, observation, result and rule names — never the probe text — so this section must append cleanly and the word must not appear anywhere in the markdown. |
+| `verify-round-1.guardlive.jsonl` | The same rows plus one whose `allowed` set cannot be satisfied and whose `note` names a fitting-side number. The note is printed verbatim in the arbitration list, so the append must be refused with exit 4. This is the half that proves the guard is still live now that nothing is exempt from it. |
 
 What the fixture is shaped to produce, and why:
 

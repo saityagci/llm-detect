@@ -21,12 +21,14 @@ import { _buildContext } from './lib/detect.mjs';
 import { FEATURES } from './lib/features.mjs';
 import { AGG_FEATURES, prepareAggregate } from './lib/feat-aggregate.mjs';
 import { segment } from './lib/segment.mjs';
-import { identify, latinSubId } from './lib/langid.mjs';
+import { identify, latinSubId, EN_STOP, TR_STOP } from './lib/langid.mjs';
 import { caseFold, AR_LETTER, WORD_RE, NUM_RE, makeViews, foldConfusables, homoglyphScan } from './lib/unicode.mjs';
 import { words } from './lib/tokenize.mjs';
 import { sha256Hex } from './lib/hash.mjs';
 import { transform, capLambda, tableVerdict, REGISTER_PROXY_LLM, AGGREGATE_DISABLED,
-  validateWeightsShape } from './lib/score.mjs';
+  validateWeightsShape, DECISION_WARNINGS, isDecisionNote } from './lib/score.mjs';
+import { foldConfusablesMapped, MATH_ALNUM_RE } from './lib/unicode.mjs';
+import { OTHER_LATIN_WORDS } from './lib/langid.mjs';
 import { assistantFrameLeak, runRules } from './lib/rules.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -258,11 +260,14 @@ const GOLDENS = [
 
   // --- B.5 structure and register ---------------------------------------
   { id: 'bold_lead_in_list',
+    // R38(f): ACTUAL ** is required. The third line ("- Rooms: Clean...") is a plain bullet and
+    // now counts for colon_led_list instead, so this golden is 2, not 3.
     text: '- **Location**: Central and well connected.\n- **Breakfast:** Included every morning here.\n- Rooms: Clean and quiet for the price paid.',
-    opts: { shape: 'prose' }, want: 3 },
+    opts: { shape: 'prose' }, want: 2 },
   { id: 'colon_led_list',
-    text: 'Here is what you get for the price of one night in this hotel:\n- breakfast\n- parking',
-    opts: { shape: 'prose' }, want: 1 },
+    // one colon-led lead-in + (R38(f)) one plain capitalised-lead bullet moved here.
+    text: 'Here is what you get for the price of one night in this hotel:\n- breakfast\n- parking\n- Rooms: Clean and quiet for the price paid.',
+    opts: { shape: 'prose' }, want: 2 },
   { id: 'enumerated_openers',
     text: 'First, the room was clean. Second, the staff was kind. Third, the view was open. '
       + 'The bed was soft. The shower was hot. The price was fair.',
@@ -825,6 +830,23 @@ const LEAK_POSITIVES = [
   ["here's your revised version", "Here's your revised version of the complaint letter you asked for."],
   ['I have rewritten it below', 'I have rewritten it below in a more formal register for you.'],
   ["here's a polished VERSION (R34 b)", "Here's a polished version of your email, ready to send."],
+  // --- R38(c): twenty more first-person self-identifications (refuter round 2, C01-C20) -------
+  ['being an AI model', 'Being an AI model, I do not have the ability to place that call for you.'],
+  ['as an artificial intelligence', 'As an artificial intelligence, I have no way of knowing the rate.'],
+  ['as a machine learning model', 'As a machine learning model, I can only work from the text given.'],
+  ['my responses are generated', 'My responses are generated from patterns in text, so please verify.'],
+  ['no personal experiences', "I don't have personal experiences, so I cannot tell you how it felt."],
+  ['no feelings', 'I do not have feelings or preferences, so I cannot pick a room for you.'],
+  ['no ability to access', 'I have no ability to access the internet, so the price may be out of date.'],
+  ['not able to browse the internet', "I'm not able to browse the internet, so I cannot check the road."],
+  ['created by an AI company', 'I was created by an AI company and I do not have access to your account.'],
+  ['I am an automated assistant', 'Note that I am an automated assistant and cannot process refunds.'],
+  ['TR bir yapay zekâ olarak', 'Bir yapay zekâ olarak otelin kartınızdan ne çektiğini teyit edemem.'],
+  ['TR ben bir yapay zekâyım', 'Ben bir yapay zekâyım ve sizin adınıza telefon açma yetkim yok.'],
+  ['TR kişisel deneyimim yok', 'Kişisel deneyimim yok, bu yüzden plajın nasıl olduğunu anlatamam.'],
+  ['TR yanıtlarım otomatik üretilir', 'Yanıtlarım otomatik olarak üretildiği için fiyatı otelden teyit ediniz.'],
+  ['TR gerçek zamanlı verilere erişimim yok', 'Gerçek zamanlı verilere erişimim bulunmuyor, yolu kontrol edemiyorum.'],
+  ['TR duygularım veya tercihlerim yok', 'Duygularım veya tercihlerim yok, hangi odayı seçeceğimi söyleyemem.'],
   ['I was trained on data', 'I was trained on data up to a certain point, so I may be out of date.'],
   ['TR yapay zeka modeli olarak', 'Bir yapay zeka modeli olarak bu rezervasyonu sizin adınıza yapamam.'],
   ['TR yapay zekâ (circumflex)', 'Bir yapay zekâ modeli olarak bu rezervasyonu sizin adınıza yapamam.'],
@@ -876,6 +898,36 @@ const LEAK_NEGATIVES = [
     + 'zeka modeli olarak bu bilgiye erişemiyorum diye cevap verdi, sonra da konuşmayı kapattı.'],
   ['the bare TR common noun alone never fires',
     'Sitenin yapay zeka asistanı felaket durumda ve hiçbir soruya doğru cevap veremiyor bugün.'],
+  // --- R38(c) human negatives: one per new pattern family, all third-person or about others ----
+  ['a human describing a colleague, not themselves',
+    'My colleague was created by an AI company and he still cannot work the coffee machine.'],
+  ['a human REPORTING what a product claimed about being an AI model',
+    'The vendor insisted that being an AI model the software could not possibly be biased.'],
+  ['a human writing about artificial intelligence as a topic',
+    'The panel on artificial intelligence ran late and the room was far too warm for anyone.'],
+  ['a human quoting a machine-learning course',
+    'The course said that a machine learning model needs far more data than we actually have.'],
+  ['a human whose replies are generated by a mail merge',
+    'Their replies are generated by a mail merge, which is why every one of them starts the same.'],
+  ['a human with no personal experience of a place',
+    'She has no personal experience of that stretch of coast, so ask someone who lives there.'],
+  ['a human describing an automated system',
+    'The switchboard is an automated system and it cannot put you through to a real person.'],
+  ['a human with no way to access a portal',
+    'Nobody in the office has any way to access the supplier portal since the password changed.'],
+  // --- R38(a) human negatives: reported speech about a machine ---------------------------------
+  ['reported speech with a noun between the frame and the pronoun (N20)',
+    'The manager told the tribunal that as an AI system he had no way of checking the roster, '
+    + 'which the panel found difficult to accept from a person.'],
+  ['reported speech about a product (N22)',
+    'Our lawyer argued that as an AI product the software could not form an intention, and that '
+    + 'the company therefore could not hide behind it.'],
+  ['a reporting clause with no quotation marks (N23)',
+    'The reply began As an AI I cannot access your booking, which told me everything I needed to '
+    + 'know about how seriously they take customer service.'],
+  ['"it" as the reported subject (N26)',
+    'The vendor insisted that as an AI it could not be biased, which is the kind of sentence that '
+    + 'ends a procurement meeting badly.'],
 ];
 
 function verifyRoundOne() {
@@ -906,10 +958,10 @@ function verifyRoundOne() {
     arLeak.notes.some((n) => n.startsWith('language_gate_not_bypassable')));
 
   // --- R24 register-proxy cap --------------------------------------------------------------
-  eq('R24: the proxy set is the ten features the ruling names', REGISTER_PROXY_LLM.size, 10);
+  eq('R24 + R38(f): the proxy set is eleven features', REGISTER_PROXY_LLM.size, 11);
   for (const id of ['terminal_punct_ratio', 'sentence_initial_caps', 'em_dash_in_chat',
     'exclam_single_regular', 'emoji_bullet_led', 'politeness_formula', 'greeting_signoff_frame',
-    'tr_formal_copula', 'out_of_channel_register', 'llm_lexicon_weak']) {
+    'tr_formal_copula', 'out_of_channel_register', 'llm_lexicon_weak', 'colon_led_list']) {
     ok(`R24: ${id} is a register proxy`, REGISTER_PROXY_LLM.has(id));
   }
 
@@ -1361,6 +1413,166 @@ function verifyRoundOne() {
   for (const k of Object.keys(empty.cells)) empty.cells[k] = { status: 'not fitted' };
   ok('R36c: a file with no usable cell at all is rejected',
     (() => { try { validateWeightsShape(empty, 'empty.json'); return false; } catch { return true; } })());
+
+  // --- R38(a): the frame still fires where it must ------------------------------------------
+  ok('R38(a): "As an AI assistant, I cannot..." still fires — a noun then a FIRST-person marker',
+    assistantFrameLeak({ raw: 'As an AI assistant, I cannot verify the current availability of '
+      + 'that room type, so please confirm directly with the property.' })?.name === 'assistant_frame_leak');
+  ok('R38(a): a first-person marker inside the frame exempts it from the lookahead',
+    assistantFrameLeak({ raw: 'As of my last update, the property was still operating under the '
+      + 'previous management.' })?.name === 'assistant_frame_leak');
+  ok('R38(a): a DRAFTING frame is exempt from the lookahead (it is not a self-identification)',
+    assistantFrameLeak({ raw: 'Here is a revised draft of the complaint letter you asked for.' })
+      ?.name === 'assistant_frame_leak');
+  ok('R38(a): Turkish is exempt from the lookahead (verb-final: the next token is the OBJECT)',
+    assistantFrameLeak({ raw: 'Bir yapay zeka modeli olarak bu rezervasyonu sizin adınıza yapamam.' })
+      ?.name === 'assistant_frame_leak');
+  ok('R38(a): a Turkish reporting clause still suppresses',
+    assistantFrameLeak({ raw: 'Otelin botu bana bir yapay zeka modeli olarak bunu yapamam dedi.' })
+      ?.suppressed === true);
+
+  // --- R38(b): an ambiguous NAME is only a cue beside an AI-context word ----------------------
+  for (const [name, text] of [
+    ['gemini (a star sign)', 'Gemini season is a good time to start something you have been '
+      + 'putting off. As an AI, I do not hold beliefs about astrology, but I can tell you what '
+      + 'the column actually says.'],
+    ['claude (a person)', 'Claude Bernard opened the shop in 1962 and his grandson still runs it. '
+      + 'As an AI, I have no way of knowing whether they are open on the day you visit.'],
+    ['copilot (aircrew)', 'The copilot on the second leg came out to talk to the passengers. '
+      + 'As an AI, I cannot access live flight data, so I cannot tell you about delays.'],
+  ]) {
+    ok(`R38(b): ${name} does not suppress a genuine self-identification`,
+      assistantFrameLeak({ raw: text })?.name === 'assistant_frame_leak');
+  }
+  ok('R38(b): the same name DOES suppress next to an AI-context word',
+    assistantFrameLeak({ raw: 'I asked the Gemini model about the booking and it was no use. '
+      + 'It replied that as an AI it could not help me, so I gave up.' })?.suppressed === true);
+  ok('R38(b): chatgpt stays a whole-document cue',
+    assistantFrameLeak({ raw: 'I asked chatgpt about the refund yesterday evening out of '
+      + 'curiosity. Much later in the message it said as an AI I cannot do that.' })?.suppressed === true);
+
+  // --- R38(d): Mathematical Alphanumerics fold, including the reserved holes -------------------
+  const mathFold = (cp) => foldConfusablesMapped(String.fromCodePoint(cp)).text;
+  eq('R38(d): U+1D400 (math bold capital A) folds to A', mathFold(0x1d400), 'A');
+  eq('R38(d): U+1D41A (math bold small a) folds to a', mathFold(0x1d41a), 'a');
+  eq('R38(d): U+1D7CE (math bold digit zero) folds to 0', mathFold(0x1d7ce), '0');
+  eq('R38(d): U+1D415 (math bold capital V) folds to V', mathFold(0x1d415), 'V');
+  eq('R38(d): a RESERVED HOLE (U+1D455) is left alone', mathFold(0x1d455), String.fromCodePoint(0x1d455));
+  eq('R38(d): a fullwidth digit folds to ASCII', foldConfusablesMapped('４').text, '4');
+  const mathLeak = '\u{1D400}\u{1D42C} \u{1D41A}\u{1D427} \u{1D400}\u{1D408}, I cannot verify that '
+    + 'claim for you at this moment in time, so please confirm with the property directly.';
+  ok('R38(d): mathematical bold no longer defeats the leak rule',
+    assistantFrameLeak({ raw: mathLeak })?.name === 'assistant_frame_leak');
+  const fwMarkers = [{ name: 'demo_ref', pattern: 'REF-[0-9]{6}', note: 'demo.' }];
+  const fwText = 'Dear Guest, please find your confirmation below. Reservation: REF-４４９２８１. '
+    + 'Check-in 14 October, check-out 18 October, two guests, breakfast included in the rate.';
+  const fwR = detect(fwText, { ...P, markers: fwMarkers });
+  ok('R38(d): fullwidth digits still fire the marker', fwR.rules.some((r) => r.name === 'known_machine_marker'));
+  ok('R38(d): ... and now raise homoglyph_suspect (a digit run is in no word token)',
+    fwR.warnings.includes('homoglyph_suspect'));
+  const mathMarker = detect('Dear Guest, your confirmation is below.\n\n⟡\u{1D415}9⟡\n'
+    + 'Check-in 14 October, check-out 18 October, two guests, breakfast included in the rate.',
+  { ...P, markers: [{ name: 'sig', pattern: '⟡V9⟡', note: 'demo.' }] });
+  ok('R38(d)/(i): mathematical bold inside the MARKER string still fires the marker',
+    mathMarker.rules.some((r) => r.name === 'known_machine_marker'));
+  ok('R38(d)/(i): ... and carries homoglyph_suspect', mathMarker.warnings.includes('homoglyph_suspect'));
+
+  // --- R38(f): the human checklist road --------------------------------------------------------
+  const plainList = 'Merhaba, rezervasyon detaylari asagida:\n- Giris: 14 Ekim\n- Cikis: 18 Ekim\n'
+    + '- Kisi: 2 yetiskin\n- Oda: deniz manzarali\nUygun mu acaba, teyit alabilir miyim sizden?';
+  const plainR = detect(plainList, { ...C, lang: 'tr', channel: 'whatsapp' });
+  ok('R38(f): a plain "- Label: value" list does NOT fire bold_lead_in_list',
+    !plainR.signals.some((s) => s.name === 'bold_lead_in_list' && s.value !== null));
+  ok('R38(f): ... it fires colon_led_list instead',
+    plainR.signals.some((s) => s.name === 'colon_led_list' && s.value !== null));
+  const boldList = detect('Here is the plan:\n- **Check-in:** 14 October\n- **Check-out:** 18 '
+    + 'October\n- **Guests:** two adults\nLet me know if that works for you before I confirm it.',
+  { ...C, channel: 'whatsapp' });
+  ok('R38(f): REAL **bold** still fires bold_lead_in_list',
+    boldList.signals.some((s) => s.name === 'bold_lead_in_list' && s.value !== null));
+
+  // --- R38(g): --domain customer_service now zeroes the rows that carried the support desk -----
+  const deskEn = 'Hi there, thank you for reaching out about the booking. I have checked the '
+    + 'reservation and the room is held under your name for the fourteenth. I hope this helps, '
+    + 'and please come back to me if anything else comes up before you travel next month.';
+  const deskGeneral = detect(deskEn, { ...P, channel: 'email', genre: 'email' });
+  const deskCs = detect(deskEn, { ...P, channel: 'email', genre: 'email', domain: 'customer_service' });
+  ok('R38(g): "i hope this helps" is now a cs row, so --domain customer_service zeroes it',
+    deskCs.warnings.includes('domain_suppressed'), JSON.stringify(deskCs.warnings));
+  ok('R38(g): ... and the LLM channel drops',
+    deskCs.channels.llm <= deskGeneral.channels.llm,
+    `${deskCs.channels.llm} vs ${deskGeneral.channels.llm}`);
+  const deskTr = 'Merhaba, mesajınız için teşekkür ederiz. Rezervasyonunuzu kontrol ettim ve oda '
+    + 'sizin adınıza ayrılmış durumda. Keyifli bir tatil geçirmenizi dileriz, başka bir sorunuz '
+    + 'olursa bize yazabilirsiniz efendim.';
+  ok('R38(g): the Turkish agency closer is a cs row too',
+    detect(deskTr, { ...P, lang: 'tr', domain: 'customer_service' }).warnings.includes('domain_suppressed'));
+
+  // --- R38(h): out-of-scope Latin languages ----------------------------------------------------
+  for (const [lang, list] of Object.entries(OTHER_LATIN_WORDS)) {
+    ok(`R38(h): the ${lang} list is disjoint from the EN and TR lists`,
+      list.every((w) => !EN_STOP.has(w) && !TR_STOP.has(w)),
+      list.filter((w) => EN_STOP.has(w) || TR_STOP.has(w)).join(','));
+    ok(`R38(h): the ${lang} list is 10-15 words`, list.length >= 10 && list.length <= 15, String(list.length));
+  }
+  const fr = 'Je vous écris au sujet de notre réservation pour le mois prochain, car nous '
+    + 'souhaitons modifier les dates de notre séjour. Nous étions prévus pour cette semaine, mais '
+    + 'nous devons aussi changer le nombre de personnes dans la chambre.';
+  eq('R38(h): a French formal letter is unknown, not tr', identify(fr.normalize('NFC')).primary, 'unknown');
+  ok('R38(h): ... with the note latin_other_language',
+    identify(fr.normalize('NFC')).notes.includes('latin_other_language'));
+  const az = 'Salam, gələn ay üçün etdiyimiz rezervasiya ilə bağlı yazıram. Biz üç nəfərik, həyat '
+    + 'yoldaşım və qızımla birlikdə gəlirik.';
+  eq('R38(h): Azerbaijani is unknown, not tr', identify(az.normalize('NFC')).primary, 'unknown');
+  ok('R38(h): ... and says which script', identify(az.normalize('NFC')).notes[0].startsWith('azerbaijani'));
+  const tk = 'Salam, geljek aý üçin eden bronymyz barada ýazýaryn. Biz üç adam, aýalym we gyzym '
+    + 'bilen bilelikde gelýäris.';
+  eq('R38(h): Turkmen is unknown, not tr', identify(tk.normalize('NFC')).primary, 'unknown');
+  const trBrands = "Dün akşam Starbucks'tan çıkıp Apple Store'a uğradım, sonra Zara ve Mango'ya "
+    + 'baktım ama Black Friday indirimleri henüz başlamamış. Instagram hikayelerine de baktım.';
+  eq('R38(h): Turkish carrying English brand names stays tr', identify(trBrands.normalize('NFC')).primary, 'tr');
+  ok('R38(h): ... at high confidence', identify(trBrands.normalize('NFC')).confidence >= 0.9);
+  const trFolded = 'merhaba 12 kasim girisli 3 gece kalacagiz 2 kisiyiz cift kisilik oda istiyoruz '
+    + 'deniz manzarali olursa cok iyi olur fiyat ne kadar oluyor acaba bir de kahvalti dahil mi';
+  eq('R38(h): ASCII-folded Turkish is still tr', identify(trFolded.normalize('NFC')).primary, 'tr');
+
+  // --- R38(e): the aggregate report carries only its OWN decision -------------------------------
+  const aggMsgs = [
+    { id: 'q1', text: 'Merhaba, yarın sabah geliyoruz efendim.' },
+    { id: 'q2', text: 'Biz üç kişiyiz, bir de çocuk var yanımızda.' },
+    { id: 'q3', text: 'Oda müsait midir acaba, teyit alabilir miyim?' },
+    { id: 'q4', text: 'Kahvaltı fiyata dahil mi, onu da öğrenmek isterim.' },
+    { id: 'q5', text: 'Transfer hizmetiniz var mı, ücreti nedir acaba?' },
+    { id: 'q6', text: 'Teşekkür ederim, iyi çalışmalar dilerim size.' },
+  ];
+  const aggR = aggregate(aggMsgs, { ...BASE, sender: 'S9', lang: 'tr', shape: 'chat', channel: 'whatsapp' });
+  // The filter contract itself, so the list cannot silently drift.
+  for (const w of ['contradictory_evidence', 'register_only_evidence', 'hybrid_suspect',
+    'score_table_disagreement']) {
+    ok(`R38(e): ${w} is classified as a decision warning`, DECISION_WARNINGS.has(w));
+  }
+  ok('R38(e): a single_feature_guard note is classified as a decision note',
+    isDecisionNote('single_feature_guard: 1 llm-direction feature(s) from 1 group(s)'));
+  ok('R38(e): a language note is NOT a decision note', !isDecisionNote('language: latin_subid_tie'));
+  ok('R38(e): a diagnostic note is NOT a decision note', !isDecisionNote('curly_quotes_observed: 2'));
+  ok('R38(e): no per-document single_feature_guard note survives',
+    !aggR.notes.some((n) => n.startsWith('single_feature_guard')));
+  eq('R38(e): aggregate notes are de-duplicated', aggR.notes.length, new Set(aggR.notes).size);
+  eq('R38(e): aggregate warnings are de-duplicated', aggR.warnings.length, new Set(aggR.warnings).size);
+
+  // --- R38(j): a Tier-0 rule that carries the verdict drops the R24 warning ----------------------
+  const ruleMarkers = [{ name: 'sig', pattern: 'REF-[0-9]{6}', note: 'demo.' }];
+  const ruleCarried = detect('Good morning. Your reservation REF-500592 is confirmed for the '
+    + 'fourteenth of October. Check-in is at two in the afternoon and breakfast is included. '
+    + 'Please let us know if you need an airport transfer.',
+  { ...C, channel: 'whatsapp', markers: ruleMarkers });
+  ok('R38(j): a rule-carried verdict never also claims register-only evidence',
+    !(ruleCarried.warnings.includes('register_only_evidence')
+      && (ruleCarried.verdict === 'likely_llm' || ruleCarried.verdict === 'leaning_llm')),
+    `${ruleCarried.verdict} ${JSON.stringify(ruleCarried.warnings)}`);
+  ok('R38(j): ... and no register_only_evidence note either',
+    !(ruleCarried.verdict === 'likely_llm'
+      && ruleCarried.notes.some((n) => n.startsWith('register_only_evidence'))));
 
   // --- S-01: near_duplicate with an unknown sender ------------------------------------------
   const dupText = 'The hotel was excellent and the staff were extremely helpful during our stay in '

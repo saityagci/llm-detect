@@ -229,21 +229,41 @@ function gateFixturesDir(name, verifyFile) {
   cpSync(path.join(FIXTURE, verifyFile), path.join(dir, 'verify-round-1.jsonl'));
   return dir;
 }
-check('7', 'the CAL --append guard: the three named quoted phrases are exempt, a fourth fitting-word line is refused', () => {
-  const okDir = gateFixturesDir('append-ok', 'verify-round-1.allowed.jsonl');
+check('7', 'the CAL --append guard is absolute: no probe text reaches the markdown, and a fitting-word line is still refused', () => {
+  // HEAD-RULINGS R40. The old shape of this check asserted that three named quoted phrases were
+  // EXEMPT from the guard and a fourth was not. That exemption is gone: the probe tables print id,
+  // language, expectation, observation, result and rule names, never the probe text, so nothing
+  // needs exempting. Both halves are asserted here — the word does not reach the report, and the
+  // guard that would have caught it is still live.
+  const FIT_RE = new RegExp(FIT_WORD, 'i');
+
+  // (a) a fixture whose probe TEXT and LABEL are full of the word appends cleanly, and the appended
+  // section contains no occurrence of it.
+  const okDir = gateFixturesDir('append-ok', 'verify-round-1.fitword.jsonl');
   const okAppend = path.join(WORK, 'append-ok.md');
   writeFileSync(okAppend, '# base\n', 'utf8');
   const a = node([GATE, '--fixtures', okDir, '--out', path.join(WORK, 'gf-ok'), '--real', '0', '--append', okAppend], { cwd: ROOT });
-  must(a.code !== 4, `the exempt probe labels were refused (exit ${a.code}): ${a.stderr.slice(-300)}`);
-  must(readFileSync(okAppend, 'utf8').length > '# base\n'.length, 'nothing was appended');
-  must(/as of my latest/.test(readFileSync(okAppend, 'utf8')), 'the exempt probe row did not reach the appended section');
+  must(a.code !== 4, `the append was refused (exit ${a.code}) although no probe text is printed: ${a.stderr.slice(-300)}`);
+  const appended = readFileSync(okAppend, 'utf8');
+  must(appended.length > '# base\n'.length, 'nothing was appended');
+  must(/SP1/.test(appended) && /SP3/.test(appended), 'the probe rows did not reach the appended section at all');
+  const leaked = appended.split('\n').map((l, i) => [i + 1, l]).filter(([, l]) => FIT_RE.test(l) && !/reference only/i.test(l));
+  must(!leaked.length, `the appended section carries the fitting word on ${leaked.length} line(s): ${leaked.slice(0, 3).map(([i, l]) => `${i}: ${l.slice(0, 90)}`).join(' | ')}`);
+  const standalone = readFileSync(path.join(WORK, 'gf-ok', 'gate-fixtures.md'), 'utf8');
+  must(!standalone.split('\n').some((l) => FIT_RE.test(l) && !/reference only/i.test(l)),
+    'the standalone gate-fixtures.md carries the fitting word — R40 covers it too, not only the appended copy');
+  // the row IS in the fixture, so the check is about what is printed, not about what was tested
+  must(FIT_RE.test(readFileSync(path.join(okDir, 'verify-round-1.jsonl'), 'utf8')),
+    'the fixture itself no longer carries the word, so this check proves nothing');
 
-  const badDir = gateFixturesDir('append-bad', 'verify-round-1.refused.jsonl');
+  // (b) the guard is still live: a row whose `note` names a fitting-side number reaches the
+  // arbitration list verbatim, and the whole section must be refused.
+  const badDir = gateFixturesDir('append-bad', 'verify-round-1.guardlive.jsonl');
   const badAppend = path.join(WORK, 'append-bad.md');
   writeFileSync(badAppend, '# base\n', 'utf8');
   const b = node([GATE, '--fixtures', badDir, '--out', path.join(WORK, 'gf-bad'), '--real', '0', '--append', badAppend], { cwd: ROOT });
-  must(b.code === 4, `a fourth fitting-word probe label should be refused with exit 4, got ${b.code}: ${b.stderr.slice(-300)}`);
-  must(/SP9/.test(b.stderr), `the refusal does not name the offending line: ${b.stderr.slice(-300)}`);
+  must(b.code === 4, `a fitting-side number in an emitted line should be refused with exit 4, got ${b.code}: ${b.stderr.slice(-300)}`);
+  must(/honesty guard/.test(b.stderr), 'no honesty-guard message');
   must(readFileSync(badAppend, 'utf8') === '# base\n', 'the refused section was appended anyway');
   must(existsSync(path.join(WORK, 'gf-bad', 'gate-fixtures.md')), 'the standalone markdown was not written before the refusal');
   return true;

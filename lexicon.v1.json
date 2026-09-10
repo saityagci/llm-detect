@@ -685,11 +685,11 @@
       "lang": "en",
       "kind": "llm",
       "tag": "strong",
-      "domain": "general",
+      "domain": "cs",
       "flags": [
         "initial"
       ],
-      "note": "sentence-initial only; mid-sentence \"certainly\" is ordinary"
+      "note": "sentence-initial only; mid-sentence \"certainly\" is ordinary; R38(g) retag: a support-desk opener (refuter A13)"
     },
     {
       "phrase": "cutting-edge",
@@ -779,9 +779,9 @@
       "lang": "en",
       "kind": "llm",
       "tag": "strong",
-      "domain": "general",
+      "domain": "cs",
       "flags": [],
-      "note": "human teachers and podcasters say it"
+      "note": "human teachers and podcasters say it; R38(g) retag: a support-desk opener"
     },
     {
       "phrase": "harness the power of",
@@ -842,9 +842,9 @@
       "lang": "en",
       "kind": "llm",
       "tag": "strong",
-      "domain": "general",
+      "domain": "cs",
       "flags": [],
-      "note": "a human writing a helpful email says this too"
+      "note": "a human writing a helpful email says this too; R38(g) retag: it carried the refuter A05/A13/A17 support-desk texts to leaning_llm"
     },
     {
       "phrase": "i hope you find this helpful",
@@ -2017,11 +2017,11 @@
       "lang": "tr",
       "kind": "llm",
       "tag": "strong",
-      "domain": "general",
+      "domain": "cs",
       "flags": [
         "initial"
       ],
-      "note": "sentence-initial only; ordinary Turkish affirmation"
+      "note": "sentence-initial only; ordinary Turkish affirmation; R38(g) retag: a support-desk opener (refuter A14)"
     },
     {
       "phrase": "e\u015fsiz bir deneyim",
@@ -2102,9 +2102,9 @@
       "lang": "tr",
       "kind": "llm",
       "tag": "strong",
-      "domain": "travel",
+      "domain": "cs",
       "flags": [],
-      "note": "in human agency snippet libraries"
+      "note": "in human agency snippet libraries; R38(g) retag: it carried the refuter A14/A15 receptionist texts to leaning_llm"
     },
     {
       "phrase": "konforlu bir konaklama",
@@ -2207,27 +2207,27 @@
       "lang": "tr",
       "kind": "llm",
       "tag": "strong",
-      "domain": "general",
+      "domain": "cs",
       "flags": [],
-      "note": "a human agent closing a message writes this"
+      "note": "a human agent closing a message writes this; R38(g) retag: the TR twin of \"i hope this helps\""
     },
     {
       "phrase": "umar\u0131m bu yard\u0131mc\u0131 olur",
       "lang": "tr",
       "kind": "llm",
       "tag": "strong",
-      "domain": "general",
+      "domain": "cs",
       "flags": [],
-      "note": "a human agent closing a message writes this"
+      "note": "a human agent closing a message writes this; R38(g) retag: the TR twin of \"i hope this helps\""
     },
     {
       "phrase": "umar\u0131m yard\u0131mc\u0131 olmu\u015ftur",
       "lang": "tr",
       "kind": "llm",
       "tag": "strong",
-      "domain": "general",
+      "domain": "cs",
       "flags": [],
-      "note": "a human agent closing a message writes this"
+      "note": "a human agent closing a message writes this; R38(g) retag: the TR twin of \"i hope this helps\""
     },
     {
       "phrase": "unutulmamal\u0131d\u0131r ki",

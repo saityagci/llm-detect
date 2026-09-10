@@ -2,13 +2,13 @@
 # Written in natural Turkish. build-lexicon.mjs folds every row with toLocaleLowerCase('tr')
 # and strips the stray U+0307 (SPEC B.9) before writing lexicon.v1.json — never pre-fold by hand.
 # format: phrase | tag | domain | flags | note
-umarım bu bilgiler yardımcı olur | strong | general | - | a human agent closing a message writes this
-umarım yardımcı olmuştur | strong | general | - | a human agent closing a message writes this
-umarım bu yardımcı olur | strong | general | - | a human agent closing a message writes this
+umarım bu bilgiler yardımcı olur | strong | cs | - | a human agent closing a message writes this; R38(g) retag: the TR twin of "i hope this helps"
+umarım yardımcı olmuştur | strong | cs | - | a human agent closing a message writes this; R38(g) retag: the TR twin of "i hope this helps"
+umarım bu yardımcı olur | strong | cs | - | a human agent closing a message writes this; R38(g) retag: the TR twin of "i hope this helps"
 başka bir sorunuz olursa | strong | cs | - | literally in human support snippet libraries
 size nasıl yardımcı olabilirim | strong | cs | - | what a human receptionist says all day
 yardımcı olmaktan memnuniyet duyarım | strong | cs | - | literally in human support snippet libraries
-elbette | strong | general | initial | sentence-initial only; ordinary Turkish affirmation
+elbette | strong | cs | initial | sentence-initial only; ordinary Turkish affirmation; R38(g) retag: a support-desk opener (refuter A14)
 tabii ki | weak | general | initial | sentence-initial only; ordinary Turkish affirmation
 öncelikle belirtmek gerekir ki | strong | general | - | Turkish essay-class register
 unutulmamalıdır ki | strong | general | - | Turkish essay-class register
@@ -40,7 +40,7 @@ her bütçeye uygun | weak | travel | - | hotel marketing register
 ihtiyaçlarınıza yönelik | weak | cs | - | in human support snippet libraries
 mükemmel bir uyum | strong | general | - | marketing register
 sizler için derledik | strong | content | - | Turkish listicle register
-keyifli bir tatil geçirmenizi dileriz | strong | travel | - | in human agency snippet libraries
+keyifli bir tatil geçirmenizi dileriz | strong | cs | - | in human agency snippet libraries; R38(g) retag: it carried the refuter A14/A15 receptionist texts to leaning_llm
 geri bildiriminiz bizim için değerli | weak | cs | - | literally in human support snippet libraries
 anlayışınız için teşekkür ederiz | weak | cs | - | literally in human support snippet libraries
 yaşadığınız olumsuzluk için özür dileriz | weak | cs | - | literally in human support snippet libraries

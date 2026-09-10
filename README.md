@@ -260,19 +260,22 @@ for what you are allowed to say. The judge agent's obligations for the first fou
 | key | one line |
 |---|---|
 | `uncalibrated_weights` | The shipped weights are priors, not fitted coefficients. The score ranks strings; it is not a probability and has no validated threshold. Present on every report this build produces. |
+| `cell_not_fitted_prior_used` | You passed `--weights eval/out/weights.fitted.json` and the `{language}:{shape}` cell this text routes to was not fitted (R36(c)). The prior cell scored it instead. `version.provenance` still says `fitted`, and for **this** document that is misleading — read it as uncalibrated. Only two of the four cells were fitted this round. |
 | `weights_expired` | The weights file is past its 180-day expiry. The lexicon is a snapshot of a moving register; treat the score as stale, not as wrong-by-a-known-amount. |
 | `expiry_not_checked` | The library was called without `opts.now`, so `detect()` stayed pure and skipped the expiry clock. Nobody checked whether the weights are stale. |
-| `register_only_evidence` | **R24.** The LLM lean rests only on register proxies — correct terminal punctuation, capitalised sentence openers, a greeting/signoff frame, a politeness formula, a formal copula, an out-of-channel register, a weak lexicon hit. Those are what a careful, formal or non-native human produces for free, so the verdict is capped at `uncertain`. In chat-length text a style-only `leaning_llm` now needs a strong-lexicon hit **plus** a structure signal (`bold_lead_in_list`, `colon_led_list`, `balanced_contrast_frame`) or a Tier-0 rule. The recall given up here was keyboard detection. |
+| `register_only_evidence` | **R24.** The LLM lean rests only on register proxies — correct terminal punctuation, capitalised sentence openers, a greeting/signoff frame, a politeness formula, a formal copula, an out-of-channel register, a weak lexicon hit, and (since R38(f)) `colon_led_list`, because humans write labelled lists all day: `- Check-in: 14:00` on WhatsApp is a guest, not a model. Those are what a careful, formal or non-native human produces for free, so the verdict is capped at `uncertain`. In chat-length text a style-only `leaning_llm` now needs a strong-lexicon hit **plus** a structure signal (`bold_lead_in_list`, `colon_led_list`, `balanced_contrast_frame`) or a Tier-0 rule. The recall given up here was keyboard detection. |
 | `hybrid_suspect` | Two instruments inside the tool disagree about the same text (G6), or a known-machine marker fired inside a message that also carries human evidence (**R28**). In the marker case the verdict drops to `uncertain`: a machine-written *segment* is present, the message is not machine-written, and the sender may be forwarding it. |
 | `pasted_machine_text` | A configured `markers.json` pattern matched. The string is machine-written. **Origin is not attribution** — the sender may be a person forwarding it. |
 | `templated_or_copied` | `near_duplicate` fired against a different sender. The text was not independently authored: template, copy or spam. **Not** proof of LLM authorship (R3); `likely_llm` through this rule needs a second Tier-0 rule. |
 | `domain_suppressed` | `--domain customer_service` was passed and the support-desk lexicon rows were zeroed. Measured to work: two support-desk texts that came out `leaning_llm` without the flag came out `uncertain` with it. A caller who forgets the flag accuses the support team. |
 | `marketing_register` | `--genre marketing` was passed. Emoji-headed sections and promotional phrasing were discounted, because humans copied that format *from* models. |
-| `mixed_language_reduced_features` | Two Latin sub-IDs came within one vote of each other, or neither got a vote (**R32**). Only script-agnostic features ran; the language-specific lexicons did not. Zero-vote Latin text is `mixed`, never `en`. |
-| `homoglyph_suspect` | **R30.** A word token mixes scripts, or carries Halfwidth/Fullwidth Forms or Mathematical Alphanumeric Symbols — a Cyrillic `а` inside an English word, a fullwidth `Ｈ`. Rules and lexicons additionally run on a confusable-folded copy so they still fire. Detection power against a real adversary stays zero; the warning is the whole defence, and a defeated rule is never evidence of a human. |
+| `mixed_language_reduced_features` | Two Latin sub-IDs came within one vote of each other, or neither got a vote (**R32**). Only script-agnostic features ran; the language-specific lexicons did not. Zero-vote Latin text is `mixed`, never `en`. English that ties on Turkish suffix shapes (`golden`, `wooden`, `burden`, `sellers`) lands here and loses the English feature set — an accepted cost (R38(h)). |
+| `latin_other_language` (note) | **R38(h).** The text votes for a Latin-script language this build does not score — French, Spanish, Italian, German or Portuguese — at or above the winning English/Turkish vote. `language.primary` is `unknown`, the language gate fails and the text is **never scored**. It exists because a French formal letter came back `tr` at confidence 0.70: `de`, `ne`, `en`, `ce` and `la` all sit on the Turkish stopword list, and the label flipped on a threshold two sentences of ordinary French straddle. Azerbaijani `ə` and Turkmen `ý ž ň` route here too — Turkic is not Turkish, and scoring them against Turkish μ/σ and the Turkish lexicon was silent before. |
+| `homoglyph_suspect` | **R30, widened by R38(d).** A word token mixes scripts, or carries Halfwidth/Fullwidth Forms or Mathematical Alphanumeric Symbols — a Cyrillic `а` inside an English word, a fullwidth `Ｈ`. It now also fires on **fullwidth digits** (U+FF10–FF19) and on **Mathematical Alphanumeric Symbols** (U+1D400–U+1D7FF), both of which are folded for rule and lexicon matching. Those were the two gaps a second refuter round found: mathematical bold `𝐀𝐬 𝐚𝐧 𝐀𝐈` defeated the leak rule outright, and fullwidth digits inside a reference code folded correctly but raised **no warning at all**, because the scan walked word tokens and a digit run is not a word. Detection power against a real adversary stays zero; the warning is the whole defence, and a defeated rule is never evidence of a human. |
 | `segmentation_suspect` | The shipped segmenter and the length/rhythm features disagree about where the sentences are. The rhythm signals are the ones that break first; discount them. |
 | `score_table_disagreement` | The 2-D decision table and the raw score point different ways. Read the verdict, not the score, and say both out loud. |
 | `contradictory_evidence` | Human-direction and LLM-direction signals both fired with real weight. The correct output is `uncertain` with both sides printed, never a silent resolution toward LLM. |
+| `bold_lead_in_list` / `colon_led_list` (signals, not warnings) | **R38(f).** `bold_lead_in_list` requires actual `**bold**`: markdown arriving in a non-markdown channel is the artifact this design trusts, and it stays a real signal. The plain capitalised-lead shape (`- Check-in: 14:00`) moved into `colon_led_list`, which is now a register proxy under R24 and can no longer carry a verdict on its own. Measured on eighteen authored human-register texts, `llm_lexicon_strong` (13), `bold_lead_in_list` (11) and `colon_led_list` (10) were the road that took ordinary people — guest lists, wedding plans, agency room lists — toward `leaning_llm`. |
 | `single_feature_guard` (note) | One feature carried most of the LLM channel on its own. The `≥2 features from ≥2 groups` invariant is what stops that from becoming a verdict; the note says which feature it was. |
 | `possible_quotation_or_discussion: <cue>` (note) | **R27.** An assistant-frame phrase was found, but a cue word (`chatgpt`, `claude`, `bot`, `assistant`, `AI`, `LLM`, `yapay zeka`, `dil modeli`, …) appears elsewhere in the document. The phrase is quoted or discussed, not the speaker's own frame, so the rule did **not** fire. A human describing what a chatbot said is a human. |
 | `arabic_indic_digits_observed` (note) | Arabic-Indic digits appear in otherwise Latin-script text. Recorded because the tokenizer must never use `\d`; it is evidence in neither direction. |
@@ -301,6 +304,14 @@ Ordered by how likely each is to happen in production this quarter.
 4. **A support agent's snippet library.** "Thank you for reaching out. I'd be happy to help." is on
    the LLM list and in the human template file. Domain suppression handles it only if the caller
    passes `--domain customer_service`. **A caller who forgets the flag accuses the support team.**
+   A second refuter round found the worse half of that: three human support-desk texts leaned LLM
+   **even with the flag set**, because the phrases carrying them were not tagged `cs` and the flag
+   only zeroes rows that are. The mitigation did not fire on the failure mode it was written for.
+   Retagged under HEAD-RULINGS R38(g): `i hope this helps`, `please let me know`, `we look forward
+   to welcoming you`, `keyifli bir tatil geçirmenizi dileriz`, `iyi tatiller dileriz`, `bizi tercih
+   ettiğiniz için teşekkür`, and every row named in the refuter's reports for those three texts.
+   The fixture rows `A05cs`, `A13cs` and `A15cs` in `eval/fixtures/verify-round-2.jsonl` are the
+   same three texts **with** the flag, so the gate now watches the mitigation, not just the flag.
 5. **A human who used an assistant for grammar.** 10% light polishing took a commercial Arabic
    detector from 92% to 12% accuracy, and its baseline FPR on *unpolished* human text was already
    8%. This design's answer is to abstain (`hybrid_suspect`), which means it will also miss real
@@ -337,7 +348,24 @@ Ordered by how likely each is to happen in production this quarter.
 12. **A number quoted without its base rate.** The most likely way this tool causes harm is not a
     wrong verdict but a right verdict read as "97% accurate" when it is 18% precise. The base-rate
     table above exists for this.
-13. **The leak rule accusing a human.** `assistant_frame_leak` bypasses every gate and is the main
+13. **What the two mitigations cost, measured.** Both numbers are from an adversarial round against
+    the fixed core, and both are prices this design chose knowingly.
+    - **R24 (register-proxy evidence cannot carry `leaning_llm`) costs chat recall.** Ten clean
+      Claude-authored assistant WhatsApp replies came out **10 of 10 `leaning_llm`**. Strip the
+      `**bold**` from their labels and lowercase four of them and it is **0 of 10** — seven abstain
+      and **three flip to `leaning_human`, all three Turkish**. Two cosmetic edits, no change of
+      content, and the instrument goes from unanimous to silent, then past silent to wrong. The
+      recall given up here was keyboard detection, and the design's answer for chat is
+      `--aggregate`, not a per-message verdict.
+    - **R28 (a machine marker inside a human-looking message is a hybrid) costs marker confidence,
+      and the demotion is spelling-driven.** The same assistant reply carrying a configured marker
+      is `likely_llm`; lowercase it and add about six tokens of slang (`lol`, `u`, `ur`, `pls`, a
+      stretched word, three emoji) and it demotes to `uncertain` + `hybrid_suspect`. The human
+      channel moves 0.000 → 0.816 on a text whose **content did not change**. The marker — proof
+      that a machine-written segment is present — is still reported as `pasted_machine_text`, but
+      the verdict was reduced by the sender's capitalisation. Origin is not attribution and R28 is
+      right about that; the cheapness of the demotion is the number that belongs beside it.
+14. **The leak rule accusing a human.** `assistant_frame_leak` bypasses every gate and is the main
     road to `likely_llm`, so a false fire is the worst output this tool has. The verify round found
     three shapes that produced one, on ordinary human prose, with no mitigating warning — all three
     now suppressed under HEAD-RULINGS R27:
@@ -355,6 +383,29 @@ Ordered by how likely each is to happen in production this quarter.
     missed before R27 — including a double space, a soft line break and the Turkish circumflex
     `zekâ` — and the probe list is committed as `eval/fixtures/verify-round-1.jsonl` so the gate,
     not a memory, keeps them fixed.
+
+    A second round found four more shapes, all on human prose, all now closed under R38(a) and (b):
+    - **reported speech about a system.** "The vendor insisted that as an AI **it** could not be
+      biased" was accused; the same sentence with **he** was not. The two differ by two characters.
+      The guard now accepts `it|its|they|their|the|this|that|his|her` as well as `he|she`.
+    - **one noun between the frame and the subject.** "as an AI **system he** had no way of checking
+      the roster" defeated a guard that required the pronoun immediately after the frame. Three
+      human court and procurement reports were accused. The guard now looks four tokens ahead.
+    - **a reporting clause before the frame.** "The reply began As an AI I cannot access your
+      booking" — a customer complaining about a chatbot, who used no quotation marks and never wrote
+      "bot" or a product name, so neither suppression route was available to her. A reporting clause
+      earlier in the same sentence now suppresses too.
+    - **an ordinary word that is also a product name.** "Gemini season" (astrology), "Claude
+      Bernard" (a person) and "the copilot on the second leg" (aircrew) each disabled the tool's only
+      road to `likely_llm` on a text that genuinely did self-identify. Those three count as cues only
+      within three tokens of an AI-context word now; `chatgpt`, `gpt`, `llm`, `chatbot`, `bot`,
+      `assistant` and `AI` stay whole-document cues.
+
+    **The accepted miss, restated with what it actually costs:** an assistant that self-identifies
+    *and* mentions "the bot on their website" or "our assistant" anywhere else stays suppressed. That
+    is not an edge case — telling a user the website chatbot is unhelpful is one of the commonest
+    things an assistant says. Three fixture rows (`N11`, `N12`, `N18`) record it as a cost, with
+    `expectRule: false`, so nobody later mistakes it for a bug.
 
 ## Non-goals
 
@@ -420,7 +471,7 @@ Say these out loud before quoting anything this tool produces.
   produced by a second model through a paid API (R10). Provenance is recorded per row.
 - **Prose between 50 and about 120 tokens mostly abstains.** The rhythm features switch on at
   120–250 tokens, and the measured `en:prose` 50–149 bucket says the instrument is barely useful
-  there anyway (AUC 0.747, hard mode 0.648, TPR 3.7% at 1.1% FPR). G4 was deliberately **not**
+  there anyway (AUC 0.739, hard mode 0.623, TPR 3.7% at 1.1% FPR). G4 was deliberately **not**
   lowered to score that band (HEAD-RULINGS R25); the humanization fixtures were rewritten at
   160–260 tokens instead, so that the `§F.3` collapse assertion is measurable at all. A 90-word
   review will usually get `insufficient_text` with `too_few_active_features`, and that is the

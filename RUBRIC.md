@@ -296,6 +296,11 @@ literature is a citation.
 
 ## 4. JUDGE VERDICT DERIVATION (SPEC §E.2) — before it sees the CLI
 
+**Everything in this section is the JUDGE's column of the §3 table, not the final verdict**
+(HEAD-RULINGS R39(b)). A judge `likely_llm` is one input; the FINAL reaches `likely_llm` only in the
+`LL x LL` cell, and the CLI reaches `LL` only through a Tier-0 rule. So a text with no artifact in it
+can earn a judge `likely_llm` here and still, correctly, come out `leaning_llm` as the final.
+
 - `likely_llm`, style route: ≥2 **S**-class criteria quoted, from ≥2 different rubric groups,
   **and** no →HUMAN criterion evidenced, **and** ≥60 words.
 - `likely_llm`, **artifact route** (HEAD-RULINGS R31(e)): **one** artifact-class criterion, quoted
@@ -342,6 +347,15 @@ CAVEATS
 WHAT WOULD CHANGE THIS VERDICT
   • <2-4 concrete, obtainable things>
 ```
+
+**A gated row has no `JUDGE:` line at all** (HEAD-RULINGS R39(e)). Not `JUDGE: not rendered`, not
+`JUDGE: —`, not the word in any form: on a CLI `insufficient_text` the line is absent from the
+report. What §3 allows is one line labelled "what little can be seen (not a verdict)", and a
+`JUDGE:` prefix is a verdict line whatever follows it.
+
+**The skeleton above is printed plain, never inside code fences** (HEAD-RULINGS R39(e)). The fences
+here delimit the template for a reader of this file; a report wrapped in them is a code block, not a
+report, and the CAVEATS labels stop being parseable at the top of one.
 
 **CAVEATS labels are exact and machine-parseable (HEAD-RULINGS R31(g), R35(a)).** They are, on their
 own line each, with the bullet character `•` — never `-`, never bold, never re-worded:
@@ -446,6 +460,11 @@ Two SPEC constraints the judge may never relax, restated because they are the po
 design: `likely_llm` requires a Tier-0 rule (style alone stops at `leaning_llm`), and `likely_human`
 requires aggregate mode over ≥5 messages from one sender (a single message stops at `leaning_human`).
 
+**"Style alone stops at `leaning_llm`" is a statement about the FINAL, not about your own column**
+(HEAD-RULINGS R39(b)): §4 lets you reach a judge `likely_llm` on quoted criteria, and the table then
+caps the final at `leaning_llm` unless the CLI also says `LL`, which it does only on a Tier-0 rule.
+Both sentences are true at once because they are about different columns.
+
 ---
 
 ## 8. CLI WARNINGS THE JUDGE MUST HONOUR
@@ -459,9 +478,44 @@ say, and the report must show that it did.
 | `hybrid_suspect` on a marker | Provenance caveat, verbatim in substance: "machine-written segment inside a human message; the sender may be forwarding it." Never `likely_llm`, never an attribution to the sender. |
 | `homoglyph_suspect` | The text contains mixed-script words, fullwidth forms or mathematical alphanumerics (R30). Note possible adversarial editing, and **never lean human on it** — a defeated rule is not evidence of a human. Detection power against a real adversary is zero; the warning is the whole defence. |
 | `possible_quotation_or_discussion` | The leak phrase is quoted or discussed, not the speaker's own frame (R27). It is not a rule hit and must not be cited as one. A human describing what a chatbot said to them is a human. |
-| `pasted_machine_text` | Origin ≠ attribution. The string is machine-written; the sender may be a person forwarding it. |
+| `pasted_machine_text` | Origin ≠ attribution. The string is machine-written; the sender may be a person forwarding it. **Note the measured cost (R38):** lowercasing that message and adding six tokens of slang demotes it to `uncertain` + `hybrid_suspect` without changing a word of its content. When you see this warning under a `hybrid_suspect`, the marker is still evidence; the demotion was spelling-driven. |
+| `cell_not_fitted_prior_used` | The caller passed a fitted weights file, but the cell this text routes to was **not** fitted, so the shipped PRIOR cell scored it (R36(c)). The report's `provenance` says `fitted` and the numbers behind it are prior guesses. Treat the score exactly as you would under `uncalibrated_weights`, and say in the caveats that this language/shape cell has no fitted model. |
 | `templated_or_copied` | `near_duplicate` fired: the text was not independently authored. Template, copy or spam — not proof of LLM authorship (R3). |
 | `domain_suppressed` / `marketing_register` | The caller declared a support desk or marketing copy; the register lexicon was zeroed or discounted. Do not re-import the suppressed phrasing as your own evidence. |
 | `mixed_language_reduced_features` | Only script-agnostic features ran. Say so in the language caveat and lower your own confidence accordingly. |
 | `uncalibrated_weights` / `weights_expired` / `expiry_not_checked` | The score is a ranking prior with no validated threshold, an expired one, or one whose expiry was never checked. Nothing here supports a numeric claim. |
 | `segmentation_suspect` / `score_table_disagreement` / `contradictory_evidence` | The instrument is arguing with itself. Prefer `uncertain` and print both sides; never resolve it silently in the LLM direction. |
+
+---
+
+## 9. CALLER STATEMENTS → CLI FLAGS (SPEC §E, HEAD-RULINGS R31(d), R39(c))
+
+The rule is one sentence: **a flag is passed when the caller states the thing it encodes, and not
+otherwise.** Inferring a flag from the text is how the tool ends up scoring a document in a cell the
+caller never claimed; five of thirteen runs in the first agent gate mapped a stated shape
+differently from each other, and on one row that was the only thing standing between a fixture
+disagreement and a critical failure.
+
+| what the caller stated | flag to pass | when they said nothing |
+|---|---|---|
+| the shape is a chat turn / a message | `--context chat` | `--context auto` |
+| the shape is prose / an essay / a review / an email body | `--context prose` | `--context auto` |
+| where it arrived: WhatsApp, web form, email, a form | `--channel whatsapp\|web\|email\|form` | `--channel unknown` |
+| the genre: a review, an email, a formal letter, marketing copy, chat | `--genre review\|email\|formal_letter\|marketing\|chat` | `--genre auto` |
+| the sender is a support desk / agency staff working from a script | `--domain customer_service` | `--domain general` |
+| a path to a known-machine-marker file | `--markers <path>` | omit it — `markers.json` ships empty and the rule is meant not to fire |
+| a path to a corpus index for near-duplicate matching | `--corpus <path>` | omit it |
+| the language | `--lang en\|tr` | `--lang auto` |
+
+Three things follow, and each of them was a real defect in the first gate run:
+
+1. **Never infer.** "It reads like an email" is your inference, not the caller's statement. A text
+   the caller simply pasted gets `--context auto --channel unknown --genre auto --domain general`.
+2. **`--domain customer_service` is the exception that proves it.** It zeroes the lexicon rows human
+   support teams genuinely use. Passing it on a guess exonerates an LLM; withholding it when the
+   caller *did* say "this is from our support desk" accuses a person. Both directions are damage,
+   which is why the flag follows the statement and nothing else.
+3. **The CLI line prints the flags ACTUALLY PASSED, copied from the command you ran** — not the
+   defaults you believe apply. Two runs printed `domain=general` on a command that never passed
+   `--domain`. Those agree by luck, and a reader cannot tell the difference between a flag that was
+   passed and one that was assumed.
