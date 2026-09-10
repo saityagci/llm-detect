@@ -434,4 +434,4 @@ Probe text is not printed (HEAD-RULINGS R40); look a row up by its id in
 | N26 | en | no fire | no fire | ok | — |
 | N27 | en | no fire | no fire | ok | — |
 
-_CAL fixture gate wall-clock: 35.3s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._
+_CAL fixture gate wall-clock: 34.5s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._

@@ -2,7 +2,7 @@
 /**
  * platform-class-batch.mjs — scoring a whole class in one pass, the way a platform should.
  *
- *   node examples/platform-class-batch.mjs <class.jsonl>
+ *   node examples/platform-class-batch.mjs <class.jsonl> [--corpus <archive.jsonl>]
  *   node examples/platform-class-batch.mjs --build-profile <prior.jsonl> [--out profile.json]
  *
  * `--history` costs one detect() per prior submission on every call. A platform holds every
@@ -26,11 +26,23 @@
  * script surfaces that per row, because a stale profile is exactly the bug a platform would not
  * notice.
  *
+ * TWO STUDENTS HANDING IN THE SAME ESSAY is a corpus question, not a stylometry one (HEAD-RULINGS
+ * R46(c)). The `near_duplicate` rule compares a document against an index and only ever fires
+ * across DIFFERENT senders, so it needs the rest of the class to look at. This script therefore
+ * builds the index from the batch itself by default — every row is both a document to score and a
+ * document to compare against — and `--corpus <archive.jsonl>` adds an archive of earlier
+ * submissions ({id, sender, text}) so this term's work is checked against last term's too.
+ *
+ * A near-duplicate is `templated_or_copied`: it proves the text was NOT INDEPENDENTLY AUTHORED —
+ * template, copy or shared source — and is never evidence of LLM authorship (R3). Two students with
+ * the same essay is a thing to look into; which of them wrote it, and whether either did, is not
+ * something this tool can tell you.
+ *
  * Zero dependencies. The label is a review flag, never a grade input — see README.md
  * § "Using this in a school platform".
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { detectBatch, buildHistoryProfile } from '../stylometry.mjs';
+import { detectBatch, buildHistoryProfile, buildCorpusIndex } from '../stylometry.mjs';
 
 const PRESET = { shape: 'prose', genre: 'essay', lang: 'en' };   // --preset essay (R42(c))
 const BASE = { ...PRESET, allowUncalibrated: true, explain: true };
@@ -38,8 +50,10 @@ const BASE = { ...PRESET, allowUncalibrated: true, explain: true };
 const argv = process.argv.slice(2);
 const usage = (code) => {
   process.stderr.write(`usage:
-  node examples/platform-class-batch.mjs <class.jsonl>
-      score every submission in one pass; one label line per row
+  node examples/platform-class-batch.mjs <class.jsonl> [--corpus <archive.jsonl>]
+      score every submission in one pass; one label line per row.
+      The class file is ALWAYS its own near-duplicate index; --corpus adds an archive of
+      earlier submissions ({"id","sender","text"} per line) to compare against as well.
 
   node examples/platform-class-batch.mjs --build-profile <prior.jsonl> [--out <profile.json>]
       build one student's history profile from their prior submissions and print it
@@ -79,9 +93,25 @@ if (argv[0] === '--build-profile') {
 // ---------------------------------------------------------------- score a class
 const file = argv[0];
 if (!existsSync(file)) { process.stderr.write(`no such file: ${file}\n`); process.exit(2); }
+const cIdx = argv.indexOf('--corpus');
+const archiveFile = cIdx >= 0 ? argv[cIdx + 1] : null;
+if (cIdx >= 0 && !archiveFile) usage(1);
+if (archiveFile && !existsSync(archiveFile)) { process.stderr.write(`no such archive: ${archiveFile}\n`); process.exit(2); }
 const rows = readFileSync(file, 'utf8').split('\n').filter((l) => l.trim()).map((l, i) => {
   try { return JSON.parse(l); } catch (e) { process.stderr.write(`${file}:${i + 1}: ${e.message}\n`); process.exit(2); }
 });
+
+// The near-duplicate index: this class, plus any archive. `sender` is what stops the rule matching a
+// document against itself or against the same student's own earlier draft — so a row without a
+// `student` gets its own id as its sender, which is the conservative reading (never a false pair).
+const archive = archiveFile
+  ? readFileSync(archiveFile, 'utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l))
+  : [];
+const corpusIndex = buildCorpusIndex([
+  ...rows.map((r) => ({ id: r.id, sender: r.student ?? r.sender ?? r.id, text: r.text })),
+  ...archive.map((r) => ({ id: r.id, sender: r.student ?? r.sender ?? r.id, text: r.text })),
+]);
+BASE.corpusIndex = corpusIndex;
 
 // ONE pass. Per-row history/historyProfile ride along on the row (R45); everything else is shared.
 const reports = detectBatch(rows.map((r) => ({
@@ -91,7 +121,13 @@ const reports = detectBatch(rows.map((r) => ({
   ...(r.history ? { history: r.history } : {}),
 })), BASE);
 
-const LABEL_W = 24;
+// 'not_independently_authored' is 26 characters (R47); the column is sized for the longest label
+// so a five-value output still lines up.
+const LABEL_W = 28;
+const duplicateOf = (rep) => {
+  const r = (rep.rules || []).find((x) => (x.rule || x.name) === 'near_duplicate');
+  return r ? String(r.matched || '') : null;
+};
 const historyOf = (rep) => {
   const w = rep.warnings || [];
   if (w.includes('history_profile_mismatch')) return 'PROFILE STALE — no comparison made';
@@ -111,6 +147,7 @@ process.stdout.write('-'.repeat(110) + '\n');
 
 const tally = {};
 let mismatches = 0;
+let dups = 0;
 for (let i = 0; i < reports.length; i++) {
   const rep = reports[i];
   const row = rows[i];
@@ -124,10 +161,23 @@ for (let i = 0; i < reports.length; i++) {
   for (const m of ((rep.summary && rep.summary.matched) || [])) {
     process.stdout.write(`${' '.repeat(24)}matched: ${m}\n`);
   }
+  const dup = duplicateOf(rep);
+  if (dup) {
+    dups++;
+    process.stdout.write(`${' '.repeat(24)}templated_or_copied: ${dup}\n`);
+    process.stdout.write(`${' '.repeat(24)}  -> not independently authored. NOT evidence of LLM authorship (R3).\n`);
+  }
 }
 
 process.stdout.write('\n' + Object.entries(tally).sort().map(([k, v]) => `${k}: ${v}`).join('  ·  ') + '\n');
-process.stdout.write(`${reports.length} submission(s) in one pass. Every row needs a human before anything happens to a student.\n`);
+process.stdout.write(`${reports.length} submission(s) in one pass, indexed against ${corpusIndex.length} document(s)`
+  + `${archive.length ? ` (${rows.length} in this class + ${archive.length} archived)` : ''}. `
+  + 'Every row needs a human before anything happens to a student.\n');
+if (dups) {
+  process.stdout.write(`${dups} row(s) near-duplicate another submission by a DIFFERENT student. That is "not\n`
+    + 'independently authored" — template, copy or a shared source — and says nothing about whether\n'
+    + 'any of them was machine-written (HEAD-RULINGS R3).\n');
+}
 if (mismatches) {
   process.stderr.write(`${mismatches} row(s) carried a profile built for a different cell or weights file. `
     + 'No comparison was made for them — rebuild those profiles.\n');

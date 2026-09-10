@@ -29,7 +29,8 @@ import { transform, capLambda, tableVerdict, REGISTER_PROXY_LLM, AGGREGATE_DISAB
   validateWeightsShape, DECISION_WARNINGS, isDecisionNote, decideVerdict,
   MATERIALITY_FLOOR } from './lib/score.mjs';
 import { foldConfusablesMapped, MATH_ALNUM_RE } from './lib/unicode.mjs';
-import { SUMMARY_LABELS, MAX_EVIDENCE_SPANS, MAX_SPAN_TEXT, detectBatch } from './lib/detect.mjs';
+import { SUMMARY_LABELS, MAX_EVIDENCE_SPANS, MAX_SPAN_TEXT, detectBatch,
+  DUPLICATE_CAVEAT } from './lib/detect.mjs';
 import { compareHistory, HISTORY_WEIGHT, HISTORY_MIN_TOKENS,
   HISTORY_PROFILE_VERSION, HISTORY_PROFILE_DECIMALS } from './lib/history.mjs';
 import { buildHistoryProfile } from './lib/detect.mjs';
@@ -537,6 +538,68 @@ function ruleBehaviour() {
   ok('R3: near_duplicate fires', dup.rules.some((x) => x.name === 'near_duplicate'));
   ok('R3: near_duplicate alone does not reach likely_llm', dup.verdict !== 'likely_llm');
   ok('R3: near_duplicate warns templated_or_copied', dup.warnings.includes('templated_or_copied'));
+
+  // R47: a copy is its own finding, not AI style. The essay-length version of the same case is
+  // asserted with the R42 goldens below; here the rule behaviour and the label agree.
+  const dupEssay = 'When I was fifteen my school ran a trip to the coast and I spent the whole '
+    + 'week convinced that I hated it. The bus was too hot, the hostel smelled of bleach, and the '
+    + 'first two days it rained without stopping. On the third morning the weather turned and one '
+    + 'of the teachers took a small group of us out along the cliff path before breakfast. '
+    + 'Nobody said very much. The sea was flat and grey and there were birds on the rocks below '
+    + 'us that I could not name then and still cannot name now. '
+    + 'I have thought about that walk more often than about anything else we did that year, and I '
+    + 'still do not entirely know why. It was not beautiful in the way a photograph is beautiful. '
+    + 'It was early, and cold, and I was tired, and none of us wanted to be awake. '
+    + 'What I remember is the quiet, and the fact that for about an hour nobody asked me anything. '
+    + 'That is the whole of it. I have tried several times to write it down as though something '
+    + 'happened, and every time the something turns out to be the nothing.';
+  const dupIdx2 = buildCorpusIndex([{ id: 'sub-999', sender: 'B', text: dupEssay }]);
+  const dupR = detect(dupEssay, { ...BASE, preset: 'essay', corpusIndex: dupIdx2, sender: 'A', id: 'sub-001' });
+  eq('R47: near_duplicate alone gives label not_independently_authored',
+    dupR.summary.label, 'not_independently_authored');
+  ok('R47: ... and quotes the duplicate and its Jaccard',
+    dupR.summary.matched.length === 1
+      && /^near_duplicate: duplicate of sub-999 at Jaccard \d\.\d{3}$/.test(dupR.summary.matched[0]),
+    JSON.stringify(dupR.summary.matched));
+  eq('R47: ... and carries R3\'s caveat, not the base-rate one', dupR.summary.caveat, DUPLICATE_CAVEAT);
+  ok('R47: ... which says a copy is not proof of LLM authorship',
+    dupR.summary.caveat.includes('NOT proof of LLM authorship'));
+  ok('R47: ... and the verdict itself is unchanged (still the R3 lean)',
+    dupR.verdict === 'leaning_llm' && dupR.warnings.includes('templated_or_copied'));
+  const dupAlone = detect(dupEssay, { ...BASE, preset: 'essay' });
+  eq('R47: the same essay with no duplicate in the corpus keeps its old label',
+    dupAlone.summary.label, 'no_reliable_indicators');
+  // A second Tier-0 rule wins, exactly as before.
+  const dupPlusLeak = 'As an AI language model, I cannot browse the web for you. ' + dupEssay;
+  const leakIdx = buildCorpusIndex([{ id: 'sub-998', sender: 'B', text: dupPlusLeak }]);
+  const both = detect(dupPlusLeak, { ...BASE, preset: 'essay', corpusIndex: leakIdx, sender: 'A' });
+  ok('R47: near_duplicate + assistant_frame_leak still gives fingerprint_found',
+    both.rules.length >= 2 && both.summary.label === 'fingerprint_found',
+    `${both.rules.map((r) => r.name).join('+')} -> ${both.summary.label}`);
+  ok('R47: ... with the base-rate caveat', both.summary.caveat === dupAlone.summary.caveat);
+  // batch and aggregate carry it too
+  const dupBatch = detectBatch([{ id: 'sub-001', text: dupEssay, sender: 'A' }],
+    { ...BASE, preset: 'essay', corpusIndex: dupIdx2 });
+  eq('R47: a batch row carries the duplicate label', dupBatch[0].summary.label, 'not_independently_authored');
+  const dupAgg = aggregate(
+    Array.from({ length: 3 }, (_, i) => ({ id: 'a' + i, text: dupEssay, sender: 'A' })),
+    { ...BASE, preset: 'essay', corpusIndex: dupIdx2, sender: 'A' });
+  ok('R47: an aggregate report carries it when the duplicate rule is the one that fired',
+    !dupAgg.rules.some((r) => r.name === 'near_duplicate')
+      || dupAgg.summary.label === 'not_independently_authored',
+    `${dupAgg.rules.map((r) => r.name).join('+')} -> ${dupAgg.summary.label}`);
+  // insufficient_text is NOT relabelled: the verdict rests on a gate, not on the rule
+  const dupShort = detect('The hotel was excellent and the staff were extremely helpful during our '
+    + 'stay in the old town last week, and we would gladly return again next summer.',
+  { ...BASE, shape: 'prose', sender: 'A',
+    corpusIndex: buildCorpusIndex([{ id: 'x', sender: 'B', text: 'The hotel was excellent and the '
+      + 'staff were extremely helpful during our stay in the old town last week, and we would '
+      + 'gladly return again next summer.' }]) });
+  ok('R47: an abstention is NOT relabelled — the verdict rests on a gate, not on the rule',
+    dupShort.verdict !== 'insufficient_text' || dupShort.summary.label === 'too_short_or_no_signal',
+    `${dupShort.verdict} -> ${dupShort.summary.label}`);
+  eq('R47: the five labels plus the fourth mapping table are all still reachable',
+    new Set(Object.values(SUMMARY_LABELS)).size, 4);
 
   // invisible_chars never fires alone.
   const inv = detect('the room was clean​ and the staff were kind to us during the stay here ok',

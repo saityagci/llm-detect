@@ -7,7 +7,7 @@
  * It imports `detect()` from the shipped module — no child process, no network, no dependencies —
  * and prints the four things a teacher-facing UI needs and nothing it does not:
  *
- *   1. summary.label      one of four values, NEVER a yes/no and never a grade input
+ *   1. summary.label      one of five values, NEVER a yes/no and never a grade input
  *   2. the verdict        the six-value detector verdict the label is derived from
  *   3. evidenceSpans[]    where the tool looked, as [start,end] offsets into the RAW text
  *   4. summary.caveat     the base-rate sentence, which travels with every label
@@ -27,9 +27,9 @@ import { detect } from '../stylometry.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
-// The label a platform shows, derived from the verdict (R42(a)). The core emits `summary` itself;
-// this map is the fallback for an older build, and it is here so a reader can see the derivation
-// rather than take it on trust. There are four values and there is never a fifth.
+// The label a platform shows (R42(a), fifth value added by R47). The core emits `summary` itself;
+// this is the fallback for an older build, and it is here so a reader can see the derivation rather
+// than take it on trust. There are five values and there is never a sixth.
 const LABEL_OF = {
   likely_llm: 'fingerprint_found',
   leaning_llm: 'ai_style_indicators',
@@ -38,8 +38,15 @@ const LABEL_OF = {
   likely_human: 'no_reliable_indicators',
   insufficient_text: 'too_short_or_no_signal',
 };
+/** R47: a duplicate alone is a COPY finding, not an AI finding — unless another rule also fired. */
+function labelOf(rep) {
+  const rules = (rep.rules || []).map((r) => r.rule || r.name);
+  if (rules.length === 1 && rules[0] === 'near_duplicate') return 'not_independently_authored';
+  return LABEL_OF[rep.verdict] || 'no_reliable_indicators';
+}
 
 const WHAT_TO_SHOW = {
+  not_independently_authored: 'Compare the two submissions. This is a copy or template finding, NOT an AI finding: a shared source, a template, a study group, one student handing in another\'s work. It does not say which of them wrote it, or that either did. Note also that it is relative to the corpus this run was compared against.',
   fingerprint_found: 'Show the matched string. This is the only label backed by a near-100%-precision rule — and it still means "a machine wrote this string", not "this student did not write this essay". A pasted confirmation, a quoted reply and a forwarded draft all land here.',
   ai_style_indicators: 'Show it as a prompt to read the essay, with the evidence spans highlighted and the base rate beside them. This label is a weak style prior and it is biased against careful and non-native writers.',
   no_reliable_indicators: 'Show nothing, or show "no indicators". This is NOT evidence the essay is human-written; it is the absence of evidence either way, which is the normal outcome.',
@@ -109,7 +116,7 @@ try {
 }
 
 const summary = report.summary || {
-  label: LABEL_OF[report.verdict] || 'no_reliable_indicators',
+  label: labelOf(report),
   humanReviewRequired: true,
   matched: (report.rules || []).map((r) => `${r.name}: ${JSON.stringify(r.matched)}`),
   reason: report.gates?.reason || null,

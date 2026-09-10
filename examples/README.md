@@ -19,7 +19,10 @@ Committed inputs for both are in [`samples/`](samples/), with the exact command 
 ## The one rule
 
 **The label is a review flag. It is never a grade input, never proof about a person, and never a
-yes/no.** `summary.humanReviewRequired` is `true` on every report this tool produces, and that is not
+yes/no.** There are five values; `not_independently_authored` is a **copy** finding, not an AI one
+(HEAD-RULINGS R47), and a label is true only relative to the corpus it was computed against — adding
+a late submission to a class can change an earlier one's label, so store the corpus id beside the
+label or recompute. `summary.humanReviewRequired` is `true` on every report this tool produces, and that is not
 a formality: on 150–499-token student essays the tool's own measured false-flag rate is 0.4% and its
 recall is 28.2%, so **roughly seven in ten AI-written essays are not flagged at all**; on general
 English prose the false-flag rate is 2.5% and at a 5% true prevalence a flag is right about **two
@@ -41,7 +44,7 @@ const report = detect(essayText, {
   now: Date.now(),             // enables the weights-expiry check; omit it and detect() stays pure
 });
 
-report.summary.label;                 // one of four values
+report.summary.label;                 // one of five values (R47)
 report.summary.humanReviewRequired;   // always true
 report.summary.caveat;                // the base-rate sentence — ship it with the label
 report.evidenceSpans;                 // [{start, end, text, source, name, direction}]

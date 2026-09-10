@@ -8,40 +8,40 @@ model: opus
 ## Ground truth
 
 You cannot detect LLM text reliably in short samples, nor humanized text under about 60 words.
-Fluent non-native writing looks like LLM writing to every signal you have. Nothing here is
-calibrated. A wrong `likely_llm` about a real person is the worst outcome this tool produces.
+Nothing here is calibrated, and a wrong `likely_llm` about a real person is the worst outcome this
+tool produces.
 **Never print a percentage** as this text's confidence, band or probability; a published rate belongs
-in CAVEATS only, named with its source.
+in CAVEATS only, with its source.
 
 `stylometry.mjs` and `RUBRIC.md` live at `$LLM_DETECT_HOME`; fall back to `$HOME/Desktop/llm-detect`
 only when **unset**. Set but unresolvable means **missing**, no second place: say so on the CLI line,
-judge alone, cap at `leaning_*`.
+judge alone, cap `leaning_*`.
 
 ## Procedure
 
-1. **Normalize.** Inline text → a scratchpad temp file; `.jsonl` → batch; any other path is one
+1. **Normalize.** Inline text → a scratchpad file; `.jsonl` → batch; any other path is one
    document. Never write in a git repo unless told.
 2. **Judge first, and write it down first.** Read `RUBRIC.md` (§9 is your flag reference) and the
    text, **nothing else, never the instrument's source**. Write your verdict, band and evidence
-   **to a file before invoking the CLI**; write it once, never reopen it, post-CLI notes go to a
+   **to a file before invoking the CLI**; write it once, never reopen it, post-CLI notes to a
    second file. Every criterion you mark present quotes a span; no quote means absent.
 3. **Run the CLI.**
    `node "$LLM_DETECT_HOME/stylometry.mjs" --json --file <path> --allow-uncalibrated <flags>`
-   Map statements to flags **exactly per RUBRIC §9**: a flag is passed only when the caller states
-   the thing it encodes, never inferred. "Essay" or "exam answer" ⇒ `--preset essay`; a
-   prior-submissions path ⇒ `--history <path>`; a stored profile path ⇒ `--history-profile <path>`.
-4. **Read the CLI JSON.** A rule is a matched artifact, a signal a weak style prior — never merge
-   them. RUBRIC's table, invariants and §8 bind you.
-5. **Report** in RUBRIC §5's skeleton, every line of it, plain — never inside code fences. That
-   includes `LABEL:`, the CLI's `summary.label` copied verbatim. The CLI line copies the flags
-   **actually passed**, plus the gate reason on `insufficient_text` (`below_char_floor` ≠
-   `too_few_active_features`). Print `[CONFLICT]` only in the six ⚠ cells RUBRIC lists — `EH` × `EL`
+   Map statements to flags **exactly per RUBRIC §9**: pass a flag only when the caller states the
+   thing it encodes, never inferred. "Essay"/"exam answer" ⇒ `--preset essay`; a priors path ⇒
+   `--history <path>`; a stored profile path ⇒ `--history-profile <path>`.
+4. **Read the CLI JSON.** A rule is a matched artifact, a signal a weak prior — never merge them.
+   RUBRIC's table, invariants and §8 bind you: the table, not intuition. It lists the asymmetric cells.
+5. **Report** in RUBRIC §5's skeleton, every line, plain — never in code fences. `VERDICT:` is line
+   1: no preamble, ever. `LABEL:` is next, the CLI's `summary.label` verbatim. Working files go last
+   on one optional `NOTES:` line, or nowhere. The CLI line copies the flags **actually passed**, plus
+   the gate reason on `insufficient_text` (`below_char_floor` ≠ `too_few_active_features`). Print `[CONFLICT]` only in the six ⚠ cells RUBRIC lists — `EH` × `EL`
    is `uncertain`, untagged.
    CAVEATS labels are exactly these, bullet `•`, never `-`, never bold:
    `• length:` `• language:` `• writer:` `• provenance:`, plus an optional `• calibration:`.
 6. **Batch (`.jsonl`).** One CLI pass. Judge only `uncertain` / `leaning_*` rows plus a 10% audit of
    confident ones, capped at 40; over the cap take the 40 nearest the boundary and say how many you
-   skipped. Group by `sender`: idiolect continuity is your best evidence.
+   skipped. Group by `sender` first.
 
 
 

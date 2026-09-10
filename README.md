@@ -293,18 +293,26 @@ short version: **the tool never gives the platform a yes/no, and a label is neve
 
 ### The four labels
 
-`detect()` returns `summary.label`, derived from the verdict. There are four values and there is
-never a fifth:
+`detect()` returns `summary.label`. There are **five** values and there is never a sixth:
 
 | `summary.label` | from | what a teacher-facing UI should show |
 |---|---|---|
-| `fingerprint_found` | `likely_llm` | The **matched string**, quoted. This is the only label backed by a near-100%-precision rule. It means a machine wrote that string — not that this student did not write the essay. A pasted confirmation, a quoted assistant reply and a forwarded draft all land here. |
-| `ai_style_indicators` | `leaning_llm` | A prompt to **read the essay**, with the evidence spans highlighted and the base rate beside them. This is a weak style prior, and it is biased against careful and non-native writers. |
+| `fingerprint_found` | `likely_llm`, or any Tier-0 rule other than `near_duplicate` alone | The **matched string**, quoted. This is the only label backed by a near-100%-precision rule. It means a machine wrote that string — not that this student did not write the essay. A pasted confirmation, a quoted assistant reply and a forwarded draft all land here. |
+| `not_independently_authored` | `near_duplicate` is the only Tier-0 rule and the verdict rests on it (`templated_or_copied`) | **Compare the two submissions.** The matched string names the other one and the overlap. This is a **copy or template finding, not an AI finding**: a shared source, a template, a study group, one student handing in another's work. It does not say which of them wrote it, or that either did, and it is never evidence of LLM authorship (R3). If another Tier-0 rule also fires, `fingerprint_found` wins and this label does not appear. |
+| `ai_style_indicators` | `leaning_llm` from style | A prompt to **read the essay**, with the evidence spans highlighted and the base rate beside them. This is a weak style prior, and it is biased against careful and non-native writers. |
 | `no_reliable_indicators` | `uncertain`, `leaning_human`, `likely_human` | Nothing, or the words "no indicators". **This is not a clearance.** It is the absence of evidence either way, which is the normal outcome. |
 | `too_short_or_no_signal` | `insufficient_text` | The **gate reason**, not a verdict. Either below the length floor, or above it with nothing to read. Do not let the UI round this to "clean". |
 
 `summary.humanReviewRequired` is `true` on **every** report the tool produces. `summary.caveat`
-carries the base-rate sentence and travels with the label wherever the label goes.
+carries the base-rate sentence — or, for `not_independently_authored`, R3's sentence — and travels
+with the label wherever the label goes.
+
+**A label is true relative to the corpus it was computed against.** `near_duplicate` compares a
+document against an index, so adding one late submission to a class can change an *earlier*
+submission's label — the first essay of a copied pair is unremarkable until the second arrives. Store
+the corpus id (or a hash of the index) alongside every label you keep, or recompute the class when it
+changes. A stored label with no record of what it was compared against is not reproducible, and a
+platform that shows a stale one is showing a finding that no longer exists.
 
 ### What the numbers actually are
 
@@ -460,6 +468,30 @@ node stylometry.mjs --file <submission.txt> \
 `--preset essay` expands to `--context prose --genre essay --lang en`. Pass `--channel` too if you
 know it (`web` for a browser form). Omit `--history` for a student's first submission; the tool says
 `history_insufficient` rather than pretending.
+
+#### Class-wide duplicates need a corpus index
+
+Two students handing in the same essay is a **corpus** question, not a stylometry one. The
+`near_duplicate` rule compares a document against an index and fires only across *different* senders,
+so it needs the rest of the class to look at — it can find nothing from a single submission. Pass the
+class file as the index (HEAD-RULINGS R46(c)):
+
+```bash
+# every row is both scored and indexed; add an archive of earlier terms if you keep one
+node stylometry.mjs --jsonl class.jsonl --corpus class.jsonl --allow-uncalibrated
+node examples/platform-class-batch.mjs class.jsonl [--corpus archive.jsonl]
+```
+
+`examples/platform-class-batch.mjs` uses the batch file as its own index by default, so duplicates
+inside a class are found without any extra flag; `--corpus` adds an archive of earlier submissions
+(`{"id","sender","text"}` per line).
+
+A hit gives the rule `near_duplicate`, the warning **`templated_or_copied`**, and the matched string
+naming the other submission and the Jaccard overlap. Read it exactly as it is written: the text was
+**not independently authored** — a template, a copy, a shared source, a study group — and that is
+**never** evidence of LLM authorship (R3). It does not say which of the two students wrote it, or
+that either of them did. It says two submissions are the same text, which is a thing worth a person's
+attention on its own terms.
 
 Two runnable backend examples:
 [`examples/platform-essay.mjs`](examples/platform-essay.mjs) for one submission

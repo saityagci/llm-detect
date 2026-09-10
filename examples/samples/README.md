@@ -114,26 +114,56 @@ whole report, not just the label. The same equality holds through
 `class-batch.jsonl` is four submissions from three students, built to exercise every history state
 in one file:
 
-| row | student | input | history state |
+| row | student | input | what it exercises |
 |---|---|---|---|
-| `sub-1041` | `s-77` | `student-essay-v3.txt` | a valid stored profile → `consistent_with_history` |
+| `sub-1041` | `s-77` | `student-essay-v3.txt` | a valid stored profile → `consistent_with_history`; **and** the near-duplicate pair below |
 | `sub-1042` | `s-81` | `assistant-essay.txt` | the same profile → `style_shift_vs_history` on 5 features |
 | `sub-1043` | `s-90` | `student-essay-v1-tidy.txt` | none — a first submission |
 | `sub-1044` | `s-77` | `student-essay-v2.txt` | a profile with a **wrong `weightsId`** → `history_profile_mismatch` |
+| `sub-1045` | `s-63` | the same bytes as `sub-1041` | a different student handing in the same essay → `near_duplicate` |
 
 ```bash
 node examples/platform-class-batch.mjs examples/samples/class-batch.jsonl
 ```
 
 ```
-sub-1041      s-77      no_reliable_indicators  leaning_human     consistent with 3 prior submission(s)
-sub-1042      s-81      fingerprint_found       likely_llm        style shift on 5 feature(s) — a reason to look
+sub-1041      s-77      not_independently_authored  leaning_llm       consistent with 3 prior submission(s)
+                        matched: near_duplicate: duplicate of sub-1045 at Jaccard 1.000
+                        templated_or_copied: duplicate of sub-1045 at Jaccard 1.000
+                          -> not independently authored. NOT evidence of LLM authorship (R3).
+sub-1042      s-81      fingerprint_found           likely_llm        style shift on 5 feature(s) — a reason to look
                         matched: assistant_frame_leak: "Here's a polished version"
-sub-1043      s-90      no_reliable_indicators  uncertain         no history supplied
-sub-1044      s-77      too_short_or_no_signal  insufficient_text PROFILE STALE — no comparison made
+sub-1043      s-90      no_reliable_indicators      uncertain         no history supplied
+sub-1044      s-77      too_short_or_no_signal      insufficient_text PROFILE STALE — no comparison made
+sub-1045      s-63      not_independently_authored  leaning_llm       no history supplied
+                        matched: near_duplicate: duplicate of sub-1041 at Jaccard 1.000
+                        templated_or_copied: duplicate of sub-1041 at Jaccard 1.000
+                          -> not independently authored. NOT evidence of LLM authorship (R3).
+
+fingerprint_found: 1  ·  no_reliable_indicators: 1  ·  not_independently_authored: 2  ·  too_short_or_no_signal: 1
+5 submission(s) in one pass, indexed against 5 document(s). Every row needs a human before anything happens to a student.
 ```
 
-The last row is the one worth staring at: a stale profile produces **no comparison**, not a wrong
+**The near-duplicate pair is the point of `sub-1045`.** It is `sub-1041`'s essay byte-for-byte under a
+different student id, and the rule finds it because the script indexes the class against itself
+(HEAD-RULINGS R46(c)); `near_duplicate` never fires within one sender, so a student's own resubmission
+is not a hit. Both rows carry the fifth platform label, **`not_independently_authored`** (R47), which
+exists precisely so a copy is not reported as an AI finding: the text was not independently authored —
+a copy, a template, a shared source — and that is **never** evidence of LLM authorship (R3). It does
+not say which student wrote it, or that either did.
+
+**The label these two rows carry did not exist when this sample was first committed.** They were
+`ai_style_indicators` — `near_duplicate` alone drives the verdict to `leaning_llm` (R3) and R42(a)
+mapped that to the AI-style label, so a copied essay was being reported as an AI-styled one. R47 added
+the fifth value to separate the two findings. The underlying verdict is still `leaning_llm`; what
+changed is what a platform is told.
+
+**And note what adding `sub-1045` did to `sub-1041`:** its label moved without its text changing. The
+essay is the same bytes it always was; the class around it acquired a duplicate. A label is true only
+relative to the corpus it was computed against — store the corpus id beside the label, or recompute
+the class when it changes. The core says so in the caveat it attaches to this label.
+
+The stale-profile row is the other one worth staring at: a stale profile produces **no comparison**, not a wrong
 one, and the platform is told so on stderr. That is the failure mode a platform would otherwise never
 notice. (`sub-1044`'s profile is `prior-profile.json` with `weightsId` changed to `fitted-deadbeef`;
 its embedded profiles are rounded to six decimals for the same reason as above.)

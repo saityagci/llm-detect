@@ -239,6 +239,56 @@ Before writing any →LLM verdict, the judge answers all six out loud:
 either side of neutral, which is ordinary noise, not a contradiction worth a block. A batch run
 tagged that cell; it is not one of the six.
 
+### The asymmetric cells — read the table, never your intuition (HEAD-RULINGS R46(a))
+
+"Take the more confident side" is the wrong mental model and it produces a wrong final about a third
+of the time. A run printed `leaning_human` for CLI `UN` × judge `EH`; the cell is `uncertain`. These
+are every cell whose result differs from the more confident input, grouped by the rule that makes it
+so. **Look the cell up. Do not derive it.**
+
+**1. One instrument alone never carries a `likely_*`.** A confident instrument beside a neutral one
+lands one step down, and a judge-only confidence lands one step down as well:
+
+| cell | result | not |
+|---|---|---|
+| `LL` × `UN` | `EL` | ~~LL~~ |
+| `LL` × `EL` | `EL` | ~~LL~~ |
+| `UN` × `LL` | `EL` | ~~LL~~ |
+| `EL` × `LL` | `EL` | ~~LL~~ |
+| `UN` × `LH` | `EH` | ~~LH~~ |
+| `EH` × `LH` | `EH` | ~~LH~~ |
+| `LH` × `UN` | `EH` | ~~LH~~ |
+| `LH` × `EH` | `EH` | ~~LH~~ |
+
+**2. A neutral instrument beside a LEANING one gives `uncertain` — the lean does not survive alone.**
+This is the pair that was misread, and note that it does not hold on the human side, where a
+`likely_human` does survive a neutral partner as `EH` (row 1):
+
+| cell | result | not |
+|---|---|---|
+| `EL` × `UN` | `UN` | ~~EL~~ |
+| `UN` × `EL` | `UN` | ~~EL~~ |
+| `EH` × `UN` | `UN` | ~~EH~~ |
+| **`UN` × `EH`** | **`UN`** | ~~EH~~ — the cell a round-4 run got wrong |
+
+Contrast `UN` × `EH` = `UN` with `UN` × `LH` = `EH`: a judge's *lean* toward human evaporates beside a
+neutral CLI, a judge's *confidence* does not.
+
+**3. When the judge abstains the system falls toward human, and the LLM side falls further.**
+
+| cell | result | steps down |
+|---|---|---|
+| `LL` × `IT` | `UN` | two |
+| `EL` × `IT` | `UN` | one |
+| `EH` × `IT` | `UN` | one |
+| `LH` × `IT` | `EH` | one |
+
+`LL` × `IT` loses two steps where `LH` × `IT` loses one. That is deliberate: an unwitnessed accusation
+is worth less than an unwitnessed exoneration.
+
+Everything else on the table is either the six ⚠ conflict cells above, the absolute `IT` row, or a
+cell where the two instruments already agree.
+
 Asymmetries, all deliberate:
 
 - `CLI=LL, judge=IT` → `UN` but `CLI=LH, judge=IT` → `EH`. When the judge abstains the system falls
@@ -347,10 +397,18 @@ CAVEATS
 
 WHAT WOULD CHANGE THIS VERDICT
   • <2-4 concrete, obtainable things>
+
+NOTES: <optional, one line, last — working-file paths and nothing that reads as a finding>
 ```
 
+**`VERDICT:` is line 1 of the report** (HEAD-RULINGS R46(b)). Nothing precedes it: no preamble, no
+"I have read the file", no repo-check sentence, no working-files block. Anything the agent wants to
+add — the path of its judgement file, what it wrote where — goes at the END, after WHAT WOULD CHANGE
+THIS VERDICT, on a single optional line beginning `NOTES:`, or nowhere at all. A reader and a parser
+both start at line 1, and a preamble puts prose where the verdict should be.
+
 **`LABEL:` is its own line, directly under `VERDICT:`** (HEAD-RULINGS R42 addendum). It carries the
-CLI's `summary.label` verbatim — one of the four values in the table below — and nothing else: no
+CLI's `summary.label` verbatim — one of the five values in the table below — and nothing else: no
 band, no score, no gloss. It was a clause inside the reporting step before, and one agent run of two
 omitted it; a line in the skeleton is not something a run can leave out and still look right.
 
@@ -488,7 +546,7 @@ say, and the report must show that it did.
 | `style_shift_vs_history` | **R42(d).** This submission sits more than 2 SD from the student's own mean on three or more features, which the note names. **Cite the named features toward `uncertain`, never toward LLM on their own.** A shift is a reason to read the essay, not evidence about who wrote it: a student who improves across a term, who writes a different genre, or who is having a bad week all produce one. History may move a lean toward `uncertain` and never away from it. |
 | `consistent_with_history` / `history_insufficient` (notes) | **R42(d).** The first says the submission looks like this student's prior work; it counts as **one** human-direction signal of the aggregate group and never more, and it is not a clearance. The second says there were fewer than two prior documents of ≥150 tokens, so history was not used at all — say so in the caveats rather than letting the reader assume it was checked. |
 | `cell_not_fitted_prior_used` | The caller passed a fitted weights file, but the cell this text routes to was **not** fitted, so the shipped PRIOR cell scored it (R36(c)). The report's `provenance` says `fitted` and the numbers behind it are prior guesses. Treat the score exactly as you would under `uncalibrated_weights`, and say in the caveats that this language/shape cell has no fitted model. |
-| `templated_or_copied` | `near_duplicate` fired: the text was not independently authored. Template, copy or spam — not proof of LLM authorship (R3). |
+| `templated_or_copied` | `near_duplicate` fired against a different sender: the text was not independently authored. Template, copy or spam — **not** proof of LLM authorship (R3). When it is the ONLY Tier-0 rule, `summary.label` is **`not_independently_authored`** (R47): report it as a copy finding, name the other submission and the overlap, and never let it read as an AI finding. The finding is relative to the index the document was compared against — say what that index was. |
 | `domain_suppressed` / `marketing_register` | The caller declared a support desk or marketing copy; the register lexicon was zeroed or discounted. Do not re-import the suppressed phrasing as your own evidence. |
 | `mixed_language_reduced_features` | Only script-agnostic features ran. Say so in the language caveat and lower your own confidence accordingly. |
 | `uncalibrated_weights` / `weights_expired` / `expiry_not_checked` | The score is a ranking prior with no validated threshold, an expired one, or one whose expiry was never checked. Nothing here supports a numeric claim. |
@@ -498,18 +556,23 @@ say, and the report must show that it did.
 
 ### The platform label (HEAD-RULINGS R42(a))
 
-A platform never gets a yes/no. It gets one of **four** values, derived from the verdict, and the
-judge prints the CLI's `summary.label` under VERDICT rather than inventing one:
+A platform never gets a yes/no. It gets one of **five** values, and the judge prints the CLI's
+`summary.label` on the `LABEL:` line verbatim rather than deriving one:
 
-| verdict | `summary.label` |
+| when | `summary.label` |
 |---|---|
-| `likely_llm` | `fingerprint_found` — a Tier-0 rule matched; the matched string is quoted |
-| `leaning_llm` | `ai_style_indicators` |
+| `likely_llm` — a Tier-0 rule matched (any but `near_duplicate` alone) | `fingerprint_found`, the matched string quoted |
+| `near_duplicate` is the ONLY Tier-0 rule and the verdict rests on it (`templated_or_copied`) | `not_independently_authored` (HEAD-RULINGS R47) |
+| `leaning_llm` from style | `ai_style_indicators` |
 | `uncertain`, `leaning_human`, `likely_human` | `no_reliable_indicators` |
 | `insufficient_text` | `too_short_or_no_signal`, with the gate reason |
 
+`not_independently_authored` is a **copy finding, not an AI finding**, and the judge must not report
+it as one: it says two submissions are the same text, never who wrote either. If another Tier-0 rule
+fires alongside the duplicate, `fingerprint_found` wins and this label does not appear.
+
 The judge prints it as the `LABEL:` line of the §5 skeleton, directly under `VERDICT:`, copied from
-the CLI's `summary.label`. There is no fifth value and there is never a numeric one.
+the CLI's `summary.label`. There is no sixth value and there is never a numeric one.
 `summary.humanReviewRequired` is `true` on every report; `summary.caveat` carries the base-rate sentence, and it travels with the label wherever
 the label goes. `no_reliable_indicators` is **the absence of evidence either way**, not a clearance —
 if a report is read as "this student is cleared", the label has been misused.
