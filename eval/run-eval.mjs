@@ -22,6 +22,9 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { normKey } from './make-splits.mjs';   // R36(h): audit with the key that made the split
+import { segment } from '../lib/segment.mjs';  // R36(f): control (d) uses the SHIPPED segmenter
+import { validateWeightsShape } from '../lib/score.mjs'; // R36(c): the emitter checks its own output
 
 const USAGE = `usage: node eval/run-eval.mjs [options]
   --data <dir>       (default eval/data)      --out <dir>   (default eval/out; with --quick and
@@ -52,10 +55,26 @@ function emit(line = '', { toReport = true, toStderr = true } = {}) {
   if (toReport) REPORT_LINES.push(s);
 }
 
-/** The headline table refuses, in code, to accept a row that was not measured on TEST. */
-function headline(row) {
+/**
+ * The headline table refuses, in code, to accept a summary that was not measured on TEST.
+ *
+ * HEAD-RULINGS R36(h): it used to validate an object literal `{side:'test', ...}` written at its
+ * one call site — a constant checking itself. It now takes the ROWS the summary is computed from
+ * and asserts every one of them is test-side, which is the claim the table actually makes.
+ */
+function headline(row, rows) {
   if (row.side !== 'test') {
     process.stderr.write(`honesty guard: headline() was handed a row measured on "${row.side}". Only test-side numbers may headline.\n`);
+    process.exit(4);
+  }
+  if (!Array.isArray(rows)) {
+    process.stderr.write('honesty guard: headline() was not handed the rows it summarises. A headline must be checked against its own data, not against a literal.\n');
+    process.exit(4);
+  }
+  const offenders = rows.filter((r) => r.side !== 'test');
+  if (offenders.length) {
+    const sides = [...new Set(offenders.map((r) => r.side))].join(', ');
+    process.stderr.write(`honesty guard: headline(${row.cell} ${row.bucket}) summarises ${offenders.length} of ${rows.length} rows measured on "${sides}". Only test-side numbers may headline.\n`);
     process.exit(4);
   }
   return row;
@@ -110,21 +129,35 @@ function ece(scores, labels, bins = 10) {
   return total;
 }
 
-/** Pool-adjacent-violators isotonic regression, fitted on VAL, applied to TEST. */
+/**
+ * Pool-adjacent-violators isotonic regression, fitted on VAL, applied to TEST.
+ *
+ * HEAD-RULINGS R36(g): equal x values are POOLED into one point before PAVA runs. Isotonic
+ * regression must be a function of x; pushing one block per point left tied scores as several
+ * blocks with different y, so apply() returned the first block's mean for a tie at the low end
+ * and the lower block for an interior tie. tr:chat's val side has 5 tied values over 19 of its 26
+ * rows, so this is not a corner case. tau, AUC, TPR and FPR do not move (they are rank statistics
+ * over the raw score); the ECE column does, because p changes.
+ */
 function fitIsotonic(scores, labels) {
   if (scores.length < 20) return null;
-  const pts = scores.map((s, i) => ({ x: s, y: labels[i], w: 1 })).sort((a, b) => a.x - b.x);
+  const sorted = scores.map((s, i) => ({ x: s, y: labels[i] })).sort((a, b) => a.x - b.x);
+  const pts = [];
+  for (const q of sorted) {
+    const last = pts[pts.length - 1];
+    if (last && last.x === q.x) { last.y += q.y; last.w += 1; }
+    else pts.push({ x: q.x, y: q.y, w: 1 });
+  }
   const blocks = [];
   for (const p of pts) {
-    blocks.push({ x: p.x, sum: p.y, w: 1 });
+    blocks.push({ x: p.x, sum: p.y, w: p.w });
     while (blocks.length > 1 && blocks[blocks.length - 2].sum / blocks[blocks.length - 2].w > blocks[blocks.length - 1].sum / blocks[blocks.length - 1].w) {
       const b = blocks.pop(); const a = blocks.pop();
       blocks.push({ x: a.x, sum: a.sum + b.sum, w: a.w + b.w });
     }
   }
   const xs = [], ys = [];
-  let acc = 0;
-  for (const b of blocks) { acc += b.w; xs.push(b.x); ys.push(b.sum / b.w); }
+  for (const b of blocks) { xs.push(b.x); ys.push(b.sum / b.w); }
   return function apply(s) {
     if (s <= xs[0]) return ys[0];
     if (s >= xs[xs.length - 1]) return ys[ys.length - 1];
@@ -135,7 +168,17 @@ function fitIsotonic(scores, labels) {
   };
 }
 
-/** L2-regularized logistic regression, batch gradient descent. Deterministic. */
+/**
+ * L2-regularized logistic regression, batch gradient descent. Deterministic.
+ *
+ * HEAD-RULINGS R36(i): the penalty term is `lambda * w / n`, i.e. the L2 gradient is divided by n
+ * along with the loss gradient. That is sklearn's convention read backwards — the objective is
+ * (1/n)(sum of losses) + (lambda/2n)||w||^2, so the EFFECTIVE penalty on the summed loss is
+ * lambda/n and shrinkage weakens as the cell grows: at lambda=1 the norm shrinks 38% at n=200 and
+ * only 5% at n=5000. This is documented, not changed: refitting with a different penalty this
+ * round would move every published coefficient for a reason unrelated to the defects being fixed.
+ * `lambdaEffective` is recorded per cell in weights.fitted.json.
+ */
 function fitLogistic(X, y, { lambda = 1.0, iters = 1200, lr = 0.5 } = {}) {
   const n = X.length, d = n ? X[0].length : 0;
   const w = new Array(d).fill(0);
@@ -252,9 +295,13 @@ async function main() {
   // ---------------------------------------------------------------- step 1: dedup assertion
   emit('## 1. Dedup and split integrity (SPEC §D.5 steps 1-3)');
   emit('');
+  // HEAD-RULINGS R36(h): audit the split with the SAME key that produced it. The local
+  // NFKC+lowercase+strip key missed the emoji strip and the Turkish fold, so it found 108
+  // duplicate rows where make-splits' normKey finds 111. An audit run with a weaker key than the
+  // thing it audits can only ever under-report.
   const keys = new Map();
   for (const r of rows) {
-    const k = (r.text || '').normalize('NFKC').toLocaleLowerCase('tr').replace(/[^\p{L}\p{Nd}]+/gu, ' ').trim();
+    const k = normKey(r.text || '');
     if (!keys.has(k)) keys.set(k, []);
     keys.get(k).push(r);
   }
@@ -271,12 +318,75 @@ async function main() {
     emit('> **The harness rejects any accuracy computed on a stream where the same string appears on');
     emit('> both sides of the split.** Fix make-splits.mjs before reading anything below as a result.');
   }
+  // HEAD-RULINGS R36(b)/(c): break the straddle count down BY GROUP KIND. The old line said
+  // "72 of 1380 — the human writers are split chronologically inside a writer, by design", and
+  // 69 of those 72 were `persona::` groups. The explanation was false and it was the line that
+  // should have caught the persona leak. Only `writer::` is excused; anything else is a leak and
+  // the harness refuses to publish numbers computed over it.
   const groupSides = new Map();
   for (const r of rows) { if (!groupSides.has(r.group)) groupSides.set(r.group, new Set()); groupSides.get(r.group).add(r.side); }
-  const leakyGroups = [...groupSides.entries()].filter(([, s]) => s.size > 1);
+  const leakyGroups = [...groupSides.entries()].filter(([, s2]) => s2.size > 1);
+  const straddleByKind = {};
+  for (const [g] of leakyGroups) { const kind = String(g).split('::')[0]; straddleByKind[kind] = (straddleByKind[kind] || 0) + 1; }
+  const nonWriterStraddle = leakyGroups.filter(([g]) => !String(g).startsWith('writer::')).length;
   emit(`- groups straddling two sides: **${leakyGroups.length}** of ${groupSides.size}` +
-    (leakyGroups.length ? ' — the human writers are split chronologically inside a writer, by design (SPEC §F.2)' : ''));
+    (leakyGroups.length ? ` — by group kind: ${Object.entries(straddleByKind).sort().map(([k, v]) => `\`${k}::\` ${v}`).join(', ')}` : ''));
+  emit(`- of those, **${nonWriterStraddle}** are NOT \`writer::\` groups (must be 0). Only \`writer::\` may straddle: human rows are split chronologically inside a writer by design (SPEC §F.2). A \`persona::\`, \`public:\` or \`fixture::\` group on two sides is a leak.`);
+  if (nonWriterStraddle > 0) {
+    emit('');
+    emit('> **LEAK: a non-writer group straddles the split.** The holdout unit for a generated row is');
+    emit('> the persona and for a public row the source row or template family. Every number below');
+    emit('> would be measured on a stream the model has partly seen. Fix make-splits.mjs first.');
+    emit('');
+    process.stderr.write(`honesty guard: ${nonWriterStraddle} non-writer group(s) straddle the split — ${JSON.stringify(straddleByKind)}\n`);
+    writeFileSync(path.join(outDir, 'REPORT.md'), REPORT_LINES.join('\n') + '\n', 'utf8');
+    process.exit(5);
+  }
   emit('');
+
+  // ---------------- HEAD-RULINGS R36(e)+(h): what make-splits recorded about the split itself.
+  // pair-key coverage and the contamination bands live in eval/data/splits-report.json, which is
+  // gitignored, so neither number ever reached a reader of REPORT.md.
+  {
+    const srFile = path.join(opts.data, 'splits-report.json');
+    if (!existsSync(srFile)) emit('- `splits-report.json` not found — pair-key coverage and the contamination bands could not be reported.');
+    else {
+      const sr = JSON.parse(readFileSync(srFile, 'utf8'));
+      if (sr.pair_key_coverage) {
+        emit('');
+        emit('**Matched-pair protection, per public source.** `shardOf()` shards on the `pair` key when a');
+        emit('row has one and falls back to `normKey(text)` when it does not, so a source that claims');
+        emit('matched pairs but ships no key is sharded per text and its pair protection is a silent no-op.');
+        emit('');
+        emit('| source | rows | rows with a `pair` key | claims matched pairs | pair protection | pairs straddling |');
+        emit('|---|---:|---:|---|---|---:|');
+        for (const [src, e] of Object.entries(sr.pair_key_coverage)) {
+          emit(`| \`${src}\` | ${e.rows} | ${e.with_pair_key} (${fmt(e.coverage_pct, 1)}%) | ${e.claims_matched_pairs ? 'yes' : 'no'} | ${String(e.pair_protection).split(' — ')[0]} | ${e.straddling_pairs === null ? 'not measurable — no key' : e.straddling_pairs} |`);
+        }
+        emit('');
+        const inactive = Object.entries(sr.pair_key_coverage).filter(([, e]) => String(e.pair_protection).startsWith('INACTIVE'));
+        if (inactive.length) {
+          emit(`- **pair protection INACTIVE on ${inactive.map(([k]) => '`' + k + '`').join(', ')}.** Whether a matched pair straddles is *not measurable* from a file without the key — index alignment is not recoverable. INACTIVE means unknown, not zero.`);
+          emit('');
+        }
+      }
+      if (sr.contamination) {
+        emit('**Contamination of the generated in-house side against the real one** (SPEC §F.2). The');
+        emit('generated side was built by replaying real transcripts, so a nonzero rate is expected and is');
+        emit('a ceiling on any honest accuracy claim from this corpus.');
+        emit('');
+        emit(`- metric: ${sr.contamination.metric}`);
+        emit(`- ${sr.contamination.n_llm_rows} generated rows; nearest real message at Jaccard ` +
+          Object.entries(sr.contamination.pct).map(([band, v]) => `**${band}: ${fmt(v, 2)}%**`).join(' · '));
+        emit('');
+      }
+      if (sr.corpus?.recorded_split_reuse) {
+        const rr = sr.corpus.recorded_split_reuse;
+        emit(`- the design round's recorded split is reused at **${rr.unit}** level (HEAD-RULINGS R36(b)): ${rr.groups_promoted_to_test} group(s) promoted to test, placing ${rr.rows_placed_by_that_promotion} row(s). ${rr.groups_partially_recorded_test} group(s) were only PARTLY recorded as test — under the old per-message-id rule those were exactly the groups that split across two sides.`);
+        emit('');
+      }
+    }
+  }
 
   if (opts.quick) {
     const cap = 250;
@@ -474,13 +584,18 @@ async function main() {
       const scoredB = rowsB.filter((r) => r.p !== null);
       const nH = rowsB.filter((r) => r.y === 0).length, nL = rowsB.filter((r) => r.y === 1).length;
       if (!nH && !nL) continue;
-      const row = headline({ side: 'test', cell, bucket, nH, nL });
+      const row = headline({ side: 'test', cell, bucket, nH, nL }, rowsB);
       if (nH < 100 || nL < 100) {
         emit(`| ${cell} | ${bucket} | ${nH} | ${nL} | INSUFFICIENT — placeholder, not a measurement | | | | | | |`);
         continue;
       }
       if (scoredB.length < 40) {
-        emit(`| ${cell} | ${bucket} | ${nH} | ${nL} | NO COVERAGE — ${rowsB.length - scoredB.length} of ${rowsB.length} rows are below the floor and were never scored | — | | 0.0% | 0.0% | 0.0% | — |`);
+        // HEAD-RULINGS R36(h): print the MEASURED confusion, never a literal 0.0%. A bucket with
+        // fewer than 40 scored rows has no AUC worth printing, but it still has a true FPR and TPR
+        // over all its rows (a gated row is a negative that never fires), and printing a hardcoded
+        // zero there is a misreport waiting for the first bucket where the zero is false.
+        const cNC = confusion(rowsB, R.tau);
+        emit(`| ${cell} | ${bucket} | ${nH} | ${nL} | NO COVERAGE — ${rowsB.length - scoredB.length} of ${rowsB.length} rows are below the floor and were never scored | — | — | ${pct(cNC.fpr)} | ${pct(cNC.tpr)} | — | ${cNC.precision === null ? '—' : fmt(cNC.precision)} |`);
         continue;
       }
       const a = auc(scoredB.map((r) => r.p), scoredB.map((r) => r.y));
@@ -634,11 +749,19 @@ async function main() {
     const m = buildModelPooled('standard', (r) => r.writer_id === w);
     if (!m) { emit(`| ${w} | ${held.length} | 0 | — | INSUFFICIENT — no model could be fitted without this writer |`); continue; }
     const valS = evaluate(m, scored.filter((r) => r.side === 'val' && r.source === 'inhouse' && r.writer_id !== w));
-    const { tau } = pickTau(valS.length >= 20 ? valS : evaluate(m, scored.filter((r) => r.side === 'val')));
+    // HEAD-RULINGS R36(h): the fallback threshold set must also exclude the held-out writer.
+    // It did not fire this round (all three folds have >= 20 in-house val rows), but a thinner
+    // corpus would have silently picked tau on the writer the fold is supposed to be blind to.
+    const usedFallback = valS.length < 20;
+    const tauSet = usedFallback
+      ? evaluate(m, scored.filter((r) => r.side === 'val' && r.writer_id !== w))
+      : valS;
+    const { tau } = pickTau(tauSet);
     const heldS = evaluate(m, held);
     const flagged = heldS.filter((r) => r.p !== null && r.p >= tau).length;
     const scoredN = heldS.filter((r) => r.p !== null).length;
     lowo[w] = { n: held.length, scored: scoredN, gated: held.length - scoredN, flagged, tau,
+      usedFallback, tauSetSize: tauSet.length,
       rateScored: scoredN ? flagged / scoredN : null, rateAll: held.length ? flagged / held.length : null };
     emit(`| ${w} | ${held.length} | ${held.length - scoredN} | ${scoredN} | ${flagged} | ` +
       `${scoredN < 20 ? 'INSUFFICIENT (n<20)' : pct(lowo[w].rateScored)} | ${pct(lowo[w].rateAll)} |`);
@@ -649,6 +772,11 @@ async function main() {
   emit('this writer removed; mu/sigma, the coefficients and the threshold are all refitted inside the');
   emit('fold. "below the floor" is this writer\'s messages that never reach a score at all — for a');
   emit('WhatsApp corpus that is most of them, and it caps how much this test can ever say.');
+  emit('');
+  emit('**The fold model is a different model shape from §3-§5: it pools all four `{en,tr} x');
+  emit('{chat,prose}` cells into one, so the fold threshold in this table is not §5\'s per-cell t and');
+  emit('the two are not comparable.** The in-house corpus is one register, and splitting an already');
+  emit('tiny set four ways inside a fold would leave nothing to fit (HEAD-RULINGS R36(h)).');
   emit('');
   emit('Counts, not comfort: after the R22 Arabic filter the surviving human rows are heavily');
   emit('concentrated in one writer. A flag rate computed over fewer than 100 rows is an anecdote.');
@@ -667,8 +795,15 @@ async function main() {
   emit('### (a) pre-2022 human text');
   emit('');
   {
-    const rowsA = scored.filter((r) => r.source === 'public:fake-reviews-gpt2era' && r.y === 0);
-    if (!rowsA.length) emit('- **not measured** — the pre-2022 human source was not present in `eval/data/public/`. Run `node eval/fetch-public-datasets.mjs` first.');
+    // HEAD-RULINGS R36(a): a false-positive rate is a HELD-OUT number. This control used to be
+    // computed over every split side (1 of 1,500 = 0.1%), which quietly includes the rows the
+    // model was fitted on. The emit() guard did not catch it because the line names no fit word.
+    const allA = scored.filter((r) => r.source === 'public:fake-reviews-gpt2era' && r.y === 0);
+    const rowsA = allA.filter((r) => r.side === 'test');
+    const composition = { fit: 0, val: 0, test: 0 };
+    for (const r of allA) if (composition[r.side] !== undefined) composition[r.side]++;
+    if (!allA.length) emit('- **not measured** — the pre-2022 human source was not present in `eval/data/public/`. Run `node eval/fetch-public-datasets.mjs` first.');
+    else if (!rowsA.length) emit(`- **not measured on held-out data** — the source has ${allA.length} human rows but none landed on the test side.`);
     else {
       const byCell = {};
       for (const r of rowsA) (byCell[r.cell] ||= []).push(r);
@@ -677,9 +812,10 @@ async function main() {
         if (!R) { emit(`- ${c}: no model`); continue; }
         const s = evaluate(R.model, list);
         const flagged = s.filter((r) => r.p !== null && r.p >= R.tau).length;
-        emit(`- ${c}: ${flagged} of ${list.length} flagged = **${pct(flagged / list.length)}**` +
+        emit(`- ${c}: ${flagged} of ${list.length} flagged = **${pct(flagged / list.length)}** (TEST side only)` +
           (flagged / list.length > 0.05 ? ' — above the target FPR. If this is 8%, we built a formality detector wearing a costume.' : ''));
       }
+      emit(`- Held-out only, by ruling: this rate is measured over the **${rowsA.length} test-side** human rows of that source. The source's full human half splits ${composition.fit} fitting / ${composition.val} val / ${composition.test} test; a rate over all three would include rows the model was fitted on and would read about three times lower.`);
       emit('- Source: the human half of the GPT-2-era review corpus, which predates the 2022 assistant era. It is a proxy for "text that cannot possibly be LLM-written", not a certified pre-2022 sample.');
     }
   }
@@ -694,37 +830,95 @@ async function main() {
   emit('');
   emit('### (d) shuffled-sentence control');
   emit('');
+  // HEAD-RULINGS R36(f): the sentences come from the SHIPPED segmenter (lib/segment.mjs), not from
+  // an ad-hoc `split(/(?<=[.!?])\s+/)` that agreed with it on only 237 of 295 documents; the
+  // ORIGINAL inter-sentence separators are kept in place (rejoining with a single space rewrote
+  // whitespace, and `space_hygiene` then moved in 9 of the 10 largest deltas — an artefact of the
+  // control, not a property of the detector); rows that become GATED after the shuffle are counted
+  // instead of silently dropped; and the features that moved on the largest deltas are named.
   {
     const cand = scored.filter((r) => r.side === 'test' && !r.gated && (r.rep.counts?.sentences || 0) >= 4);
     const rng = mulberry32(20260909);
     const sample = cand.slice(0, opts.quick ? 60 : 300);
-    let deltas = [], rawDeltas = [];
+    let deltas = [], rawDeltas = [], gatedAfter = 0, unsplittable = 0, noModel = 0;
+    const detail = [];
     for (const r of sample) {
       const R = results.standard[r.cell];
-      if (!R) continue;
-      const sents = String(r.text).split(/(?<=[.!?])\s+/).filter((s) => s.trim());
-      if (sents.length < 4) continue;
-      for (let i = sents.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [sents[i], sents[j]] = [sents[j], sents[i]]; }
-      const shuffledText = sents.join(' ');
+      if (!R) { noModel++; continue; }
+      const text = String(r.text);
+      const shape = r.rep.shape === 'chat' ? 'chat' : 'prose';
+      const sents = segment(text.normalize('NFC'), shape).sentences.map((x) => x.text);
+      if (sents.length < 4) { unsplittable++; continue; }
+      // locate each sentence in the ORIGINAL string so the separators between them survive
+      const spans = [];
+      let cursor = 0, ok = true;
+      for (const t of sents) {
+        const i = text.indexOf(t, cursor);
+        if (i < 0) { ok = false; break; }
+        spans.push([i, i + t.length]);
+        cursor = i + t.length;
+      }
+      if (!ok) { unsplittable++; continue; }
+      const perm = sents.map((_, i) => i);
+      for (let i = perm.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [perm[i], perm[j]] = [perm[j], perm[i]]; }
+      let shuffledText = text.slice(0, spans[0][0]);
+      for (let i = 0; i < spans.length; i++) {
+        shuffledText += sents[perm[i]];
+        shuffledText += (i + 1 < spans.length) ? text.slice(spans[i][1], spans[i + 1][0]) : text.slice(spans[i][1]);
+      }
       let rep2;
       try { rep2 = detect(shuffledText, { shape: r.shape || 'auto', channel: r.channel || 'unknown', lang: 'auto', genre: r.genre || 'auto', domain: r.domain || 'general', allowUncalibrated: true, explain: true, now: NOW }); } catch { continue; }
       const r2 = { ...r, gated: rep2.verdict === 'insufficient_text', features: vectorFor(rep2) };
-      const before = R.model.p(r), after = r2.gated ? null : R.model.p(r2);
-      if (after !== null) {
-        deltas.push(Math.abs(after - before));
-        const vec = (x) => R.model.use.map((n) => (x.features.has(n) ? clip((x.features.get(n) - R.model.mu[n]) / R.model.sigma[n], -3, 3) : 0));
-        const rawOf = (x) => sigmoid(R.model.b + R.model.w.reduce((a, wi, j) => a + wi * vec(x)[j], 0));
-        rawDeltas.push(Math.abs(rawOf(r2) - rawOf(r)));
+      if (r2.gated) { gatedAfter++; continue; }
+      const before = R.model.p(r), after = R.model.p(r2);
+      if (after === null || before === null) continue;
+      deltas.push(Math.abs(after - before));
+      const vec = (x) => R.model.use.map((n) => (x.features.has(n) ? clip((x.features.get(n) - R.model.mu[n]) / R.model.sigma[n], -3, 3) : 0));
+      const rawOf = (x) => sigmoid(R.model.b + R.model.w.reduce((a, wi, j) => a + wi * vec(x)[j], 0));
+      const rawDelta = Math.abs(rawOf(r2) - rawOf(r));
+      rawDeltas.push(rawDelta);
+      // which features moved, and by how much of the score
+      const moved = [];
+      for (let j = 0; j < R.model.use.length; j++) {
+        const n = R.model.use[j];
+        const z1 = r.features.has(n) ? clip((r.features.get(n) - R.model.mu[n]) / R.model.sigma[n], -3, 3) : 0;
+        const z2 = r2.features.has(n) ? clip((r2.features.get(n) - R.model.mu[n]) / R.model.sigma[n], -3, 3) : 0;
+        if (Math.abs(z2 - z1) > 1e-9) moved.push({ name: n, dContribution: R.model.w[j] * (z2 - z1) });
       }
+      moved.sort((a, b) => Math.abs(b.dContribution) - Math.abs(a.dContribution));
+      detail.push({ id: r.id, cell: r.cell, delta: Math.abs(after - before), rawDelta, moved });
     }
     if (!deltas.length) emit('- no eligible multi-sentence documents in the test side.');
     else {
-      deltas.sort((a, b) => a - b);
-      emit(`- ${deltas.length} documents re-scored with their sentences shuffled.`);
-      emit(`- calibrated p: mean |delta| **${fmt(mean(deltas))}** · median **${fmt(deltas[Math.floor(deltas.length / 2)])}** · max **${fmt(deltas[deltas.length - 1])}**`);
-      rawDeltas.sort((a, b) => a - b);
-      emit(`- pre-isotonic score: mean |delta| **${fmt(mean(rawDeltas))}** · max **${fmt(rawDeltas[rawDeltas.length - 1])}** (isotonic calibration is a step function and flattens small moves, so this is the sensitive one)`);
-      emit('- The score should barely move. A large move means the segmenter is order-dependent and the features are reading document order rather than style.');
+      const sortedD = [...deltas].sort((a, b) => a - b);
+      emit(`- ${deltas.length} documents re-scored with their sentences shuffled by the shipped segmenter, original inter-sentence separators preserved.`);
+      emit(`- **${gatedAfter}** document(s) became \`insufficient_text\` AFTER the shuffle and are excluded from the deltas below — a shuffle that gates a document is itself a finding, and it used to leave the denominator without a line.`);
+      if (unsplittable || noModel) emit(`- ${unsplittable} document(s) could not be re-assembled from their segmented sentences (NFC normalisation moved the bytes) and ${noModel} had no model for their cell; both are skipped and counted rather than dropped.`);
+      emit(`- calibrated p: mean |delta| **${fmt(mean(deltas))}** · median **${fmt(sortedD[Math.floor(sortedD.length / 2)])}** · max **${fmt(sortedD[sortedD.length - 1])}**`);
+      const sortedR = [...rawDeltas].sort((a, b) => a - b);
+      emit(`- pre-isotonic score: mean |delta| **${fmt(mean(rawDeltas))}** · max **${fmt(sortedR[sortedR.length - 1])}** (isotonic calibration is a step function and flattens small moves, so this is the sensitive one)`);
+      emit('- The score should barely move. A large move means the features are reading document order rather than style.');
+      emit('');
+      const top = [...detail].sort((a, b) => b.rawDelta - a.rawDelta).slice(0, 5);
+      emit('Top 5 documents by |delta| on the pre-isotonic score, and the features that actually moved.');
+      emit('A permutation cannot change the multiset of sentence lengths, so `sentence_len_cv`,');
+      emit('`sentence_len_mode_mass` and `terminal_punct_ratio` moving at all means the segmenter drew');
+      emit('different boundaries in the shuffled text — that is the control measuring itself.');
+      emit('');
+      emit('| row | cell | \\|delta p\\| | \\|delta raw\\| | features that moved (delta contribution) |');
+      emit('|---|---|---:|---:|---|');
+      for (const d of top) {
+        const names = d.moved.length
+          ? d.moved.slice(0, 6).map((m) => `\`${m.name}\` ${m.dContribution >= 0 ? '+' : ''}${fmt(m.dContribution)}`).join(', ') + (d.moved.length > 6 ? `, +${d.moved.length - 6} more` : '')
+          : 'none — the score moved through the isotonic map only';
+        emit(`| ${d.id} | ${d.cell} | ${fmt(d.delta)} | ${fmt(d.rawDelta)} | ${names} |`);
+      }
+      emit('');
+      const freq = new Map();
+      for (const d of detail) for (const m of d.moved) freq.set(m.name, (freq.get(m.name) || 0) + 1);
+      const ranked = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+      if (ranked.length) emit(`- across all ${detail.length} shuffled documents the features that moved most often were ${ranked.map(([n, c]) => `\`${n}\` (${c})`).join(', ')}.`);
+      emit('');
     }
   }
   emit('');
@@ -882,29 +1076,99 @@ async function main() {
   emit('');
 
   // ---------------------------------------------------------------- weights.fitted.json
-  const corpusHash = createHash('sha256').update(rows.map((r) => r.id).join('|')).digest('hex');
+  // HEAD-RULINGS R36(d): the hash covered IDS ONLY, so editing the text of every row in the
+  // corpus left it unchanged — a corpusHash that cannot detect a changed corpus is decoration.
+  // It now covers the id, the SIDE the row landed on, and a hash of the normalised text, sorted
+  // so row order cannot move it.
+  const corpusHash = createHash('sha256').update(
+    rows.map((r) => `${r.id}|${r.side}|${createHash('sha256').update(normKey(r.text || '')).digest('hex')}`)
+      .sort().join('\n'),
+  ).digest('hex');
   const generatedAt = new Date().toISOString().slice(0, 10);
   const expiresAt = new Date(Date.now() + 180 * 86400000).toISOString().slice(0, 10);
+  // HEAD-RULINGS R36(c): the file must carry every field the CLI's loader dereferences, or
+  // `--weights eval/out/weights.fitted.json` is an uncaught TypeError and R23's opt-in path is a
+  // promise nobody can keep. The prior file is the schema of record: per-feature `kind` is copied
+  // from it (the transform a feature uses is a property of the FEATURE, not of the fit), and the
+  // top-level `K` comes from it too. A cell that could not be fitted is emitted as an explicit
+  // `{status, reason}`, which lib/score.mjs's isNotFittedCell() recognises and detect() turns into
+  // a fall-back to the prior cell with warning `cell_not_fitted_prior_used`.
+  const priorFile = path.resolve(path.dirname(detectorPath), 'weights.v1.json');
+  let prior = null;
+  try { prior = JSON.parse(readFileSync(priorFile, 'utf8')); }
+  catch (e) { process.stderr.write(`fatal: cannot read the prior weights at ${priorFile} (${e.message}). The fitted file copies its per-feature "kind" map and its K; emitting a fitted file without them would ship a file the CLI cannot load.\n`); process.exit(2); }
+
+  // `kind` is a property of the FEATURE, not of the cell: it names the transform the detector
+  // applies to that feature's raw value. The prior file lists a feature only in the cells where it
+  // is scoped (a Turkish chat feature is absent from en:prose), while a fitted cell can carry a
+  // weight for any feature that reached it. So resolve `kind` from the cell first and from the
+  // union over every prior cell second, and assert the union is consistent — two prior cells
+  // disagreeing about a feature's transform would be a real schema bug worth stopping for.
+  const priorKindUnion = {};
+  for (const [cellName, c] of Object.entries(prior.cells || {})) {
+    for (const [f, k] of Object.entries(c.kind || {})) {
+      if (priorKindUnion[f] && priorKindUnion[f].kind !== k) {
+        process.stderr.write(`fatal: weights.v1.json disagrees with itself about feature "${f}": `
+          + `${priorKindUnion[f].cell} says "${priorKindUnion[f].kind}", ${cellName} says "${k}".\n`);
+        process.exit(2);
+      }
+      priorKindUnion[f] = { kind: k, cell: cellName };
+    }
+  }
+
   const fitted = {
-    provenance: 'fitted', generatedAt, expiresAt,
+    provenance: 'fitted',
+    weightsId: 'fitted-' + corpusHash.slice(0, 8),
+    generatedAt, expiresAt,
     corpusHash: corpusHash.slice(0, 16),
+    corpusHashNote: 'sha256 over the sorted list of "id|side|sha256(normKey(text))" for every row in the split (HEAD-RULINGS R36(d)). Changing any row\'s text, side or id changes it.',
+    K: prior.K,
     modelFamiliesCovered: [...new Set(scored.filter((r) => r.y === 1).map((r) => r.generator || r.source))].sort(),
     languageScope: ['en', 'tr'],
-    note: 'Cells are {en,tr} x {chat,prose} (four, not six) per HEAD-RULINGS R22. Fitted by eval/run-eval.mjs. Per HEAD-RULINGS R11 the CLI default stays weights.v1.json until the head decides otherwise; nobody flips it unilaterally.',
+    lambda: 1.0,
+    lambdaNote: 'HEAD-RULINGS R36(i): fitLogistic applies the L2 gradient as lambda*w/n, so the EFFECTIVE penalty on the summed loss is lambda/n and shrinkage weakens as a cell grows (38% norm reduction at n=200, 5% at n=5000). `lambdaEffective` is recorded per fitted cell. This is documented, not refitted, this round.',
+    note: 'Cells are {en,tr} x {chat,prose} (four, not six) per HEAD-RULINGS R22. Fitted by eval/run-eval.mjs. Per HEAD-RULINGS R11/R23 the CLI default stays weights.v1.json until the head decides otherwise; nobody flips it unilaterally. A cell marked "not fitted" makes the loader fall back to the PRIOR cell and warn `cell_not_fitted_prior_used`.',
     cells: {},
     hardMode: {},
   };
+  const notFittedCells = [];
   for (const cell of ['en:chat', 'en:prose', 'tr:chat', 'tr:prose']) {
     const R = results.standard[cell];
-    if (!R) { fitted.cells[cell] = { status: 'not fitted — too few rows in this cell' }; continue; }
+    const priorCell = prior.cells?.[cell] || {};
+    if (!R) {
+      const nFitRows = scored.filter((r) => r.side === 'fit' && r.cell === cell && !r.gated).length;
+      fitted.cells[cell] = {
+        status: 'not fitted',
+        reason: `too few rows survived the gates on the fitting side of this cell (${nFitRows} scored fit-side rows). The CLI falls back to the prior cell and warns cell_not_fitted_prior_used.`,
+      };
+      notFittedCells.push(cell);
+      continue;
+    }
     const m = R.model;
+    // `kind` must cover every feature this cell carries a weight for. The prior file is the source
+    // of truth; a feature the prior does not know is a schema drift and must stop the run, not
+    // silently ship a cell the loader will reject.
+    const kind = {};
+    const missingKind = [];
+    for (const n of m.use) {
+      const k = priorCell.kind?.[n] ?? priorKindUnion[n]?.kind;
+      if (!k) missingKind.push(n); else kind[n] = k;
+    }
+    if (missingKind.length) {
+      process.stderr.write(`fatal: no "kind" anywhere in weights.v1.json for ${cell} feature(s) ${missingKind.join(', ')}. `
+        + 'The fitted file cannot be emitted without them: the CLI dereferences cell.kind[feature].\n');
+      process.exit(2);
+    }
     fitted.cells[cell] = {
       b0: m.b, tau: Number.isFinite(R.tau) ? R.tau : null,
       tau_note: Number.isFinite(R.tau) ? R.tauSource
         : 'null means NO threshold satisfies the fairness limit on this cell: nothing is flagged. It is not 1.0, because the flag rule is p >= tau and the isotonic map saturates at exactly 1.0.',
       isotonic: m.iso, n_fit_rows: m.nFit, n_val_rows: m.nVal,
+      lambda: 1.0,
+      lambdaEffective: m.nFit ? 1.0 / m.nFit : null,
       w: Object.fromEntries(m.use.map((n, j) => [n, m.w[j]])),
       mu: m.mu, sigma: m.sigma,
+      kind,
       signFlips: m.signFlips,
     };
     const H = results.hard[cell];
@@ -914,12 +1178,26 @@ async function main() {
   // coefficients deserve, and a full float prints a 15-digit run that trips the head's
   // phone-shaped-digit-run acceptance grep on a tracked file.
   const round6 = (k, v) => (typeof v === 'number' && Number.isFinite(v) ? Number(v.toFixed(6)) : v);
-  writeFileSync(path.join(outDir, 'weights.fitted.json'), JSON.stringify(fitted, round6, 2) + '\n', 'utf8');
+  const fittedPath = path.join(outDir, 'weights.fitted.json');
+  const serialised = JSON.stringify(fitted, round6, 2) + '\n';
+  // Check the file against the SHIPPED loader's own contract before writing it. A fitted file the
+  // CLI cannot load is worse than no fitted file: it turns R23's documented opt-in into a crash.
+  try { validateWeightsShape(JSON.parse(serialised), path.relative(process.cwd(), fittedPath)); }
+  catch (e) {
+    process.stderr.write(`fatal: the fitted weights this run produced do not satisfy the shipped loader's contract.\n${e.message}\n`);
+    process.exit(6);
+  }
+  writeFileSync(fittedPath, serialised, 'utf8');
 
   emit('## 13. Output');
   emit('');
-  emit(`- \`${path.relative(process.cwd(), path.join(outDir, 'weights.fitted.json'))}\` — provenance \`fitted\`, corpusHash \`${fitted.corpusHash}\`, expires ${expiresAt} (180 days).`);
-  emit('- Per HEAD-RULINGS R11 the shipped CLI default remains `weights.v1.json`. Whether the fitted file becomes the default is the head\'s call after reading this report.');
+  emit(`- \`${path.relative(process.cwd(), fittedPath)}\` — provenance \`fitted\`, weightsId \`${fitted.weightsId}\`, corpusHash \`${fitted.corpusHash}\`, expires ${expiresAt} (180 days).`);
+  emit(`- It carries every field the shipped loader dereferences — top-level \`provenance\`, \`weightsId\`, \`generatedAt\`, \`expiresAt\`, \`K\`, \`cells\`, and per fitted cell \`b0\`, \`w\`, \`mu\`, \`sigma\` and the per-feature \`kind\` map copied from \`weights.v1.json\` — and this run validated it against \`lib/score.mjs\`'s own \`validateWeightsShape()\` before writing it (HEAD-RULINGS R36(c)).`);
+  emit(notFittedCells.length
+    ? `- Cells not fitted this round: ${notFittedCells.map((c) => '`' + c + '`').join(', ')}. They are emitted as an explicit \`{status:"not fitted", reason}\`; the CLI falls back to the PRIOR cell for them and warns \`cell_not_fitted_prior_used\`. A text routed to one of those cells is NOT scored with fitted weights, whatever the file's \`provenance\` says.`
+    : '- Every cell was fitted this round.');
+  emit(`- \`corpusHash\` is sha256 over the sorted \`id|side|sha256(normKey(text))\` of every row (R36(d)). The previous hash covered ids only and did not move when a row's text changed.`);
+  emit('- Per HEAD-RULINGS R11/R23 the shipped CLI default remains `weights.v1.json`. Whether the fitted file becomes the default is the head\'s call after reading this report.');
   emit('');
   emit('## What this report does not say');
   emit('');

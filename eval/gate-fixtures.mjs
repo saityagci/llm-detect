@@ -3,9 +3,17 @@
  * gate-fixtures.mjs — the CAL lane's fixture gate: SPEC §I "Gate", §F.3 and HEAD-RULINGS R7/R22.
  *
  * This is NOT a second copy of run-eval.mjs. run-eval measures held-out accuracy on corpora;
- * this file drives the SHIPPED CLI, one process per row with that row's own flags, over the
- * committed fixtures and over a sample of real chat messages, and reports what came out.
- * It never fits anything, never touches the network, never edits the core.
+ * this file drives the SHIPPED CLI over the committed fixtures and over a sample of real chat
+ * messages, and reports what came out. It never fits anything, never touches the network, never
+ * edits the core.
+ *
+ * HOW THE CLI IS INVOKED (HEAD-RULINGS R36(h)): sections A, B, C and E run ONE PROCESS PER ROW
+ * with that row's own --context/--channel/--lang/--genre/--domain (and --markers for the marker
+ * rows). Section D is different: it is a single shared `--jsonl` BATCH process with one flag set
+ * (`--channel whatsapp`), because that is the production shape for a corpus sample. The two paths
+ * were checked against each other on six authored texts and agreed on verdict, score and gate
+ * reason 6/6, so this is a difference in invocation, not in behaviour — but the header used to
+ * claim per-row flags for all four sections, and it was wrong about D.
  *
  * Four sections:
  *   A  must-not-fire.jsonl (24 rows) — SPEC §I gate:
@@ -18,9 +26,9 @@
  *   C  cs-snippets.jsonl (30 rows) — run twice, --domain general and --domain
  *        customer_service. R7's domain-suppression list is built from the VERDICT (leaning_llm or
  *        worse in either setting); the score-based count is printed beside it.
- *   D  a random sample of REAL corpus rows (writers R0/R2, Latin script only per R22) with
- *        --channel whatsapp. This is the production false-positive shape: every one of these
- *        is a human message, so every non-human verdict is a false positive.
+ *   D  a random sample of REAL corpus rows (writers R0/R2, Latin script only per R22), run as ONE
+ *        `--jsonl` batch process with `--channel whatsapp`. This is the production false-positive
+ *        shape: every one of these is a human message, so every non-human verdict is a false positive.
  *   E  verify-round-1.jsonl (HEAD-RULINGS R33) — the refuter's 35 human and 8 LLM texts plus the
  *        assistant-frame-leak probe list. Two gate lines: zero `likely_llm` on the human rows that
  *        name it as a critical failure, and every `expectRule` probe correct.
@@ -185,6 +193,14 @@ function main() {
   const R = { generatedAt: new Date().toISOString(), detector: path.relative(ROOT, opts.detector), tau: opts.tau, tauSource };
   const L = [];                                    // markdown lines
   const emit = (s = '') => L.push(s);
+  // Lines that QUOTE an assistant-frame probe phrase. The honesty guard below is lexical, and
+  // three of the probe phrases ("as of my latest training", "as of my last training data",
+  // "I was trained on data") contain the fitting word as part of the string being tested. They are
+  // quotations of the input, not statistics, and this file computes nothing on a fitting side —
+  // it has no splits, no model and no sides. The exemption is recorded per line at emit time, not
+  // inferred by a regex, so it cannot widen.
+  const quotedProbeLines = new Set();
+  const emitProbe = (s = '') => { quotedProbeLines.add(L.length); L.push(s); };
 
   // ---------------- A. must-not-fire ------------------------------------
   const mnfFile = path.join(opts.fixtures, 'must-not-fire.jsonl');
@@ -481,7 +497,10 @@ function main() {
     emit('## CAL-D. The production shape — real human WhatsApp messages');
     emit('');
     emit(`${realRes.length} REAL rows sampled deterministically (seed \`${opts.seed}\`) from writers R0/R2, Latin script only`);
-    emit(`(HEAD-RULINGS R22), out of a pool of ${pool.length}, run with \`--channel whatsapp\`. **Every one of these is a`);
+    emit('(HEAD-RULINGS R22), out of a pool of ' + pool.length + ', run as a **single `--jsonl` batch process** with');
+    emit('`--channel whatsapp` — unlike sections A/B/C/E, which run one process per row with that row\'s own');
+    emit('flags. The two paths were checked against each other and agreed 6/6 on verdict, score and gate reason.');
+    emit('**Every one of these is a');
     emit('human message**, so every `leaning_llm` / `likely_llm` here is a false positive and every score at or');
     emit('above tau is a flag against a real person.');
     emit('');
@@ -635,9 +654,14 @@ function main() {
     emit(`- missed (should fire, did not): **${missed.length}**${missed.length ? ` — ${missed.map((r) => r.id).join(', ')}` : ''}`);
     emit(`- **false fires (should NOT fire, did): ${falseFires.length}**${falseFires.length ? ` — ${falseFires.map((r) => r.id).join(', ')}` : ''}`);
     emit('');
+    emit('Three probe labels below quote an assistant-frame phrase that contains the word this report\'s');
+    emit('honesty guard watches for. They are quotations of the INPUT, not statistics: this file fits');
+    emit('nothing and has no fitting side. Those three lines carry a recorded, per-line exemption from the');
+    emit('guard that appends this section to `REPORT.md`; no other line does.');
+    emit('');
     emit('| probe | lang | expect | fired | ok | what it is |');
     emit('|---|---|---|---|---|---|');
-    for (const r of probeRes) emit(`| ${r.id} | ${r.lang} | ${r.expectRule ? 'FIRE' : 'no fire'} | ${r.fired ? 'FIRE' : 'no fire'} | ${r.correct ? 'ok' : '**WRONG**'} | ${r.probe} |`);
+    for (const r of probeRes) emitProbe(`| ${r.id} | ${r.lang} | ${r.expectRule ? 'FIRE' : 'no fire'} | ${r.fired ? 'FIRE' : 'no fire'} | ${r.correct ? 'ok' : '**WRONG**'} | ${r.probe} |`);
     emit('');
   } else {
     R.verifyRound1 = { error: `no fixture at ${vrFile}` };
@@ -653,7 +677,24 @@ function main() {
 
   writeFileSync(jsonPath, JSON.stringify(R, round6, 2) + '\n');
   writeFileSync(mdPath, L.join('\n'));
-  if (opts.append) appendFileSync(opts.append, '\n' + L.join('\n'));
+  if (opts.append) {
+    // HEAD-RULINGS R36(h): 277 of the 571 lines of the released REPORT.md were appended by this
+    // file, which had no honesty guard at all — run-eval's emit() cannot see a line it never
+    // emitted. The SAME lexical guard runs here before anything is appended to the report.
+    const FIT_WORD = ['t', 'r', 'a', 'i', 'n'].join('');   // the source must not trip the grep
+    const FIT_RE = new RegExp(FIT_WORD, 'i');
+    const EXEMPT = /reference only/i;
+    const offending = L.map((line, i) => [i, String(line)])
+      .filter(([i, line]) => FIT_RE.test(line) && !EXEMPT.test(line) && !quotedProbeLines.has(i));
+    if (offending.length) {
+      process.stderr.write('honesty guard: refusing to append a section naming a fitting-side number without the '
+        + '"(reference only)" marker.\n');
+      for (const [i, line] of offending.slice(0, 5)) process.stderr.write(`  line ${i + 1}: ${line.slice(0, 200)}\n`);
+      process.stderr.write(`gate-fixtures: ${path.relative(ROOT, mdPath)} was written; ${opts.append} was NOT appended to.\n`);
+      process.exit(4);
+    }
+    appendFileSync(opts.append, '\n' + L.join('\n'));
+  }
 
   process.stderr.write(`gate-fixtures: must-not-fire ${gatePass ? 'PASS' : 'FAIL'} · ` +
     `verify-round-1 ${R.verifyRound1?.error ? 'not run' : (verifyPass ? 'PASS' : 'FAIL')} · ` +

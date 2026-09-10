@@ -202,7 +202,7 @@ guess with an expiry date. Calibration produced `eval/out/weights.fitted.json`, 
   stratum in either fitted cell — **fewer than 20 human rows each** — so the condition "passes the
   fairness-constrained thresholds in both languages" is not failed, it is *not measurable*;
 - `tr:chat`'s fitted threshold is **t = 1.000** (it flags only rows the isotonic map pinned at
-  certainty) and its **hard-mode AUC is 0.443**, below chance;
+  certainty) and its **hard-mode AUC is 0.450**, below chance;
 - **eight fitted coefficients in `en:prose` carry the opposite sign to the design**, including
   `terminal_punct_ratio` at −0.175. A sign flip is something to investigate, not to ship.
 
@@ -420,7 +420,7 @@ Say these out loud before quoting anything this tool produces.
   produced by a second model through a paid API (R10). Provenance is recorded per row.
 - **Prose between 50 and about 120 tokens mostly abstains.** The rhythm features switch on at
   120–250 tokens, and the measured `en:prose` 50–149 bucket says the instrument is barely useful
-  there anyway (AUC 0.757, hard mode 0.603, TPR 4.7% at 1.1% FPR). G4 was deliberately **not**
+  there anyway (AUC 0.747, hard mode 0.648, TPR 3.7% at 1.1% FPR). G4 was deliberately **not**
   lowered to score that band (HEAD-RULINGS R25); the humanization fixtures were rewritten at
   160–260 tokens instead, so that the `§F.3` collapse assertion is measurable at all. A 90-word
   review will usually get `insufficient_text` with `too_few_active_features`, and that is the

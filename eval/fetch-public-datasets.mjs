@@ -213,7 +213,34 @@ function assertMageMapping() {
   if (mf.label({ label: 'OR' }) !== 'human' || mf.label({ label: 'CG' }) !== 'llm') {
     throw new Error('modern-fake-reviews label mapping is wrong: OR = human, CG = machine.');
   }
-  return 'MAGE 0=machine/1=human asserted; the other three datasets asserted non-inverted';
+  // HEAD-RULINGS R36(h): the two sources that were NOT asserted. maide-up-tr's `source` column is
+  // the label and it is the only Turkish resource in the project, so an inversion there inverts
+  // every Turkish number in the report with nothing to catch it. hc3-en carries no label column at
+  // all — expand() reads the label off the FIELD NAME, so a renamed field silently yields rows of
+  // one class labelled as the other.
+  const mu = REGISTRY.find((s) => s.name === 'maide-up-tr');
+  if (mu.label({ source: 0 }) !== 'human' || mu.label({ source: 1 }) !== 'llm') {
+    throw new Error('maide-up-tr label mapping is wrong: source 0 = human (real review), 1 = llm (GPT-4).');
+  }
+  if (mu.label({ source: 2 }) !== null) {
+    throw new Error('maide-up-tr label mapping is wrong: an unrecognised `source` value must map to null, not to a class.');
+  }
+  const hc3 = REGISTRY.find((s) => s.name === 'hc3-en');
+  const expanded = hc3.expand({ human_answers: ['H1', 'H2'], chatgpt_answers: ['C1'] });
+  const hOut = expanded.filter((x) => x.label === 'human').map((x) => x.text).sort();
+  const lOut = expanded.filter((x) => x.label === 'llm').map((x) => x.text).sort();
+  if (expanded.length !== 3 || hOut.join(',') !== 'H1,H2' || lOut.join(',') !== 'C1') {
+    throw new Error('hc3-en expand() is wrong: human_answers must yield label "human" and chatgpt_answers label "llm". '
+      + `Got ${JSON.stringify(expanded)}.`);
+  }
+  if (expanded.some((x) => x.label === 'llm' && x.generator !== 'chatgpt')) {
+    throw new Error('hc3-en expand() is wrong: the machine half must record generator "chatgpt".');
+  }
+  if (hc3.expand({}).length !== 0) {
+    throw new Error('hc3-en expand() is wrong: a row with neither answer field must yield no rows, not a throw and not a mislabelled one.');
+  }
+  return 'MAGE 0=machine/1=human asserted; fake-reviews-gpt2era 0=human/1=machine, modern-fake-reviews OR=human/CG=machine, '
+    + 'maide-up-tr source 0=human/1=gpt-4 and hc3-en human_answers=human/chatgpt_answers=llm all asserted non-inverted';
 }
 
 // ---------------------------------------------------------------- one source

@@ -16,16 +16,16 @@
 ## surviving human rows after the Arabic filter — every threshold is valid for them and nobody else)
 | cell | bucket | n_h / n_llm | AUC | AUC hard | FPR@t | TPR@t |
 |---|---|---|---|---|---|---|
-| en:prose | 150–499 tok | 217 / 281 | 0.887 | 0.859 | 7.4 % | 64.8 % |
-| en:prose | 50–149 tok | 355 / 343 | 0.757 | 0.603 | 1.1 % | 4.7 % |
+| en:prose | 150–499 tok | 224 / 297 | 0.884 | 0.858 | 7.6 % | 65.0 % |
+| en:prose | 50–149 tok | 359 / 356 | 0.747 | 0.648 | 1.1 % | 3.7 % |
 | en:prose | <50, 500+ | — | NO COVERAGE / INSUFFICIENT | | | |
 | en:chat, tr:prose | all | — | no model (too few rows survive the gates) | | | |
-| tr:chat | all | — | INSUFFICIENT / NO COVERAGE; cell-level AUC 0.975 → **0.443 in hard mode** | | | |
-Coverage (`insufficient_text` rate): en:chat 98.5 %, tr:chat 91.2 %, tr:prose 98.1 %, en:prose 72.2 %.
+| tr:chat | all | — | INSUFFICIENT / NO COVERAGE; cell-level AUC 0.975 → **0.450 in hard mode** | | | |
+Coverage (`insufficient_text` rate): en:chat 98.5 %, tr:chat 91.2 %, tr:prose 97.7 %, en:prose 72.1 %.
 Real WhatsApp messages (200, R0/R2, Latin script): 196 `insufficient_text`, 2 `uncertain`, 2 `leaning_human`,
 0 false positives — the FPR of silence; 2 % of real chat gets a score at all.
 Leave-one-writer-out: R0 25 of 33 scored rows flagged (75.8 %; 2.1 % of all 1,194 rows); R1/R2 INSUFFICIENT (n<20).
-Base rate: at a 1 % prior, en:prose 150–499 precision is 0.081 — twelve wrong flags per right one.
+Base rate: at a 1 % prior, en:prose 150–499 precision is 0.080 — twelve wrong flags per right one.
 Fixture gates: must-not-fire PASS (0/12 `likely_llm`, 0/12 `likely_human`, 24/24 abstained);
 verify-round PASS (0/33 human `likely_llm`, 40/40 leak probes). Fitted weights NOT promoted (R23).
 

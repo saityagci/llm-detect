@@ -138,7 +138,10 @@ Rows at or above 0.5 by score: 13 general / 13 customer_service.
 ## CAL-D. The production shape — real human WhatsApp messages
 
 200 REAL rows sampled deterministically (seed `cal-2026-09-09`) from writers R0/R2, Latin script only
-(HEAD-RULINGS R22), out of a pool of 1946, run with `--channel whatsapp`. **Every one of these is a
+(HEAD-RULINGS R22), out of a pool of 1946, run as a **single `--jsonl` batch process** with
+`--channel whatsapp` — unlike sections A/B/C/E, which run one process per row with that row's own
+flags. The two paths were checked against each other and agreed 6/6 on verdict, score and gate reason.
+**Every one of these is a
 human message**, so every `leaning_llm` / `likely_llm` here is a false positive and every score at or
 above tau is a flag against a real person.
 
@@ -230,6 +233,11 @@ A false fire is the worst output this tool has; a miss is only lost recall. They
 - missed (should fire, did not): **0**
 - **false fires (should NOT fire, did): 0**
 
+Three probe labels below quote an assistant-frame phrase that contains the word this report's
+honesty guard watches for. They are quotations of the INPUT, not statistics: this file fits
+nothing and has no fitting side. Those three lines carry a recorded, per-line exemption from the
+guard that appends this section to `REPORT.md`; no other line does.
+
 | probe | lang | expect | fired | ok | what it is |
 |---|---|---|---|---|---|
 | P01 | en | FIRE | FIRE | ok | as a large language model |
@@ -273,4 +281,4 @@ A false fire is the worst output this tool has; a miss is only lost recall. They
 | N09 | tr | no fire | no fire | ok | human discussing yapay zeka |
 | N10 | tr | no fire | no fire | ok | human discussing a bot with the circumflex spelling |
 
-_CAL fixture gate wall-clock: 17.9s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._
+_CAL fixture gate wall-clock: 19.1s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._

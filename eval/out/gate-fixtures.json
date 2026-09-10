@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-09T11:03:51.392Z",
+  "generatedAt": "2026-09-10T03:50:29.931Z",
   "detector": "stylometry.mjs",
   "tau": 0.5,
   "tauSource": "the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.",
@@ -4167,5 +4167,5 @@
       }
     ]
   },
-  "wallClockSec": 17.9
+  "wallClockSec": 19.1
 }

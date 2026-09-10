@@ -41,6 +41,15 @@ That is the whole command, and it is the only thing that may write `eval/out/REP
 - **`eval/out/REPORT.md` is machine-generated only.** Nothing hand-written survives a regeneration.
   Findings — defects, network wedges, head rulings — live in the "Findings log" at the bottom of
   *this* file, which no command overwrites.
+- **`run-eval.mjs` exits non-zero rather than publish numbers measured on a leaked split.** Exit 5
+  when a non-`writer::` group straddles two sides (only human writers may, and only because they
+  are split chronologically inside a writer); exit 6 when the `weights.fitted.json` it just built
+  does not satisfy the shipped loader's own `validateWeightsShape()`; exit 4 for the honesty guard;
+  exit 2 for a missing input. `gate-fixtures.mjs` exits 4 rather than append a section that trips
+  the same lexical guard (HEAD-RULINGS R36).
+- **`node eval/fetch-public-datasets.mjs` has no `timeout` on macOS.** `timeout(1)` is not installed;
+  run it under a shell watchdog instead:
+  `node eval/fetch-public-datasets.mjs --only <name> & p=$!; (sleep 900; kill -9 $p) & wait $p`.
 
 `run-eval.mjs` imports `detect()` from `../stylometry.mjs`. Point it elsewhere with
 `--detector <path>` — that is how the harness was developed before the core existed.
@@ -60,7 +69,7 @@ Naming the side "fit" keeps that guard from tripping over the harness's own pros
 |---|---|
 | `fetch-public-datasets.mjs` | The only file in the project that touches the network, and only `datasets-server.huggingface.co` (plus one documented Zenodo attempt, gated behind `--include-arabic`, which R22 leaves off). Caps at 1500 rows per label per dataset, pages `/rows` at 100, retries with Retry-After-aware backoff on 500/429, writes a manifest with per-file sha256, licence, cap, actual counts and the sampling strategy. A 500 from this API means "the index is loading", not "the dataset is gone". |
 | `make-splits.mjs` | SPEC §D.5 steps 1-3. Normalized-key dedup; cross-label strings forced to one side; group-aware split (writer for humans, persona for generated personas, source row / template family for public corpora); Arabic-script exclusion with counts; near-duplicate contamination scan; the R8 scrub. |
-| `gate-fixtures.mjs` | The CAL lane's gate. Runs the SHIPPED CLI, one process per row with that row's own flags, over `must-not-fire.jsonl` (SPEC §I gate), the 50 authored LLM rows (§F.3 verdicts and the humanization delta), the 30 support-desk snippets at both `--domain` settings, a deterministic sample of real corpus messages at `--channel whatsapp`, and `verify-round-1.jsonl` (R33). Exits 3 if the §I gate or either R33 gate line fails; a row outside its `allowed` set is reported as arbitration, never silently fixed. `--out` is a directory (default `eval/out`). It fits nothing and never touches the network. |
+| `gate-fixtures.mjs` | The CAL lane's gate. Runs the SHIPPED CLI over `must-not-fire.jsonl` (SPEC §I gate), the 50 authored LLM rows (§F.3 verdicts and the humanization delta), the 30 support-desk snippets at both `--domain` settings, a deterministic sample of real corpus messages, and `verify-round-1.jsonl` (R33). Sections A, B, C and E run **one process per row with that row's own flags**; section D is **one shared `--jsonl` batch** with `--channel whatsapp`, and the header now says so (R36(h)). Exits 3 if the §I gate or either R33 gate line fails, 4 if the section it would append to `REPORT.md` trips the honesty guard; a row outside its `allowed` set is reported as arbitration, never silently fixed. `--out` is a directory (default `eval/out`). It fits nothing and never touches the network. |
 | `run-eval.mjs` | SPEC §D.5 steps 4-10 and the §G.1 tables. Hand-rolled logistic regression, PAVA isotonic calibration, rank AUC, ECE, fairness-limited threshold, hard mode, leave-one-writer-out, negative controls (a)-(e), base-rate table. |
 | `adapters/supabase-messages.cjs` | Optional. Rebuilds `corpus_user_messages.json` from a Supabase message table. Not zero-dependency and not in `package.json` — see below. |
 | `fixtures/*.jsonl` | Committed. See the table further down. |
@@ -238,8 +247,8 @@ forge than the LLM side. Recorded in README §"Ways this detector will be confid
 **E7 — the G4 dead band: prose between 50 and about 120 tokens abstains.**
 34 of the 50 authored LLM fixtures (90–110-token prose) returned `insufficient_text` with G1–G3
 passed and `too_few_active_features`, because the rhythm features switch on at 120–250 tokens. The
-measured `en:prose` 50–149 bucket says the instrument is barely useful there anyway (AUC 0.757, hard
-mode 0.603, TPR 4.7% at 1.1% FPR). **Ruling: HEAD-RULINGS R25** — G4 stays where it is; the band is
+measured `en:prose` 50–149 bucket says the instrument is barely useful there anyway (AUC 0.747, hard
+mode 0.648, TPR 3.7% at 1.1% FPR). **Ruling: HEAD-RULINGS R25** — G4 stays where it is; the band is
 documented as abstaining, and the ten prose humanization pairs (five per language) were rewritten at 160–260 tokens on
 both sides so the §F.3 collapse assertion became measurable. Measured effect: evaluable prose pairs
 went from **1 of 10 to 7 of 10** (total evaluable pairs 3 → 9). Read the `**R25 check**` line in
@@ -339,6 +348,80 @@ in R35. No run exercised `likely_llm` as a final, the R31(e) artifact route, `re
 the round measures the report mechanics, not accuracy. Report: `.scratch/e2e2/e2e2-report.md`
 (scratch, not committed).
 
+**The eval-harness review (HEAD-RULINGS R36).** An independent reviewer re-derived §3 AUC/FPR/TPR/
+precision, §4 hard mode, §5/5b thresholds and strata, §7 leave-one-writer-out, §9 base rates and the
+fixture sections **exactly**, and confirmed mu/sigma from the fitting-side human rows only, t on VAL
+only, TEST-only headlines, zero duplicate straddles, chronological writer splits and the sha256 of all
+five public files. Seventeen defects were reproduced with a probe each
+(`.scratch/harness-review/`, scratch, not committed). All seventeen are fixed here and the report was
+regenerated. What actually moved:
+
+- **The split leaked at the persona level (D2/D3).** `make-splits.mjs` let the design round's
+  per-MESSAGE-ID `data_split.json` override the persona group hash, so 69 personas straddled and
+  **135 of 723 in-house TEST llm rows shared a persona with a fitting-side row**. SPEC §D.5 step 3
+  says never split by row. The recorded split is now reused at GROUP level or not at all (a group any
+  of whose rows was recorded test goes to test entirely), the cross-label collision force is applied
+  to the whole group for the same reason, and §1 now breaks the straddle count down by group kind and
+  **exits 5** if any non-`writer::` group straddles. Measured after: **0 of 771** in-house test llm
+  rows share a persona with a fitting-side row; straddling groups 72 → 3, all three `writer::`.
+  Repro: `node eval/make-splits.mjs` then read `group_straddle` in `eval/data/splits-report.json`.
+- **§8(a) was not a held-out number (D1).** The pre-2022 false-positive rate was computed over every
+  split side — 1 of 1,500 = 0.1%. Held-out only it is **1 of 317 = 0.3%**, and the report now prints
+  the fit/val/test composition beside it so the reader can see what was excluded. `emit()` never
+  caught it because the line names no fitting word; that is D9's point.
+- **HC3's matched-pair protection was a silent no-op (D6).** Four of the five public files predate the
+  `pair` field, so `shardOf()` fell back to `normKey(text)` and a human answer and a ChatGPT answer to
+  the same question could land on different sides. R36(e) permitted ONE re-pull of `hc3-en`; it
+  succeeded (see the CAL E3 note above — the wedge did not recur), the key came back for all 3,000
+  rows / 1,500 pairs, and **434 of the 500 multi-row pairs used to straddle**, every one of them
+  spanning both labels. Under pair sharding: **0**. `splits-report.json` now records pair-key coverage
+  per source and `REPORT.md` §1 prints it; the three sources that still have no key are marked
+  "not measurable — no key", because INACTIVE means unknown, not zero. Repro:
+  `.scratch/harness-review/` probes, or read the pair table in §1.
+- **`weights.fitted.json` could not be loaded at all (D4).** `--weights eval/out/weights.fitted.json`
+  was an uncaught `TypeError` on a missing per-feature `kind`. The emitter now writes every field the
+  shipped loader dereferences — top-level `provenance`, `weightsId`, `generatedAt`, `expiresAt`, `K`,
+  `cells`, and per fitted cell `b0`, `w`, `mu`, `sigma`, `kind` — copies `kind` from the prior file
+  (the transform is a property of the feature, and the emitter stops the run if the prior disagrees
+  with itself about one), emits a not-fitted cell as an explicit `{status, reason}`, and **validates
+  its own output against `lib/score.mjs`'s `validateWeightsShape()` before writing**, exiting 6 if it
+  fails. R23's opt-in path is real now: an `en:prose` text scores with `provenance: "fitted"` and no
+  `uncalibrated_weights`; a `tr:prose` text falls back to the prior cell and warns
+  `cell_not_fitted_prior_used`.
+- **`corpusHash` hashed ids only (D5)** — editing the text of every row left it unchanged. It is now
+  sha256 over the sorted `id|side|sha256(normKey(text))`.
+- **Isotonic regression was not a function of x (D8).** `fitIsotonic` pushed one block per point and
+  pooled only PAVA violations, so tied scores survived as several blocks with different y. `tr:chat`'s
+  val side has 5 tied values over 19 of its 26 rows. Equal x values are pooled before PAVA now. AUC,
+  FPR, TPR and t are rank statistics over the raw score and do not move; **the ECE column does**.
+- **Control (d) was measuring itself (D7).** It split sentences with an ad-hoc
+  `split(/(?<=[.!?])\s+/)` that agreed with the shipped segmenter on 237 of 295 documents, then
+  rejoined with a single space — so `space_hygiene` moved in 9 of the 10 largest deltas and the
+  published max |delta| 0.425 was substantially an artefact. It now uses `lib/segment.mjs`, preserves
+  the original inter-sentence separators, counts the documents that became gated after the shuffle
+  (3, previously dropped silently), and names the features that moved on the top-5 deltas.
+- **The honesty guard was shallow (D9).** `headline()` validated an object literal written at its one
+  call site — a constant checking itself; it now takes the ROWS and asserts every one is test-side.
+  277 of the released report's 571 lines were appended by `gate-fixtures.mjs`, which had no guard at
+  all; the same lexical guard now runs there and exits 4 rather than append. Three leak-probe labels
+  quote an assistant-frame phrase containing the watched word; they carry a recorded per-line
+  exemption, disclosed in the section itself.
+- **Smaller, all fixed:** NO-COVERAGE rows print the measured confusion instead of a literal `0.0%`
+  (D10); §7 states that the fold model pools all four cells and its threshold is not §5's per-cell t
+  (D11); the LOWO fallback threshold set now excludes the held-out writer — it never fired this round,
+  but a thinner corpus would have picked t on the writer the fold is blind to (D12); §1 prints the
+  contamination bands and the pair table out of the gitignored `splits-report.json` (D13); the §1
+  integrity audit uses `make-splits`' own `normKey`, which finds 111 duplicate rows where the local
+  weaker key found 108 (D14); `gate-fixtures.mjs`'s header now says section D is a batch run (D15);
+  `assertMageMapping()` also asserts `maide-up-tr` (source 0=human/1=gpt-4, unknown → null) and
+  `hc3-en` (`human_answers`→human, `chatgpt_answers`→llm with generator `chatgpt`, empty row → no
+  rows) (D16); the L2 penalty's effective scale is documented as `lambdaEffective` = lambda/n per
+  cell and **not refitted** (D17).
+- **Not a defect, recorded:** the reviewer's own prediction that `tr:chat` cell AUC would move
+  0.975 → ~0.980 once the leak was removed did NOT reproduce. Removing the leak by REASSIGNING the
+  rows (what the fix does) is not the same experiment as deleting them (what the estimate did); at
+  three decimals the cell AUC is unchanged.
+
 ## Ruling index
 
 | finding | ruling |
@@ -356,3 +439,4 @@ the round measures the report mechanics, not accuracy. Report: `.scratch/e2e2/e2
 | the verify-round texts become a committed fixture and part of the gate | R33 |
 | second-pass leak-rule precision, silent abstention reason, code-switch note; transform (b)/(c) findings | R34 |
 | agent report discipline after the CONFLICT block first rendered | R35 |
+| eval-harness review: persona-level split leak, held-out control (a), loadable fitted weights, real corpusHash, HC3 pair key, tie-pooled isotonic, honest control (d), deeper honesty guard | R36 |

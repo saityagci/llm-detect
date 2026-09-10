@@ -28,6 +28,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
+import { REGISTRY } from './fetch-public-datasets.mjs';
 
 const USAGE = `usage: node eval/make-splits.mjs [options]
   --data <dir>       data directory (default eval/data)
@@ -317,22 +318,49 @@ function main() {
   // ---- 2. texts occurring under BOTH labels: force onto the same side
   const collisions = [...keyLabels.entries()].filter(([, s]) => s.size > 1).map(([k]) => k);
   report.corpus.cross_label_collisions = collisions.length;
-  report.corpus.cross_label_note = 'These strings are irreducible: no feature set separates them. They are forced onto one side so they cannot be counted as both a hit and a miss.';
+  report.corpus.cross_label_note = 'These strings are irreducible: no feature set separates them. They are forced onto one side so they cannot be counted as both a hit and a miss. HEAD-RULINGS R36(b): the force is applied to the whole GROUP, not to the single row, or it would split a persona.';
   const collisionSide = new Map(collisions.map((k) => [k, sideOf('collision::' + k, opts.seed)]));
 
   // ---- 3. group-aware assignment
+  //
+  // HEAD-RULINGS R36(b) / SPEC §D.5 step 3: "Never split by row." The design round's
+  // data_split.json records a side per MESSAGE ID. Applying it per row let 443 generated rows
+  // override their persona's group hash, so 69 personas straddled and 18.7 % of in-house TEST
+  // llm rows shared a persona with a FIT row. The holdout unit for a generated row is the
+  // PERSONA, so the recorded split is reused at GROUP level or not at all: a group any of whose
+  // rows the design round put on test goes to test entirely; every other group takes the hash.
+  const groupOf = (r) => (r.label === 'REAL' ? 'writer::' + r.writer_id : 'persona::' + (r.persona_id || 'unknown'));
+  const recordedTestGroups = new Set();
+  const recordedGroupRows = new Map();          // group -> {recordedTest, total}
+  if (recorded) {
+    for (const r of unique) {
+      const g = groupOf(r);
+      const e = recordedGroupRows.get(g) || { recordedTest: 0, total: 0 };
+      e.total++;
+      if (recorded.side.get(r.id) === 'test') { e.recordedTest++; recordedTestGroups.add(g); }
+      recordedGroupRows.set(g, e);
+    }
+  }
+  // The cross-label collision constraint is applied at GROUP level for the same reason: forcing
+  // ONE row of a persona onto the collision's side splits that persona. Deterministic tie-break:
+  // the lowest collision key in the group wins. (Dedup has already dropped the second copy of a
+  // both-label string, so this is belt-and-braces, and it must not cost a group boundary.)
+  const groupForced = new Map();
+  for (const r of unique) {
+    if (!collisionSide.has(r._key)) continue;
+    const g = groupOf(r);
+    const prev = groupForced.get(g);
+    if (!prev || r._key < prev.key) groupForced.set(g, { key: r._key, side: collisionSide.get(r._key) });
+  }
   const rows = [];
   let reusedFromRecorded = 0;
   for (const r of unique) {
     const isHuman = r.label === 'REAL';
-    const group = isHuman ? ('writer::' + r.writer_id) : ('persona::' + (r.persona_id || 'unknown'));
+    const group = groupOf(r);
     let side;
-    if (collisionSide.has(r._key)) side = collisionSide.get(r._key);
-    else if (recorded && recorded.side.get(r.id) === 'test') { side = 'test'; reusedFromRecorded++; }
+    if (groupForced.has(group)) side = groupForced.get(group).side;
+    else if (recordedTestGroups.has(group)) { side = 'test'; reusedFromRecorded++; }
     else side = sideOf(group, opts.seed);
-    // the design round's split only had two sides; anything it put on the fit side may still
-    // become val here, which is what the 60/20/20 group hash decides.
-    if (side === 'fit-or-val') side = sideOf(group, opts.seed) === 'test' ? 'val' : sideOf(group, opts.seed);
     rows.push({
       id: r.id, text: r.content, label: isHuman ? 'human' : 'llm', lang: r.language === 'en' ? 'en' : 'tr',
       source: 'inhouse', group, side,
@@ -341,7 +369,15 @@ function main() {
       created_at: r.created_at || null,
     });
   }
-  report.corpus.reused_recorded_test_ids = reusedFromRecorded;
+  report.corpus.recorded_split_reuse = {
+    unit: 'group (writer:: for human rows, persona:: for generated rows)',
+    rule: 'HEAD-RULINGS R36(b): a group any of whose rows the design round recorded as test goes to test ENTIRELY. The per-message-id override is gone — it split by row, which SPEC §D.5 step 3 forbids.',
+    groups_promoted_to_test: recordedTestGroups.size,
+    rows_placed_by_that_promotion: reusedFromRecorded,
+    groups_partially_recorded_test: [...recordedGroupRows.entries()]
+      .filter(([, e]) => e.recordedTest > 0 && e.recordedTest < e.total).length,
+    note: 'groups_partially_recorded_test counts the groups the OLD per-row rule would have split across two sides. Under the group rule they cannot.',
+  };
 
   // Human rows are additionally split CHRONOLOGICALLY per writer (SPEC §F.2): every held-out
   // human message is later than that writer's fitting messages. This overrides the group hash
@@ -378,6 +414,70 @@ function main() {
     const k = r.source;
     (report.sources[k] ||= { fit: { human: 0, llm: 0 }, val: { human: 0, llm: 0 }, test: { human: 0, llm: 0 } });
     report.sources[k][r.side][r.label]++;
+  }
+
+  // ---- HEAD-RULINGS R36(e): pair-key coverage. shardOf() falls back to normKey(text) when a row
+  // carries no `pair`, so a source whose registry entry claims matched pairs but whose file has no
+  // pair key is sharded per TEXT and its matched-pair protection is silently a no-op. Four of the
+  // five public files predate the `pair` field. Say so, per source, and never call a source
+  // "pair-protected" without the key.
+  {
+    const claimsPairs = new Set(REGISTRY.filter((s2) => s2.pairs).map((s2) => 'public:' + s2.name));
+    const cov = {};
+    for (const r of pub) {
+      const e = (cov[r.source] ||= { rows: 0, with_pair_key: 0, distinct_pairs: new Set(), claims_matched_pairs: claimsPairs.has(r.source) });
+      e.rows++;
+      if (r.pair) { e.with_pair_key++; e.distinct_pairs.add(r.pair); }
+    }
+    const straddlingPairs = {};
+    for (const r of pub) {
+      if (!r.pair) continue;
+      const e = (straddlingPairs[r.source] ||= new Map());
+      if (!e.has(r.pair)) e.set(r.pair, new Set());
+      e.get(r.pair).add(r.side);
+    }
+    report.pair_key_coverage = {};
+    for (const [src, e] of Object.entries(cov)) {
+      const pct2 = e.rows ? Number((100 * e.with_pair_key / e.rows).toFixed(2)) : 0;
+      const straddle = straddlingPairs[src] ? [...straddlingPairs[src].values()].filter((x) => x.size > 1).length : 0;
+      report.pair_key_coverage[src] = {
+        rows: e.rows, with_pair_key: e.with_pair_key, coverage_pct: pct2,
+        distinct_pairs: e.distinct_pairs.size,
+        claims_matched_pairs: e.claims_matched_pairs,
+        pair_protection: e.claims_matched_pairs
+          ? (pct2 === 100 ? 'ACTIVE' : 'INACTIVE — the registry says this source has matched pairs, the file has no `pair` key, so shardOf() fell back to normKey(text) and a matched pair can straddle')
+          : (pct2 === 100 ? 'ACTIVE (source does not claim matched pairs)' : 'n/a — source does not claim matched pairs'),
+        straddling_pairs: e.with_pair_key ? straddle : null,
+      };
+    }
+    report.pair_key_note = 'HEAD-RULINGS R36(e). Whether a pair straddles is not measurable from a file without the key: index alignment is not recoverable. INACTIVE means unknown, not zero.';
+  }
+
+  // ---- HEAD-RULINGS R36(b)/(c): the straddle assertion, broken down by group kind.
+  // Only `writer::` groups may straddle — human rows are split chronologically INSIDE a writer by
+  // design (SPEC §F.2). Every other kind straddling is a leak.
+  {
+    const gs = new Map();
+    for (const r of all) { if (!gs.has(r.group)) gs.set(r.group, new Set()); gs.get(r.group).add(r.side); }
+    const byKind = {};
+    let nonWriter = 0;
+    for (const [g, sides] of gs) {
+      if (sides.size < 2) continue;
+      const kind = String(g).split('::')[0];
+      byKind[kind] = (byKind[kind] || 0) + 1;
+      if (kind !== 'writer') nonWriter++;
+    }
+    report.group_straddle = {
+      groups: gs.size,
+      straddling: Object.values(byKind).reduce((a, b) => a + b, 0),
+      by_kind: byKind,
+      non_writer_straddling: nonWriter,
+      assertion: 'non_writer_straddling must be 0. Only `writer::` groups may straddle, because human rows are split chronologically inside a writer (SPEC §F.2).',
+      pass: nonWriter === 0,
+    };
+    if (nonWriter !== 0) {
+      process.stderr.write(`LEAK: ${nonWriter} non-writer group(s) straddle two sides — ${JSON.stringify(byKind)}\n`);
+    }
   }
   report.buckets = {};
   for (const r of all) {

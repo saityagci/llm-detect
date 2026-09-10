@@ -13,6 +13,7 @@ import {
   detect as coreDetect, detectBatch as coreBatch, aggregate as coreAggregate,
   buildCorpusIndex, configure, DETECTOR_VERSION,
 } from './lib/detect.mjs';
+import { validateWeightsShape } from './lib/score.mjs';
 
 // One-time resource load (SPEC §I B1 item 3: the Aho-Corasick trie is built once at module load).
 const RES = loadResources();
@@ -173,15 +174,14 @@ function validateMarkers(markers, where) {
   return markers;
 }
 
-/** S-04: a malformed expiresAt used to mean the weights NEVER expire — silently. */
+/**
+ * R36(c): every field lib/detect.mjs and lib/score.mjs dereference is required, and a violation
+ * exits 4 naming the file, the cell and the field — never a stack trace. S-04's expiresAt check
+ * (a malformed expiry used to mean the weights NEVER expire) is folded into the same contract.
+ */
 function validateWeights(w, where) {
-  if (!w.cells || !w.provenance) fail(4, 'weights file schema mismatch: need { provenance, cells }');
-  if (w.expiresAt !== undefined && w.expiresAt !== null) {
-    if (typeof w.expiresAt !== 'string' || Number.isNaN(Date.parse(w.expiresAt))) {
-      fail(4, `weights file schema mismatch: expiresAt is not a parsable date (${where}): `
-        + `${JSON.stringify(w.expiresAt)} — a malformed expiry means the weights never expire`);
-    }
-  }
+  try { return validateWeightsShape(w, where); }
+  catch (e) { fail(4, e.message); }
   return w;
 }
 

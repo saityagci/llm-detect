@@ -25,7 +25,8 @@ import { identify, latinSubId } from './lib/langid.mjs';
 import { caseFold, AR_LETTER, WORD_RE, NUM_RE, makeViews, foldConfusables, homoglyphScan } from './lib/unicode.mjs';
 import { words } from './lib/tokenize.mjs';
 import { sha256Hex } from './lib/hash.mjs';
-import { transform, capLambda, tableVerdict, REGISTER_PROXY_LLM, AGGREGATE_DISABLED } from './lib/score.mjs';
+import { transform, capLambda, tableVerdict, REGISTER_PROXY_LLM, AGGREGATE_DISABLED,
+  validateWeightsShape } from './lib/score.mjs';
 import { assistantFrameLeak, runRules } from './lib/rules.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -880,6 +881,10 @@ const LEAK_NEGATIVES = [
 function verifyRoundOne() {
   const P = { ...BASE, shape: 'prose' };
   const C = { ...BASE, shape: 'chat' };
+  // A text that reaches likely_llm through a Tier-0 rule, so the weights-provenance and expiry
+  // paths in R36c have something to demote.
+  const leakTextForWeights = 'As an AI language model, I do not have access to real-time booking '
+    + 'information, but here is a revised draft you can adapt for your hotel enquiry next week.';
 
   // --- reviewer D-06 / R22: the language gate is NOT bypassable by a Tier-0 rule -----------
   // Built from code points so no Arabic script appears in this file.
@@ -1268,6 +1273,95 @@ function verifyRoundOne() {
     detect(trMixed, { ...P, lang: 'tr' }).notes.some((n) => n.startsWith('code_switch_observed')
       && n.includes('%')));
 
+  // --- R36(c): the weights-file shape contract ------------------------------------------------
+  // `--weights eval/out/weights.fitted.json` used to die with an uncaught TypeError
+  // ("Cannot read properties of undefined (reading 'sentence_len_cv')") because the fitted file
+  // carried no per-feature `kind` map and no top-level `K`. R23's opt-in path is only real if the
+  // file loads.
+  const prior = JSON.parse(readFileSync(join(HERE, 'weights.v1.json'), 'utf8'));
+  ok('R36c: the shipped prior file satisfies the shape contract',
+    (() => { try { validateWeightsShape(prior, 'weights.v1.json'); return true; } catch { return false; } })());
+
+  /** A minimal FITTED-shaped file: the prior numbers, relabelled. */
+  const fittedLike = (over = {}) => ({
+    ...JSON.parse(JSON.stringify(prior)),
+    provenance: 'fitted',
+    weightsId: 'fitted-selftest',
+    generatedAt: '2026-09-09',
+    expiresAt: '2027-03-08T00:00:00Z',
+    ...over,
+  });
+
+  // (i) a fitted file loads, reports provenance fitted, and never claims uncalibrated_weights.
+  const fitW = fittedLike();
+  const fitR = detect(leakTextForWeights, { ...P, weights: fitW });
+  eq('R36c (i): a fitted file reports provenance fitted', fitR.version.provenance, 'fitted');
+  eq('R36c (i): ... and its weights id', fitR.version.weights, 'fitted-selftest');
+  ok('R36c (i): ... and does NOT warn uncalibrated_weights',
+    !fitR.warnings.includes('uncalibrated_weights'), JSON.stringify(fitR.warnings));
+  eq('R36c (i): ... and K comes from the file', fitR.scoring.K, prior.K);
+  eq('R36c (i): ... and the cell came from the file itself', fitR.scoring.cellSource, 'file');
+  ok('R36c (i): a fitted likely_llm is not demoted by the prior-weights guard',
+    fitR.verdict === 'likely_llm', `got ${fitR.verdict}`);
+
+  // (ii) now past expiresAt => weights_expired AND a one-step demotion.
+  const expR = detect(leakTextForWeights, {
+    ...P, weights: fitW, now: Date.parse('2030-01-01T00:00:00Z'),
+  });
+  ok('R36c (ii): a fitted file past expiresAt warns weights_expired',
+    expR.warnings.includes('weights_expired'));
+  eq('R36c (ii): ... and the verdict is demoted one step', expR.verdict, 'leaning_llm');
+
+  // (iii) a file missing the per-feature `kind` map is rejected, naming file, cell and field.
+  const noKind = fittedLike();
+  delete noKind.cells['en:prose'].kind;
+  let kindErr = '';
+  try { validateWeightsShape(noKind, 'fitted-no-kind.json'); }
+  catch (e) { kindErr = e.message; }
+  ok('R36c (iii): a missing `kind` map is rejected', kindErr !== '');
+  ok('R36c (iii): ... and the message names the file', kindErr.includes('fitted-no-kind.json'), kindErr);
+  ok('R36c (iii): ... the cell', kindErr.includes('en:prose'), kindErr);
+  ok('R36c (iii): ... and the field', kindErr.includes('kind'), kindErr);
+  for (const [field, mutate] of [
+    ['K', (w) => { delete w.K; }],
+    ['weightsId', (w) => { delete w.weightsId; }],
+    ['generatedAt', (w) => { delete w.generatedAt; }],
+    ['expiresAt', (w) => { w.expiresAt = 'not-a-date'; }],
+    ['mu', (w) => { delete w.cells['en:prose'].mu.sentence_len_cv; }],
+    ['sigma', (w) => { w.cells['en:prose'].sigma.sentence_len_cv = 0; }],
+  ]) {
+    const broken = fittedLike();
+    mutate(broken);
+    let msg = '';
+    try { validateWeightsShape(broken, 'broken.json'); } catch (e) { msg = e.message; }
+    ok(`R36c (iii): a missing/invalid "${field}" is rejected and named`,
+      msg.includes(field), msg || '(accepted)');
+  }
+
+  // (iv) a cell the file marks "not fitted" falls back to the PRIOR cell, loudly.
+  for (const notFitted of [{ status: 'not fitted — too few rows survived the gates' }, undefined]) {
+    const partial = fittedLike();
+    if (notFitted === undefined) delete partial.cells['en:chat'];
+    else partial.cells['en:chat'] = notFitted;
+    ok(`R36c (iv): a ${notFitted ? 'status-marked' : 'missing'} cell still passes the validator`,
+      (() => { try { validateWeightsShape(partial, 'partial.json'); return true; } catch { return false; } })());
+    const pr = detect('the room was clean and the staff were kind to us during our stay here ok '
+      + 'and we will come back again next year with the whole family for sure', { ...C, weights: partial });
+    eq(`R36c (iv): a ${notFitted ? 'status-marked' : 'missing'} cell falls back to the prior cell`,
+      pr.scoring.cellSource, 'prior_fallback');
+    ok('R36c (iv): ... and warns cell_not_fitted_prior_used',
+      pr.warnings.includes('cell_not_fitted_prior_used'));
+    ok('R36c (iv): ... and re-asserts uncalibrated_weights, because that cell IS a prior',
+      pr.warnings.includes('uncalibrated_weights'));
+    ok('R36c (iv): ... and a note says which cell and why',
+      pr.notes.some((n) => n.startsWith('cell_not_fitted_prior_used') && n.includes('en:chat')));
+  }
+  // A file whose every cell is unusable is a schema error, not a silent all-prior run.
+  const empty = fittedLike();
+  for (const k of Object.keys(empty.cells)) empty.cells[k] = { status: 'not fitted' };
+  ok('R36c: a file with no usable cell at all is rejected',
+    (() => { try { validateWeightsShape(empty, 'empty.json'); return false; } catch { return true; } })());
+
   // --- S-01: near_duplicate with an unknown sender ------------------------------------------
   const dupText = 'The hotel was excellent and the staff were extremely helpful during our stay in '
     + 'the old town last week, and we would gladly return again next summer with the family.';
@@ -1285,8 +1379,8 @@ function exitCodes() {
     try {
       const out = execFileSync(process.execPath, ['stylometry.mjs', ...args],
         { cwd: HERE, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'], ...opts });
-      return { code: 0, out };
-    } catch (e) { return { code: e.status, out: e.stdout ?? '' }; }
+      return { code: 0, out, err: '' };
+    } catch (e) { return { code: e.status, out: String(e.stdout ?? ''), err: String(e.stderr ?? '') }; }
   };
   eq('exit 0 on a normal report', run(['--text', 'hello there friend', '--allow-uncalibrated']).code, 0);
   eq('exit 1 on an unknown flag', run(['--nope']).code, 1);
@@ -1324,6 +1418,40 @@ function exitCodes() {
   eq('S-04: exit 4 on a weights file whose expiresAt is not a parsable date',
     run(['--text', 'hello there friend and some more words', '--allow-uncalibrated',
       '--weights', badWeights]).code, 4);
+
+  // R36(c) through the real CLI: a fitted file missing `kind` exits 4 with a message naming the
+  // file, the cell and the field — never a stack trace.
+  const shortText = 'The hotel was excellent and the staff were extremely helpful during our stay '
+    + 'in the old town last week, and we would gladly return again next summer.';
+  const priorJson = JSON.parse(readFileSync(join(HERE, 'weights.v1.json'), 'utf8'));
+  const mkFitted = (over, mutate) => {
+    const w = { ...JSON.parse(JSON.stringify(priorJson)), provenance: 'fitted',
+      weightsId: 'fitted-selftest', generatedAt: '2026-09-09',
+      expiresAt: '2027-03-08T00:00:00Z', ...over };
+    if (mutate) mutate(w);
+    const path = join(tmp, `w-${Object.keys(over ?? {}).join('-') || 'x'}-${Math.abs(JSON.stringify(over ?? {}).length)}.json`);
+    writeFileSync(path, JSON.stringify(w));
+    return path;
+  };
+  const noKindPath = mkFitted({}, (w) => { delete w.cells['en:prose'].kind; });
+  const noKindRun = run(['--text', shortText, '--weights', noKindPath]);
+  eq('R36c CLI: a weights file missing `kind` exits 4', noKindRun.code, 4);
+  ok('R36c CLI: ... with a message naming the field and the cell',
+    noKindRun.err.includes('kind') && noKindRun.err.includes('en:prose'), noKindRun.err.slice(0, 200));
+  ok('R36c CLI: ... and no stack trace',
+    !/\n\s+at\s/.test(noKindRun.err), noKindRun.err.slice(0, 200));
+
+  // A well-formed FITTED file loads with NO --allow-uncalibrated (SPEC D.4) and says so.
+  const goodFitted = mkFitted({});
+  const fittedRun = run(['--text', shortText, '--weights', goodFitted, '--json']);
+  eq('R36c CLI: a fitted file needs no --allow-uncalibrated', fittedRun.code, 0);
+  if (fittedRun.code === 0) {
+    const j = JSON.parse(fittedRun.out);
+    eq('R36c CLI: ... and the report carries provenance fitted', j.version.provenance, 'fitted');
+    eq('R36c CLI: ... and the weights id', j.version.weights, 'fitted-selftest');
+    ok('R36c CLI: ... and never warns uncalibrated_weights',
+      !j.warnings.includes('uncalibrated_weights'), JSON.stringify(j.warnings));
+  }
   rmSync(tmp, { recursive: true, force: true });
 }
 
