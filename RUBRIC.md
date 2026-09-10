@@ -222,6 +222,23 @@ Before writing any →LLM verdict, the judge answers all six out loud:
 | **LH** | UN ⚠ | UN | EH | EH | LH | EH |
 | **IT** | IT | IT | IT | IT | IT | IT |
 
+### The six ⚠ cells — the only places `[CONFLICT]` is printed (HEAD-RULINGS R35(b))
+
+`[CONFLICT]` appears in these six cells and nowhere else:
+
+| CLI | judge | final |
+|---|---|---|
+| `LL` | `EH` | `uncertain` ⚠ |
+| `LL` | `LH` | `uncertain` ⚠ |
+| `EL` | `EH` | `uncertain` ⚠ |
+| `EL` | `LH` | `uncertain` ⚠ |
+| `EH` | `LL` | `uncertain` ⚠ |
+| `LH` | `LL` | `uncertain` ⚠ |
+
+**CLI `EH` × judge `EL` is `uncertain` WITHOUT the tag** — the two instruments are one step apart on
+either side of neutral, which is ordinary noise, not a contradiction worth a block. A batch run
+tagged that cell; it is not one of the six.
+
 Asymmetries, all deliberate:
 
 - `CLI=LL, judge=IT` → `UN` but `CLI=LH, judge=IT` → `EH`. When the judge abstains the system falls
@@ -243,6 +260,14 @@ Asymmetries, all deliberate:
    writer; sender is a support agent using a script; text is a pasted template or machine-written
    text the sender is forwarding; text is a structured list, not prose; under 40 words).
    **Never one step toward LLM.**
+
+**Invariant 4's third reason, qualified (HEAD-RULINGS R35(d)).** "Text is a pasted template or
+machine-written text the sender is forwarding" licenses the one-step shift **only when the whole
+text is the paste, or all of it but a greeting line**. A message that merely *contains* a pasted
+line — a human question wrapped around a forwarded booking summary — does **not** qualify: that is
+the R28 hybrid, which the CLI already handles with `hybrid_suspect`, and shifting for it a second
+time double-counts the same fact. Single and batch runs had read this differently on the same bytes.
+The other four reasons are unchanged.
 
 A fifth, structural, follows from the table itself: `likely_*` requires both instruments confident.
 One confident instrument plus one neutral one caps at `leaning_*` — the table never promotes.
@@ -317,6 +342,20 @@ CAVEATS
 WHAT WOULD CHANGE THIS VERDICT
   • <2-4 concrete, obtainable things>
 ```
+
+**CAVEATS labels are exact and machine-parseable (HEAD-RULINGS R31(g), R35(a)).** They are, on their
+own line each, with the bullet character `•` — never `-`, never bold, never re-worded:
+
+```
+  • length:
+  • language:
+  • writer:
+  • provenance:
+  • calibration:        (optional fifth; use it when the weights' state matters to the reader)
+```
+
+Two of six end-to-end runs wrote `- length:` or `- **length:**`, which costs a parser a third of the
+reports. The label is the contract; the text after the colon is free.
 
 Bands are **words, never percentages**: strong / moderate / none / n/a. Numeric ranges are permitted
 only after a labelled validation set exists, and then only labelled `uncalibrated heuristic range`.

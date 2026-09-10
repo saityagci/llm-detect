@@ -326,6 +326,19 @@ were **not** tuned away: transform (b) is a no-op in prose on three of five pair
 Turkish email's score; the §F.3 "a humanized variant scores lower" assertion is now measurable and
 partly false. Read the R25 check line and the pair table in CAL-B of `gate-fixtures.md`.
 
+**End-to-end round 2 (HEAD-RULINGS R35).** Six engineered texts through the installed agent copy: the
+⚠ CONFLICT block rendered for the first time, correctly, on two CLI-`leaning_llm` × judge-`leaning_human`
+cells (both sides printed, final `uncertain`, no averaging) and correctly did **not** render on the
+`leaning_human` × `leaning_llm` cell, which is plain `uncertain`. R31 (a) tool-missing with no
+fallback, (b) unjudged batch abstentions, (c) percentages and (f) judge-first all held; R28's hybrid
+marker produced the right provenance caveat. What remained was report discipline — CAVEATS labels
+drifting to `-`/bold in two of six runs (a recurrence), a stray `[CONFLICT]` on a non-⚠ batch row,
+flags missing from one CLI line, two readings of invariant 4's "pasted template" reason — all ruled
+in R35. No run exercised `likely_llm` as a final, the R31(e) artifact route, `register_only_evidence`,
+`homoglyph_suspect` or `templated_or_copied` through the agent, and every text was Claude-authored, so
+the round measures the report mechanics, not accuracy. Report: `.scratch/e2e2/e2e2-report.md`
+(scratch, not committed).
+
 ## Ruling index
 
 | finding | ruling |
@@ -342,3 +355,4 @@ partly false. Read the R25 check line and the pair table in CAL-B of `gate-fixtu
 | zero-vote Latin is `mixed`; ASCII-fied Turkish votes Turkish | R32 |
 | the verify-round texts become a committed fixture and part of the gate | R33 |
 | second-pass leak-rule precision, silent abstention reason, code-switch note; transform (b)/(c) findings | R34 |
+| agent report discipline after the CONFLICT block first rendered | R35 |

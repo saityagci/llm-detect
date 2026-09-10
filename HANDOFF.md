@@ -35,13 +35,15 @@ verify-round PASS (0/33 human `likely_llm`, 40/40 leak probes). Fitted weights N
 - An LLM imitating a telegraphic Turkish writer buys `leaning_human` with 33 tokens and one prompt line.
 - ESL connector essays can still lean LLM (R24 keeps prose rhythm/connectors out of the proxy set).
 - Negative controls (b) human-translated and (c) machine-translated: NOT MEASURED (zero-spend rule).
-- The agent's CONFLICT (⚠) block never rendered in testing. Cross-Node determinism NOT VERIFIED (R12).
+- The agent's CONFLICT (⚠) block rendered correctly in end-to-end round 2 (R35); `likely_llm` as a FINAL
+  through the agent, the R31(e) artifact route and `register_only_evidence` via the agent remain unexercised.
+  Cross-Node determinism NOT VERIFIED (R12).
 - `fetch-public-datasets.mjs` wedged on re-pulls after the first success; run it under a watchdog.
 
 ## Exact next step
 1. The owner creates the remote; the head pushes `main` (commit `build+verify round 1`).
-2. Next round candidates, in order: (a) a text engineered to split CLI and judge, to exercise the
-   CONFLICT block; (b) more human rows for `tr:chat` / `en:chat` before any fitted cell can be trusted;
+2. Next round candidates, in order: (a) a human-written text carrying a genuine artifact (not a declared
+   paste) so `likely_llm` as a final and the R31(e) route are exercised through the agent; (b) more human rows for `tr:chat` / `en:chat` before any fitted cell can be trusted;
    (c) re-decide R23 only when a cell has ≥100 human rows per bucket AND ≥20 per fairness stratum.
 
 ## Do not
