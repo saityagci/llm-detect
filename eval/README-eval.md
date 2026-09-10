@@ -24,13 +24,52 @@ node eval/run-eval.mjs --quick                      # SMOKE RUN — writes eval/
 node eval/gate-fixtures.mjs --out .scratch/<lane>/out --real 20     # while developing
 ```
 
+### Harness self-test
+
+```bash
+node eval/selftest-eval.mjs            # ~6 s, exit 0 on pass, 1 with a FAIL line per failed check
+```
+
+`selftest.mjs` at the repo root tests the detector. **This tests the harness that decides whether
+the detector's numbers may be believed.** It drives the shipped `run-eval.mjs` and
+`gate-fixtures.mjs` over `eval/fixtures/synthetic-split/` — an authored, deterministic corpus with
+no corpus row in it — and over deliberately corrupted copies written to a scratch directory, and it
+asserts **exit codes and structure only**. It never asserts a rate: nothing measured on synthetic
+text says anything about the detector, and a self-test that pinned an AUC here would pin a fiction.
+
+**Ten green checks prove the guards refuse planted faults; the correctness of the numbers
+printed when nothing fires rests on the independent re-derivation of R36, which a fixture
+cannot replace.**
+
+The synthetic **"human" class is shaped to reach code paths**, not to model human writing: its
+sentences are capitalised and terminated so the rows clear gate G4 and a model can be fitted at all
+(HEAD-RULINGS R37(d)). An all-lowercase pool left fewer than ten scoreable fitting-side humans and
+therefore no fitted cell to validate. Nothing about that class resembles a real writer.
+
+The ten checks: a clean run exits 0 with sections 1-13 and a fitted-weights file the CLI actually
+loads · a planted `persona::` straddle exits 5 naming the group kind · a planted duplicate string on
+two sides exits 5 · a planted both-label string on two sides exits 5 and reports the cross-label
+count · `headline()` exits 4 for a non-test row, for a test-labelled summary over val-side rows, and
+for being handed no rows at all · `emit()` exits 4 on an unmarked fitting-side number and passes the
+same line with `(reference only)` · the CAL append guard exempts exactly the three named quoted
+probe phrases and refuses a fourth · a fitted-weights file the shipped loader could not read is
+never written (exit 6) · two runs are byte-identical apart from the timestamp and the out path ·
+`INSUFFICIENT` and `NO COVERAGE` placeholders print the counts and the measured confusion they claim.
+
+It writes only under `--work` (default `.scratch/selftest-eval/`, removed on success, kept with
+`--keep`). It never reads `eval/data/` and never touches `eval/out/`.
+
 ### Regenerating the release report
 
 ```bash
-node eval/run-eval.mjs && node eval/gate-fixtures.mjs --real 200 --append eval/out/REPORT.md
+node selftest.mjs && node eval/selftest-eval.mjs \
+  && node eval/run-eval.mjs \
+  && node eval/gate-fixtures.mjs --real 200 --append eval/out/REPORT.md
 ```
 
-That is the whole command, and it is the only thing that may write `eval/out/REPORT.md`.
+That is the whole sequence (HEAD-RULINGS R37(a)), and its last two commands are the only things that
+may write `eval/out/REPORT.md`. The detector's own selftest runs first, then the harness self-test:
+a harness whose guards do not fire has no business publishing a number. **Ten green checks prove the guards refuse planted faults; the correctness of the numbers printed when nothing fires rests on the independent re-derivation of R36, which a fixture cannot replace.**
 
 - **`--quick` never writes there.** A smoke run subsamples the rows, and a subsampled run overwrote
   the release `REPORT.md` and `weights.fitted.json` once this round. `--quick` now defaults its
@@ -73,6 +112,8 @@ Naming the side "fit" keeps that guard from tripping over the harness's own pros
 | `run-eval.mjs` | SPEC §D.5 steps 4-10 and the §G.1 tables. Hand-rolled logistic regression, PAVA isotonic calibration, rank AUC, ECE, fairness-limited threshold, hard mode, leave-one-writer-out, negative controls (a)-(e), base-rate table. |
 | `adapters/supabase-messages.cjs` | Optional. Rebuilds `corpus_user_messages.json` from a Supabase message table. Not zero-dependency and not in `package.json` — see below. |
 | `fixtures/*.jsonl` | Committed. See the table further down. |
+| `selftest-eval.mjs` | The harness self-test — see "Harness self-test" above, and step 3 of the release sequence (R37(a)). Drives the shipped harness over a synthetic corpus and asserts the refusals it documents. Zero dependency, ~6 s, default work dir `.scratch/selftest-eval/`. Ten green checks prove the guards refuse planted faults; the correctness of the numbers printed when nothing fires rests on the independent re-derivation of R36, which a fixture cannot replace. |
+| `fixtures/synthetic-split/` | The authored corpus the self-test corrupts, plus its generator. No corpus row, no real text, no result. See its own `README.md`. |
 | `data/` | Gitignored. Real chat messages live here. Never commit anything from it. |
 | `out/` | Where the release `REPORT.md` and `weights.fitted.json` land. `out/quick/` is where `--quick` lands (R26). |
 
@@ -422,6 +463,30 @@ regenerated. What actually moved:
   rows (what the fix does) is not the same experiment as deleting them (what the estimate did); at
   three decimals the cell AUC is unchanged.
 
+**The harness had no self-test, and its refusals were verified by reading them (R36 follow-up).**
+Every branch R36 added to `run-eval.mjs` — exit 5 on a leaked split, exit 4 on the honesty guard,
+exit 6 on an unloadable fitted-weights file — plus the CAL append guard in `gate-fixtures.mjs` was
+asserted by code reading, because staging a real failure would have meant copying private chat
+messages into a scratch directory. `eval/fixtures/synthetic-split/` (624 authored rows, one seeded
+PRNG, no corpus row) and `eval/selftest-eval.mjs` (10 checks, ~6 s) close that. Running them changed
+three things in the harness itself:
+
+- **`run-eval.mjs` now exits 5 on a duplicate straddling the split.** §1's prose already said "the
+  harness rejects any accuracy computed on a stream where the same string appears on both sides of
+  the split" and then printed the numbers anyway. It rejects it now, and reports the cross-label
+  count beside it. The real corpus is 0 and 0, so no published number moves. Repro: check 3 / 4.
+- **The CAL append exemption was too wide.** It was registered for every line of the leak-probe
+  table; it is now a closed list of the three phrases that actually carry the watched word, and a
+  fourth probe label wording is refused. Repro: check 7, which asserts both halves.
+- **`run-eval.mjs` is importable.** `main()` used to run on import, so `emit()` and `headline()`
+  could not be exercised in a child process. It is behind the same entry-point guard
+  `make-splits.mjs` already used, and both functions are exported.
+
+Recorded, and now ruled (HEAD-RULINGS R37): the self-test joins the release sequence, its work dir
+is lane-neutral, and two sentences travel with every citation of it. **Ten green checks prove the guards refuse planted faults; the correctness of the numbers printed when nothing fires rests on the independent re-derivation of R36, which a fixture cannot replace.**
+And the synthetic "human" class is shaped to reach code paths — capitalised, terminated sentences so
+gate G4 passes — and models nothing about human writing (R37(d)).
+
 ## Ruling index
 
 | finding | ruling |
@@ -440,3 +505,4 @@ regenerated. What actually moved:
 | second-pass leak-rule precision, silent abstention reason, code-switch note; transform (b)/(c) findings | R34 |
 | agent report discipline after the CONFLICT block first rendered | R35 |
 | eval-harness review: persona-level split leak, held-out control (a), loadable fitted weights, real corpusHash, HC3 pair key, tie-pooled isotonic, honest control (d), deeper honesty guard | R36 |
+| the harness self-test joins the release sequence; it proves refusal, not correctness | R37 |

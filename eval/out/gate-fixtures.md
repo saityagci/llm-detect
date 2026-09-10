@@ -281,4 +281,4 @@ guard that appends this section to `REPORT.md`; no other line does.
 | N09 | tr | no fire | no fire | ok | human discussing yapay zeka |
 | N10 | tr | no fire | no fire | ok | human discussing a bot with the circumflex spelling |
 
-_CAL fixture gate wall-clock: 19.1s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._
+_CAL fixture gate wall-clock: 17.9s. tau source: the neutral 0.5, NOT the fitted tau: the CLI scores with the shipped PRIOR weights (R11), and run-eval's tau belongs to the fitted model. Read the verdict column, not the score column.._

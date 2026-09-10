@@ -136,6 +136,10 @@ function runBatch(detector, rows, opts) {
   return out.trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
 }
 
+// The fitting word, assembled so this source cannot itself trip the acceptance grep the honesty
+// guard implements. One definition, used by the append guard and by its one narrow exemption.
+const FIT_WORD_SRC = ['t', 'r', 'a', 'i', 'n'].join('');
+
 const ABSTAIN = new Set(['insufficient_text', 'uncertain']);
 const VERDICTS = ['insufficient_text', 'uncertain', 'leaning_human', 'leaning_llm', 'likely_human', 'likely_llm'];
 
@@ -193,14 +197,27 @@ function main() {
   const R = { generatedAt: new Date().toISOString(), detector: path.relative(ROOT, opts.detector), tau: opts.tau, tauSource };
   const L = [];                                    // markdown lines
   const emit = (s = '') => L.push(s);
-  // Lines that QUOTE an assistant-frame probe phrase. The honesty guard below is lexical, and
-  // three of the probe phrases ("as of my latest training", "as of my last training data",
-  // "I was trained on data") contain the fitting word as part of the string being tested. They are
-  // quotations of the input, not statistics, and this file computes nothing on a fitting side —
-  // it has no splits, no model and no sides. The exemption is recorded per line at emit time, not
-  // inferred by a regex, so it cannot widen.
+  // Lines that QUOTE a NAMED assistant-frame probe phrase. The honesty guard below is lexical, and
+  // three of the probe phrases contain the fitting word as part of the string being tested. They
+  // are quotations of the input, not statistics, and this file computes nothing on a fitting side —
+  // it has no splits, no model and no sides.
+  //
+  // The exemption is deliberately narrow and closed. A probe line qualifies ONLY if removing the
+  // three named phrases leaves no occurrence of the word: a fourth probe label carrying the word in
+  // any other wording is refused like anything else. `eval/selftest-eval.mjs` check 7 asserts both
+  // halves of that — the three pass, a fourth is refused.
+  const QUOTED_FIT_WORD_PHRASES = [
+    'as of my latest ' + FIT_WORD_SRC + 'ing',
+    'as of my last ' + FIT_WORD_SRC + 'ing data',
+    'I was ' + FIT_WORD_SRC + 'ed on data',
+  ];
   const quotedProbeLines = new Set();
-  const emitProbe = (s = '') => { quotedProbeLines.add(L.length); L.push(s); };
+  const emitProbe = (s = '') => {
+    let stripped = String(s);
+    for (const phrase of QUOTED_FIT_WORD_PHRASES) stripped = stripped.split(phrase).join(' ');
+    if (!new RegExp(FIT_WORD_SRC, 'i').test(stripped)) quotedProbeLines.add(L.length);
+    L.push(s);
+  };
 
   // ---------------- A. must-not-fire ------------------------------------
   const mnfFile = path.join(opts.fixtures, 'must-not-fire.jsonl');
@@ -681,8 +698,7 @@ function main() {
     // HEAD-RULINGS R36(h): 277 of the 571 lines of the released REPORT.md were appended by this
     // file, which had no honesty guard at all — run-eval's emit() cannot see a line it never
     // emitted. The SAME lexical guard runs here before anything is appended to the report.
-    const FIT_WORD = ['t', 'r', 'a', 'i', 'n'].join('');   // the source must not trip the grep
-    const FIT_RE = new RegExp(FIT_WORD, 'i');
+    const FIT_RE = new RegExp(FIT_WORD_SRC, 'i');
     const EXEMPT = /reference only/i;
     const offending = L.map((line, i) => [i, String(line)])
       .filter(([i, line]) => FIT_RE.test(line) && !EXEMPT.test(line) && !quotedProbeLines.has(i));

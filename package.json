@@ -16,6 +16,7 @@
   "scripts": {
     "selftest": "node selftest.mjs",
     "eval": "node eval/run-eval.mjs",
+    "selftest:eval": "node eval/selftest-eval.mjs",
     "build-lexicon": "node build-lexicon.mjs"
   }
 }

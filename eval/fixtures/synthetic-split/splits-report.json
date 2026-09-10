@@ -1,0 +1,86 @@
+{
+  "generatedAt": "2026-09-10T00:00:00.000Z",
+  "seed": "synthetic-split-20260910",
+  "language_scope": "en + tr (HEAD-RULINGS R22)",
+  "synthetic": true,
+  "synthetic_note": "Authored by eval/fixtures/synthetic-split/generate.mjs. No corpus row, no real human or real LLM text. Structure only: nothing measured on this corpus is a result.",
+  "corpus": {
+    "raw": 624,
+    "recorded_split_reuse": {
+      "unit": "group (writer:: for human rows, persona:: for generated rows)",
+      "rule": "HEAD-RULINGS R36(b): synthetic fixture — every row was assigned at group level by construction.",
+      "groups_promoted_to_test": 0,
+      "rows_placed_by_that_promotion": 0,
+      "groups_partially_recorded_test": 0,
+      "note": "synthetic: there is no recorded design-round split to reuse."
+    }
+  },
+  "pair_key_coverage": {
+    "public:synthetic-reviews": {
+      "rows": 176,
+      "with_pair_key": 0,
+      "coverage_pct": 0,
+      "distinct_pairs": 0,
+      "claims_matched_pairs": false,
+      "pair_protection": "n/a — source does not claim matched pairs",
+      "straddling_pairs": null
+    },
+    "public:fake-reviews-gpt2era": {
+      "rows": 40,
+      "with_pair_key": 0,
+      "coverage_pct": 0,
+      "distinct_pairs": 0,
+      "claims_matched_pairs": false,
+      "pair_protection": "n/a — source does not claim matched pairs",
+      "straddling_pairs": null
+    },
+    "public:synthetic-pairs": {
+      "rows": 60,
+      "with_pair_key": 60,
+      "coverage_pct": 100,
+      "distinct_pairs": 30,
+      "claims_matched_pairs": true,
+      "pair_protection": "ACTIVE",
+      "straddling_pairs": 0
+    },
+    "public:synthetic-shorts": {
+      "rows": 210,
+      "with_pair_key": 0,
+      "coverage_pct": 0,
+      "distinct_pairs": 0,
+      "claims_matched_pairs": false,
+      "pair_protection": "n/a — source does not claim matched pairs",
+      "straddling_pairs": null
+    },
+    "public:synthetic-tr": {
+      "rows": 30,
+      "with_pair_key": 0,
+      "coverage_pct": 0,
+      "distinct_pairs": 0,
+      "claims_matched_pairs": false,
+      "pair_protection": "n/a — source does not claim matched pairs",
+      "straddling_pairs": null
+    }
+  },
+  "pair_key_note": "HEAD-RULINGS R36(e). Synthetic fixture.",
+  "group_straddle": {
+    "groups": 83,
+    "straddling": 3,
+    "by_kind": {
+      "writer": 3
+    },
+    "non_writer_straddling": 0,
+    "assertion": "non_writer_straddling must be 0.",
+    "pass": true
+  },
+  "contamination": {
+    "metric": "synthetic fixture: no contamination scan was run, the bands below are declared zero by construction",
+    "n_llm_rows": 274,
+    "pct": {
+      ">=0.5": 0,
+      ">=0.7": 0,
+      ">=0.9": 0
+    },
+    "note": "Synthetic corpus. Nothing here was replayed from a real transcript, because there is no real transcript."
+  }
+}

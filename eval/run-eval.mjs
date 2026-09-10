@@ -313,10 +313,22 @@ async function main() {
   emit(`- residual duplicate rows after make-splits: **${dupRows}** (${pct(dupRows / rows.length, 2)})`);
   emit(`- duplicate groups straddling two sides: **${straddling}** (must be 0)`);
   emit(`- duplicate groups appearing under both labels: **${crossLabel}**`);
+  // The prose already said "the harness rejects any accuracy computed on a stream where the same
+  // string appears on both sides of the split", and then printed the numbers anyway. It rejects it
+  // now. A duplicate group straddling the split is the same class of leak as a persona straddling
+  // it, so it takes the same exit code; the cross-label count is printed beside it because a string
+  // that appears under both labels on two sides is the worse version of the same fault.
   if (straddling > 0) {
     emit('');
-    emit('> **The harness rejects any accuracy computed on a stream where the same string appears on');
-    emit('> both sides of the split.** Fix make-splits.mjs before reading anything below as a result.');
+    emit(`> **LEAK: ${straddling} duplicate group(s) straddle two sides**` +
+      (crossLabel > 0 ? `, and ${crossLabel} duplicate group(s) appear under BOTH labels` : '') + '.');
+    emit('> The harness rejects any accuracy computed on a stream where the same string appears on');
+    emit('> both sides of the split. Fix make-splits.mjs before reading anything below as a result.');
+    emit('');
+    process.stderr.write(`honesty guard: ${straddling} duplicate group(s) straddle two sides`
+      + (crossLabel > 0 ? `; ${crossLabel} of the duplicate groups appear under both labels` : '') + '\n');
+    writeFileSync(path.join(outDir, 'REPORT.md'), REPORT_LINES.join('\n') + '\n', 'utf8');
+    process.exit(5);
   }
   // HEAD-RULINGS R36(b)/(c): break the straddle count down BY GROUP KIND. The old line said
   // "72 of 1380 — the human writers are split chronologically inside a writer, by design", and
@@ -1211,4 +1223,12 @@ async function main() {
   process.stderr.write(`\nwrote ${path.join(outDir, 'REPORT.md')}\n`);
 }
 
-main().catch((e) => { process.stderr.write(`fatal: ${e.stack || e.message}\n`); process.exit(1); });
+// Importable: `eval/selftest-eval.mjs` calls emit() and headline() in a CHILD process to prove
+// their exit codes, and both of them call process.exit(). Running main() on import would make that
+// impossible, so main() runs only when this file is the entry point — the same guard
+// make-splits.mjs and fetch-public-datasets.mjs already use.
+export { emit, headline, REPORT_LINES };
+
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('run-eval.mjs')) {
+  main().catch((e) => { process.stderr.write(`fatal: ${e.stack || e.message}\n`); process.exit(1); });
+}
